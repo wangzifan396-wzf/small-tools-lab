@@ -1,0 +1,144 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, "Microsoft YaHei", sans-serif;
+  color: #222;
+  background: #f5f6f8;
+}
+
+.todo-app {
+  width: 400px;
+  max-width: calc(100% - 32px);
+  margin: 64px auto;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #e4e6eb;
+  border-radius: 8px;
+}
+
+h1 {
+  margin: 0 0 20px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.todo-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.todo-input input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #c9ced6;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.todo-input button,
+.todo-item button {
+  border: 0;
+  border-radius: 6px;
+  color: #fff;
+  background: #2563eb;
+  cursor: pointer;
+}
+
+.todo-input button {
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.todo-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #eef0f3;
+}
+
+.todo-item span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.todo-item.done span {
+  color: #8b9098;
+  text-decoration: line-through;
+}
+
+.todo-item button {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  background: #dc2626;
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 2px;
+  color: #8b9098;
+  font-size: 12px;
+}
+
+#task-count {
+  flex: 1;
+  text-align: center;
+}
+
+#clear-done {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border: 1px solid #dc2626;
+  border-radius: 4px;
+  color: #dc2626;
+  background: transparent;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#clear-done:hover {
+  background: #fef2f2;
+}
+
+.filters {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.filter-btn {
+  border: 1px solid #c9ced6;
+  border-radius: 4px;
+  background: transparent;
+  color: #8b9098;
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.filter-btn.active {
+  color: #2563eb;
+  border-color: #2563eb;
+}
+
+.filter-btn:hover:not(.active) {
+  background: #f5f6f8;
+}

@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+**/.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments and local dependencies
+.venv/
+**/.venv/
+venv/
+**/venv/
+env/
+ENV/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Runtime data
+*.sqlite
+*.sqlite3
+*.db
+local-kb/data/kb.sqlite
+screenshot-qa/data/history/
+screenshot-qa/data/screenshots/
+
+# Generated browser/tool state
+.playwright-cli/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+Thumbs.db
+.DS_Store
