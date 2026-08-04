@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "floating-package": {
+      "command": "npx",
+      "args": ["@example/demo-server"]
+    },
+    "shell-wrapper": {
+      "command": "bash",
+      "args": ["-c", "node server.js"]
+    },
+    "remote": {
+      "url": "http://example.invalid/mcp"
+    }
+  }
+}

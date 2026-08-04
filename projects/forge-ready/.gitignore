@@ -1,0 +1,7 @@
+node_modules/
+coverage/
+*.log
+forge-ready-report.html
+forge-ready.md
+.env
+*.pem

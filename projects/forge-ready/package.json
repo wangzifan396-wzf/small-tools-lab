@@ -1,0 +1,45 @@
+{
+  "name": "forge-ready",
+  "version": "0.1.0",
+  "description": "Evidence-based open-source release readiness audits for repositories and CI.",
+  "license": "MIT",
+  "private": false,
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wangzifan396-wzf/small-tools-lab.git",
+    "directory": "projects/forge-ready"
+  },
+  "homepage": "https://github.com/wangzifan396-wzf/small-tools-lab/tree/main/projects/forge-ready#readme",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "bin": {
+    "forge-ready": "bin/forge-ready.js",
+    "forgeready": "bin/forge-ready.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "docs/forge-ready-report.png",
+    "action.yml",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "github-action",
+    "open-source",
+    "preflight",
+    "release",
+    "repository-audit",
+    "repository-health",
+    "static-analysis"
+  ],
+  "scripts": {
+    "check": "node --check bin/forge-ready.js && node --check src/scanner.js && node --check src/reporters.js",
+    "test": "node --test tests/*.test.js",
+    "audit:self": "node bin/forge-ready.js . --profile cli --min-score 80 --no-color",
+    "demo": "node bin/forge-ready.js examples/unready-repo --profile cli --format html --output forge-ready-report.html --min-score 0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

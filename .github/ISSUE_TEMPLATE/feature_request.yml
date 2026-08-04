@@ -1,0 +1,26 @@
+name: Tool or feature proposal
+description: Propose a focused addition backed by a real workflow
+title: "[proposal] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: job
+    attributes:
+      label: Developer job
+      description: What repeated task is difficult today, and who has it?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Existing alternatives
+      description: What tools or manual workflow have you tried, and where do they fall short?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Smallest useful scope
+      description: Describe an initial version that solves one concrete job without becoming a platform.
+    validations:
+      required: true

@@ -1,0 +1,17 @@
+{
+  "name": "readme-studio",
+  "version": "1.0.0",
+  "description": "Local-first README and open-source cover image composer.",
+  "license": "MIT",
+  "private": false,
+  "repository": { "type": "git", "url": "git+https://github.com/wangzifan396-wzf/small-tools-lab.git", "directory": "projects/readme-studio" },
+  "homepage": "https://wangzifan396-wzf.github.io/small-tools-lab/projects/readme-studio/",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "keywords": ["readme", "markdown", "open-source", "documentation"],
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "test": "node --test tests/readme.test.js",
+    "check": "node --check src/readme.js && node --check src/app.js && node --check scripts/serve.js"
+  },
+  "engines": { "node": ">=20" }
+}

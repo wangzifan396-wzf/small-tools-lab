@@ -1,0 +1,5 @@
+{
+  "ignore": [
+    "projects/harnesslint/examples/**"
+  ]
+}

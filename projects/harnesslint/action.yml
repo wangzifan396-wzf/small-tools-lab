@@ -1,0 +1,24 @@
+name: HarnessLint
+description: Audit AI coding-agent instructions, skills, hooks, and MCP configuration
+branding:
+  icon: shield
+  color: green
+inputs:
+  path:
+    description: Repository path to scan
+    required: false
+    default: .
+  fail-on:
+    description: Minimum severity that fails the action
+    required: false
+    default: high
+  sarif-output:
+    description: SARIF output path
+    required: false
+    default: harnesslint.sarif
+runs:
+  using: composite
+  steps:
+    - name: Run HarnessLint
+      shell: bash
+      run: node "$GITHUB_ACTION_PATH/bin/harnesslint.js" "${{ inputs.path }}" --format sarif --output "${{ inputs.sarif-output }}" --fail-on "${{ inputs.fail-on }}"

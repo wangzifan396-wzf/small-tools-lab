@@ -1,0 +1,44 @@
+{
+  "name": "env-matrix",
+  "version": "0.1.0",
+  "description": "Map environment-variable contracts across source, examples, CI, containers, and docs.",
+  "license": "MIT",
+  "private": false,
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wangzifan396-wzf/small-tools-lab.git",
+    "directory": "projects/env-matrix"
+  },
+  "homepage": "https://github.com/wangzifan396-wzf/small-tools-lab/tree/main/projects/env-matrix#readme",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "bin": {
+    "env-matrix": "bin/env-matrix.js",
+    "envmatrix": "bin/env-matrix.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "docs/env-matrix-report.png",
+    "action.yml",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "configuration",
+    "dotenv",
+    "environment-variables",
+    "github-actions",
+    "linter",
+    "twelve-factor",
+    "validation"
+  ],
+  "scripts": {
+    "check": "node --check bin/env-matrix.js && node --check src/scanner.js && node --check src/reporters.js",
+    "test": "node --test tests/*.test.js",
+    "demo": "node bin/env-matrix.js examples/drifted-service --format html --output env-matrix-report.html --fail-on none"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

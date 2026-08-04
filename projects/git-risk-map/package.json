@@ -1,0 +1,45 @@
+{
+  "name": "git-risk-map",
+  "version": "0.1.0",
+  "description": "Deterministic Git change-risk scoring and review prioritization for humans and CI.",
+  "license": "MIT",
+  "private": false,
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wangzifan396-wzf/small-tools-lab.git",
+    "directory": "projects/git-risk-map"
+  },
+  "homepage": "https://github.com/wangzifan396-wzf/small-tools-lab/tree/main/projects/git-risk-map#readme",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "bin": {
+    "git-risk-map": "bin/git-risk-map.js",
+    "riskmap": "bin/git-risk-map.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "scripts/demo.js",
+    "docs/git-risk-map-report.png",
+    "action.yml",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "code-review",
+    "diff",
+    "git",
+    "github-actions",
+    "pull-request",
+    "risk-analysis",
+    "static-analysis"
+  ],
+  "scripts": {
+    "check": "node --check bin/git-risk-map.js && node --check src/analyzer.js && node --check src/reporters.js && node --check scripts/demo.js",
+    "test": "node --test tests/*.test.js",
+    "demo": "node scripts/demo.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

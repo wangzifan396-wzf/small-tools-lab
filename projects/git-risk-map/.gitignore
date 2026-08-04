@@ -1,0 +1,6 @@
+node_modules/
+coverage/
+*.log
+git-risk-map-report.html
+git-risk-map.md
+.demo-repo/

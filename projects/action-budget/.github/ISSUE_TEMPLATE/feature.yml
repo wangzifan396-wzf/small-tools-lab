@@ -1,0 +1,32 @@
+name: Analyzer proposal
+description: Propose a workflow construct, budget metric, or report improvement
+title: "proposal: "
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Matrix semantics
+        - Concurrency
+        - Timeout exposure
+        - Triggers and schedules
+        - Runner model
+        - Report format
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case and representative YAML
+    validations:
+      required: true
+  - type: textarea
+    id: uncertainty
+    attributes:
+      label: Static-analysis boundary
+      description: Explain what can be known from YAML and what must remain unknown.
+    validations:
+      required: true

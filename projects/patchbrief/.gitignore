@@ -1,0 +1,9 @@
+node_modules/
+coverage/
+*.log
+patchbrief-report.html
+patchbrief.md
+patchbrief.xml
+patchbrief.json
+.env
+*.pem

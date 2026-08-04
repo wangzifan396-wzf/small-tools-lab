@@ -1,0 +1,65 @@
+name: PatchBrief
+description: Build a minimal, redacted, token-budgeted pull request context packet
+branding:
+  icon: file-text
+  color: green
+inputs:
+  path:
+    description: Repository path
+    required: false
+    default: .
+  base:
+    description: Base Git ref; pull requests default to the event base SHA
+    required: false
+    default: ""
+  head:
+    description: Head Git ref
+    required: false
+    default: HEAD
+  budget:
+    description: Total estimated token budget
+    required: false
+    default: "12000"
+  context-lines:
+    description: Lines around changed ranges
+    required: false
+    default: "20"
+  output:
+    description: Markdown packet path
+    required: false
+    default: patchbrief.md
+  fail-on-redaction:
+    description: Fail when secret-like values are redacted
+    required: false
+    default: "true"
+outputs:
+  packet:
+    description: Path to the generated context packet
+    value: ${{ steps.build.outputs.packet }}
+runs:
+  using: composite
+  steps:
+    - id: build
+      name: Build context packet
+      shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_BASE: ${{ inputs.base }}
+        INPUT_HEAD: ${{ inputs.head }}
+        INPUT_BUDGET: ${{ inputs.budget }}
+        INPUT_CONTEXT_LINES: ${{ inputs.context-lines }}
+        INPUT_OUTPUT: ${{ inputs.output }}
+        INPUT_FAIL_ON_REDACTION: ${{ inputs.fail-on-redaction }}
+        EVENT_BASE: ${{ github.event.pull_request.base.sha }}
+      run: |
+        base="$INPUT_BASE"
+        if [[ -z "$base" ]]; then base="$EVENT_BASE"; fi
+        args=("$INPUT_PATH" --budget "$INPUT_BUDGET" --context-lines "$INPUT_CONTEXT_LINES" --format markdown --output "$INPUT_OUTPUT")
+        if [[ -n "$base" ]]; then args+=(--base "$base" --head "$INPUT_HEAD"); fi
+        if [[ "$INPUT_FAIL_ON_REDACTION" == "true" ]]; then args+=(--fail-on-redaction); fi
+        set +e
+        node "$GITHUB_ACTION_PATH/bin/patchbrief.js" "${args[@]}"
+        status=$?
+        set -e
+        echo "packet=$INPUT_OUTPUT" >> "$GITHUB_OUTPUT"
+        exit "$status"

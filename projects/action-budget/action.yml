@@ -1,0 +1,58 @@
+name: Action Budget
+description: Enforce GitHub Actions fanout and timeout exposure budgets
+branding:
+  icon: activity
+  color: green
+inputs:
+  path:
+    description: Repository path to analyze
+    required: false
+    default: .
+  fail-on:
+    description: Minimum finding severity that fails the job
+    required: false
+    default: high
+  max-jobs:
+    description: Maximum visible job variants per workflow run
+    required: false
+    default: "64"
+  max-minutes:
+    description: Maximum timeout-minutes exposure per workflow run
+    required: false
+    default: "1440"
+  max-matrix:
+    description: Maximum static variants in one matrix job
+    required: false
+    default: "20"
+  report-output:
+    description: Markdown report path
+    required: false
+    default: action-budget.md
+outputs:
+  report:
+    description: Path to the generated Markdown report
+    value: ${{ steps.analyze.outputs.report }}
+runs:
+  using: composite
+  steps:
+    - name: Install locked parser dependency
+      shell: bash
+      run: npm ci --omit=dev --ignore-scripts --no-audit --no-fund --prefix "$GITHUB_ACTION_PATH"
+    - id: analyze
+      name: Analyze workflow budget
+      shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_MAX_JOBS: ${{ inputs.max-jobs }}
+        INPUT_MAX_MINUTES: ${{ inputs.max-minutes }}
+        INPUT_MAX_MATRIX: ${{ inputs.max-matrix }}
+        INPUT_REPORT: ${{ inputs.report-output }}
+      run: |
+        set +e
+        node "$GITHUB_ACTION_PATH/bin/action-budget.js" "$INPUT_PATH" --max-jobs "$INPUT_MAX_JOBS" --max-minutes "$INPUT_MAX_MINUTES" --max-matrix "$INPUT_MAX_MATRIX" --format markdown --output "$INPUT_REPORT" --fail-on "$INPUT_FAIL_ON"
+        status=$?
+        set -e
+        echo "report=$INPUT_REPORT" >> "$GITHUB_OUTPUT"
+        if [[ -f "$INPUT_REPORT" && -n "$GITHUB_STEP_SUMMARY" ]]; then cat "$INPUT_REPORT" >> "$GITHUB_STEP_SUMMARY"; fi
+        exit "$status"

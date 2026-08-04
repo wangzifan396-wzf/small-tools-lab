@@ -1,0 +1,54 @@
+name: Git Risk Map
+description: Score change risk and publish a prioritized review plan
+branding:
+  icon: activity
+  color: green
+inputs:
+  path:
+    description: Repository path to analyze
+    required: false
+    default: .
+  base:
+    description: Base Git ref; pull requests default to the event base SHA
+    required: false
+    default: ""
+  head:
+    description: Head Git ref
+    required: false
+    default: HEAD
+  history-days:
+    description: Hotspot history window
+    required: false
+    default: "90"
+  fail-on:
+    description: Overall risk level that fails the action
+    required: false
+    default: high
+  report-output:
+    description: Markdown report path
+    required: false
+    default: git-risk-map.md
+runs:
+  using: composite
+  steps:
+    - name: Analyze change risk
+      shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_BASE: ${{ inputs.base }}
+        INPUT_HEAD: ${{ inputs.head }}
+        INPUT_HISTORY_DAYS: ${{ inputs.history-days }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_REPORT: ${{ inputs.report-output }}
+        EVENT_BASE: ${{ github.event.pull_request.base.sha }}
+      run: |
+        base="$INPUT_BASE"
+        if [[ -z "$base" ]]; then base="$EVENT_BASE"; fi
+        args=("$INPUT_PATH" --history-days "$INPUT_HISTORY_DAYS" --format markdown --output "$INPUT_REPORT" --fail-on "$INPUT_FAIL_ON")
+        if [[ -n "$base" ]]; then args+=(--base "$base" --head "$INPUT_HEAD"); fi
+        set +e
+        node "$GITHUB_ACTION_PATH/bin/git-risk-map.js" "${args[@]}"
+        status=$?
+        set -e
+        if [[ -f "$INPUT_REPORT" && -n "$GITHUB_STEP_SUMMARY" ]]; then cat "$INPUT_REPORT" >> "$GITHUB_STEP_SUMMARY"; fi
+        exit "$status"

@@ -1,0 +1,32 @@
+name: Discovery proposal
+description: Propose a source language, deployment layer, rule, or report improvement
+title: "proposal: "
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Source syntax
+        - Example format
+        - CI or deployment layer
+        - Finding rule
+        - Report format
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: Show representative synthetic syntax and the contract information it carries.
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: False-positive boundaries
+      description: Explain ambiguous syntax or cases a static scanner should intentionally skip.
+    validations:
+      required: true

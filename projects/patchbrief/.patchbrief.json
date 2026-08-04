@@ -1,0 +1,11 @@
+{
+  "budget": 12000,
+  "contextLines": 20,
+  "maxFileBytes": 1048576,
+  "importerScanLimit": 2000,
+  "ignore": [
+    "dist/**",
+    "coverage/**"
+  ],
+  "alwaysInclude": []
+}

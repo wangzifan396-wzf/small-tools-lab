@@ -1,0 +1,10 @@
+{
+  "name": "unready-demo",
+  "private": true,
+  "bin": {
+    "unready-demo": "bin/missing.js"
+  },
+  "dependencies": {
+    "floating-demo": "1.0.0"
+  }
+}

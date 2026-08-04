@@ -1,0 +1,45 @@
+{
+  "name": "harnesslint",
+  "version": "0.1.0",
+  "description": "Deterministic linter for AI coding-agent instructions, hooks, skills, and MCP configuration.",
+  "license": "MIT",
+  "private": false,
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wangzifan396-wzf/small-tools-lab.git",
+    "directory": "projects/harnesslint"
+  },
+  "homepage": "https://github.com/wangzifan396-wzf/small-tools-lab/tree/main/projects/harnesslint#readme",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "bin": {
+    "harnesslint": "bin/harnesslint.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "docs/harnesslint-report.png",
+    "action.yml",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "agents-md",
+    "ai-agents",
+    "claude-code",
+    "codex",
+    "linter",
+    "mcp",
+    "sarif",
+    "security"
+  ],
+  "scripts": {
+    "check": "node --check bin/harnesslint.js && node --check src/scanner.js && node --check src/reporters.js",
+    "lint:self": "node bin/harnesslint.js . --format pretty --fail-on high --no-color",
+    "demo": "node bin/harnesslint.js examples/vulnerable-harness --format html --output harnesslint-report.html --fail-on none",
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

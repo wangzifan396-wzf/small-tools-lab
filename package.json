@@ -1,0 +1,24 @@
+{
+  "name": "small-tools-lab",
+  "version": "1.0.0",
+  "description": "A practical monorepo of browser tools, developer CLIs, and local AI experiments.",
+  "private": true,
+  "license": "MIT",
+  "type": "commonjs",
+  "repository": "https://github.com/wangzifan396-wzf/small-tools-lab",
+  "homepage": "https://wangzifan396-wzf.github.io/small-tools-lab/",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "workspaces": [
+    "projects/*"
+  ],
+  "scripts": {
+    "check": "node --check app.js && node --check scripts/run-project-tests.js && node --check scripts/run-python-tests.js",
+    "test": "node --test tests/*.test.js",
+    "test:projects": "node scripts/run-project-tests.js",
+    "test:python": "node scripts/run-python-tests.js",
+    "verify": "npm run check && npm test && npm run test:projects"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

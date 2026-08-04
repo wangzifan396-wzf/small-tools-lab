@@ -1,0 +1,35 @@
+name: Bug report
+description: Report an incorrect finding, missed variable, or output problem
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials or private repository content. Use synthetic values only.
+  - type: input
+    id: version
+    attributes:
+      label: Env Matrix version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include synthetic files, command, configuration, and output format.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Windows 11, Node.js 22
+    validations:
+      required: true

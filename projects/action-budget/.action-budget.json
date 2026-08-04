@@ -1,0 +1,9 @@
+{
+  "ignore": [],
+  "defaultTimeoutMinutes": 360,
+  "maxMatrixVariants": 20,
+  "maxJobsPerRun": 64,
+  "maxTimeoutMinutesPerRun": 1440,
+  "maxScheduledRunsPerDay": 24,
+  "concurrencyWarning": 8
+}

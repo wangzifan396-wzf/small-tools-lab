@@ -1,0 +1,45 @@
+name: Env Matrix
+description: Map environment-variable contracts and fail on cross-layer drift
+branding:
+  icon: grid
+  color: green
+inputs:
+  path:
+    description: Repository path to scan
+    required: false
+    default: .
+  fail-on:
+    description: Minimum finding severity that fails the job
+    required: false
+    default: high
+  config:
+    description: Configuration filename relative to the scanned path
+    required: false
+    default: .env-matrix.json
+  report-output:
+    description: Markdown report path
+    required: false
+    default: env-matrix.md
+outputs:
+  report:
+    description: Path to the generated Markdown report
+    value: ${{ steps.scan.outputs.report }}
+runs:
+  using: composite
+  steps:
+    - id: scan
+      name: Scan environment contract
+      shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_CONFIG: ${{ inputs.config }}
+        INPUT_REPORT: ${{ inputs.report-output }}
+      run: |
+        set +e
+        node "$GITHUB_ACTION_PATH/bin/env-matrix.js" "$INPUT_PATH" --config "$INPUT_CONFIG" --format markdown --output "$INPUT_REPORT" --fail-on "$INPUT_FAIL_ON"
+        status=$?
+        set -e
+        echo "report=$INPUT_REPORT" >> "$GITHUB_OUTPUT"
+        if [[ -f "$INPUT_REPORT" && -n "$GITHUB_STEP_SUMMARY" ]]; then cat "$INPUT_REPORT" >> "$GITHUB_STEP_SUMMARY"; fi
+        exit "$status"

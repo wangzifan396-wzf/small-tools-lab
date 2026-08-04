@@ -1,0 +1,17 @@
+{
+  "name": "schema-scout",
+  "version": "1.0.0",
+  "description": "Local-first JSON structure analysis and schema generation.",
+  "license": "MIT",
+  "private": false,
+  "repository": { "type": "git", "url": "git+https://github.com/wangzifan396-wzf/small-tools-lab.git", "directory": "projects/schema-scout" },
+  "homepage": "https://wangzifan396-wzf.github.io/small-tools-lab/projects/schema-scout/",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "keywords": ["json", "json-schema", "typescript", "data-profiling"],
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "test": "node --test tests/schema.test.js",
+    "check": "node --check src/schema.js && node --check src/app.js && node --check scripts/serve.js"
+  },
+  "engines": { "node": ">=20" }
+}

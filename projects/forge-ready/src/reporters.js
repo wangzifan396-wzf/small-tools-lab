@@ -1,0 +1,67 @@
+"use strict";
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
+}
+
+function ansi(enabled, code, value) { return enabled ? `\u001b[${code}m${value}\u001b[0m` : value; }
+
+function renderPretty(report, options) {
+  const color = Boolean(options && options.color);
+  const gradeColor = report.score >= 90 ? "32" : report.score >= 70 ? "33" : "31";
+  const severityColor = { high: "31", medium: "33", low: "36" };
+  const lines = [ansi(color, "1", "ForgeReady"), "=".repeat(74)];
+  lines.push(`${report.repository}  |  ${report.profile} profile  |  ${report.filesScanned} files`);
+  lines.push(`Grade ${ansi(color, `${gradeColor};1`, report.grade)}  Score ${ansi(color, gradeColor, `${report.score}/100`)}  High ${report.counts.high}  Medium ${report.counts.medium}  Low ${report.counts.low}`);
+  lines.push("");
+  lines.push("Category              Score");
+  lines.push("-".repeat(36));
+  for (const [name, category] of Object.entries(report.categories)) lines.push(`${name.padEnd(21)} ${String(category.score).padStart(2)} / ${category.maximum}`);
+  lines.push("");
+  if (!report.findings.length) lines.push(ansi(color, "32", "No findings. This repository passed every enabled check."));
+  for (const item of report.findings) {
+    lines.push(`${ansi(color, `${severityColor[item.severity]};1`, item.severity.toUpperCase().padEnd(6))} ${ansi(color, "1", item.rule)}  -${item.penalty}  ${item.message}`);
+    lines.push(`       ${item.file}:${item.line}  |  effort ${item.effort}`);
+    if (item.evidence) lines.push(`       > ${item.evidence.replace(/\s+/g, " ").slice(0, 120)}`);
+    lines.push(`       Fix: ${item.suggestion}`, "");
+  }
+  lines.push("Next actions");
+  report.nextActions.forEach((item, index) => lines.push(`${index + 1}. [${item.rule}] ${item.suggestion} (${item.effort})`));
+  return `${lines.join("\n")}\n`;
+}
+
+function cleanReport(report) {
+  return {
+    tool: report.tool, version: report.version, generatedAt: report.generatedAt, repository: report.repository,
+    profile: report.profile, filesScanned: report.filesScanned, score: report.score, grade: report.grade,
+    categories: report.categories, counts: report.counts, findings: report.findings, nextActions: report.nextActions
+  };
+}
+
+function renderJson(report) { return `${JSON.stringify(cleanReport(report), null, 2)}\n`; }
+
+function renderMarkdown(report) {
+  const lines = ["## ForgeReady", "", `**Grade ${report.grade} - ${report.score}/100** using the \`${report.profile}\` profile.`, "", "| Category | Score |", "| --- | ---: |"];
+  for (const [name, category] of Object.entries(report.categories)) lines.push(`| ${name} | ${category.score} / ${category.maximum} |`);
+  lines.push("", "### Findings", "", "| Rule | Severity | Deduction | Location | Finding |", "| --- | --- | ---: | --- | --- |");
+  report.findings.forEach((item) => lines.push(`| ${item.rule} | ${item.severity} | -${item.penalty} | \`${item.file}:${item.line}\` | ${item.message.replaceAll("|", "\\|")} |`));
+  if (!report.findings.length) lines.push("| - | - | 0 | - | No findings | ");
+  lines.push("", "### Next actions", "");
+  report.nextActions.forEach((item, index) => lines.push(`${index + 1}. **${item.rule}:** ${item.suggestion} _Effort: ${item.effort}._`));
+  return `${lines.join("\n")}\n`;
+}
+
+function findingCard(item) {
+  return `<article class="finding" data-severity="${escapeHtml(item.severity)}" data-category="${escapeHtml(item.category)}" data-search="${escapeHtml(`${item.rule} ${item.file} ${item.message} ${item.title}`.toLowerCase())}"><div class="penalty"><strong>-${item.penalty}</strong><span>points</span></div><div class="finding-main"><div class="finding-heading"><span class="severity severity-${escapeHtml(item.severity)}">${escapeHtml(item.severity)}</span><code>${escapeHtml(item.rule)}</code><h3>${escapeHtml(item.message)}</h3><i>${escapeHtml(item.effort)}</i></div><a href="#">${escapeHtml(item.file)}:${item.line}</a>${item.evidence ? `<pre>${escapeHtml(item.evidence)}</pre>` : ""}<p><b>Fix</b>${escapeHtml(item.suggestion)}</p></div></article>`;
+}
+
+function renderHtml(report) {
+  const findings = report.findings.map(findingCard).join("") || '<div class="empty">No findings</div>';
+  const categories = Object.entries(report.categories).map(([name, item]) => `<div class="category"><div><span>${escapeHtml(name)}</span><strong>${item.score}<small> / ${item.maximum}</small></strong></div><i><b style="width:${(item.score / item.maximum) * 100}%"></b></i><small>-${item.deductions} deducted</small></div>`).join("");
+  const generated = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(report.generatedAt));
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ForgeReady - ${escapeHtml(report.repository)}</title><style>
+:root{color-scheme:light;--page:#f4f5f2;--surface:#fff;--ink:#19201e;--muted:#69736f;--line:#ccd4d0;--green:#287661;--lime:#bfd14c;--yellow:#d2a52d;--coral:#d75c49;--blue:#4f78a7;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--ink);font-size:14px;line-height:1.45}.topbar{display:flex;height:58px;align-items:center;justify-content:space-between;padding:0 max(4vw,calc((100vw - 1360px)/2));border-bottom:1px solid var(--line);background:var(--surface)}.brand{display:flex;align-items:center;gap:10px;font-weight:800}.mark{display:grid;width:30px;height:30px;place-items:center;border-radius:5px;background:var(--ink);color:var(--lime);font:800 10px ui-monospace,monospace}.topbar>span{color:var(--muted);font:10px ui-monospace,monospace}main{padding:35px max(4vw,calc((100vw - 1360px)/2)) 60px}.heading{display:flex;align-items:end;justify-content:space-between;gap:24px}.eyebrow{color:var(--green);font:800 10px ui-monospace,monospace;text-transform:uppercase}.heading h1{margin:5px 0 2px;font-size:30px;letter-spacing:0}.heading p{margin:0;color:var(--muted);font:11px ui-monospace,monospace}.grade{display:flex;align-items:center;gap:13px}.grade strong{display:grid;width:68px;height:68px;place-items:center;border:1px solid var(--ink);border-radius:50%;font-size:29px}.grade div{display:grid}.grade span{color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}.grade b{font:800 15px ui-monospace,monospace}.summary{display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;margin-top:25px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}.summary div{padding:15px 17px;border-right:1px solid var(--line)}.summary div:last-child{border:0}.summary span{display:block;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}.summary strong{font:800 21px ui-monospace,monospace}.dashboard{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}.panel{padding:19px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}.panel h2{margin:0 0 14px;font-size:14px}.categories{display:grid;grid-template-columns:repeat(2,1fr);gap:11px 18px}.category>div{display:flex;align-items:baseline;justify-content:space-between}.category span{font-size:10px;text-transform:capitalize}.category strong{font:800 16px ui-monospace,monospace}.category strong small{color:var(--muted);font-size:8px}.category i{display:block;height:7px;margin:5px 0 3px;overflow:hidden;border-radius:3px;background:var(--page)}.category i b{display:block;height:100%;border-radius:3px;background:var(--green)}.category>small{color:var(--muted);font-size:8px}.actions{display:grid;gap:8px;counter-reset:steps}.action{display:grid;grid-template-columns:22px 1fr;gap:8px;font-size:10px}.action:before{counter-increment:steps;content:counter(steps);display:grid;width:22px;height:22px;place-items:center;border-radius:4px;background:var(--ink);color:#fff;font:9px ui-monospace,monospace}.action b{display:block}.action small{color:var(--muted)}.filters{display:grid;grid-template-columns:1fr auto;gap:8px;margin:27px 0 11px}.filters input{height:40px;padding:8px 11px;border:1px solid var(--line);border-radius:5px;background:var(--surface);font:inherit}.buttons{display:flex;gap:5px}.buttons button{min-width:75px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--muted);font-weight:700;cursor:pointer}.buttons button[aria-pressed=true]{border-color:var(--ink);background:var(--ink);color:#fff}.findings{display:grid;gap:8px}.finding{display:grid;grid-template-columns:72px minmax(0,1fr);overflow:hidden;border:1px solid var(--line);border-radius:6px;background:var(--surface)}.penalty{display:grid;align-content:center;background:var(--ink);color:#fff;text-align:center}.penalty strong{font:800 20px ui-monospace,monospace}.penalty span{color:#c9d2ce;font-size:8px;text-transform:uppercase}.finding-main{min-width:0;padding:14px 16px}.finding-heading{display:flex;align-items:center;gap:7px}.finding-heading h3{margin:0;font-size:12px}.finding-heading code{padding:2px 5px;border-radius:3px;background:var(--page);font-size:9px}.finding-heading i{margin-left:auto;color:var(--muted);font-size:8px;text-transform:uppercase}.severity{padding:3px 6px;border-radius:3px;color:#fff;font-size:8px;font-weight:800;text-transform:uppercase}.severity-high{background:var(--coral)}.severity-medium{background:#ad790f}.severity-low{background:var(--blue)}.finding a{display:inline-block;margin-top:4px;color:var(--green);font:9px ui-monospace,monospace;text-decoration:none}.finding pre{overflow-x:auto;margin:9px 0 0;padding:8px;border-radius:4px;background:#18201e;color:#e1e8e4;font-size:9px;white-space:pre-wrap}.finding p{display:flex;gap:8px;margin:9px 0 0;color:var(--muted);font-size:10px}.finding p b{color:var(--green);text-transform:uppercase}.finding[hidden]{display:none}.empty{display:grid;min-height:150px;place-items:center;border:1px dashed var(--line);border-radius:6px;color:var(--muted);font:10px ui-monospace,monospace;text-transform:uppercase}@media(max-width:720px){.topbar{padding:0 13px}.topbar>span{display:none}main{padding:25px 13px}.heading{align-items:flex-start}.heading h1{font-size:24px}.grade strong{width:52px;height:52px;font-size:22px}.summary{grid-template-columns:repeat(2,1fr)}.summary div:nth-child(-n+2){border-bottom:1px solid var(--line)}.summary div:nth-child(even){border-right:0}.dashboard{grid-template-columns:1fr}.categories{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.buttons{overflow-x:auto}.buttons button{min-width:67px}.finding{grid-template-columns:1fr}.penalty{display:flex;justify-content:center;gap:5px;padding:5px}.penalty strong{font-size:11px}.penalty span{align-self:center}.finding-heading{align-items:flex-start;flex-wrap:wrap}.finding-heading i{margin-left:0}.finding p{align-items:flex-start}}
+</style></head><body><header class="topbar"><div class="brand"><span class="mark">FR</span>ForgeReady</div><span>Generated ${escapeHtml(generated)}</span></header><main><div class="heading"><div><span class="eyebrow">open-source release preflight</span><h1>${escapeHtml(report.repository)}</h1><p>${escapeHtml(report.profile)} profile / ${report.filesScanned} files inspected</p></div><div class="grade"><strong>${escapeHtml(report.grade)}</strong><div><span>Readiness score</span><b>${report.score} / 100</b></div></div></div><section class="summary"><div><span>High findings</span><strong>${report.counts.high}</strong></div><div><span>Medium findings</span><strong>${report.counts.medium}</strong></div><div><span>Low findings</span><strong>${report.counts.low}</strong></div><div><span>Next actions</span><strong>${report.nextActions.length}</strong></div></section><div class="dashboard"><section class="panel"><h2>Readiness by category</h2><div class="categories">${categories}</div></section><section class="panel"><h2>Highest-impact next actions</h2><div class="actions">${report.nextActions.map((item) => `<div class="action"><div><b>${escapeHtml(item.rule)} - ${escapeHtml(item.title)}</b><small>${escapeHtml(item.effort)} effort</small></div></div>`).join("")}</div></section></div><div class="filters"><input id="search" type="search" placeholder="Filter by rule, file, or finding" aria-label="Filter findings"><div class="buttons" role="group" aria-label="Severity filter"><button data-filter="all" aria-pressed="true">All</button><button data-filter="high" aria-pressed="false">High</button><button data-filter="medium" aria-pressed="false">Medium</button><button data-filter="low" aria-pressed="false">Low</button></div></div><section class="findings">${findings}</section></main><script>const search=document.querySelector('#search');let severity='all';function apply(){const q=search.value.trim().toLowerCase();document.querySelectorAll('.finding').forEach(item=>{item.hidden=(severity!=='all'&&item.dataset.severity!==severity)||(q&&!item.dataset.search.includes(q))})}search.addEventListener('input',apply);document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{severity=button.dataset.filter;document.querySelectorAll('[data-filter]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));apply()}));</script></body></html>`;
+}
+
+module.exports = { cleanReport, escapeHtml, renderHtml, renderJson, renderMarkdown, renderPretty };

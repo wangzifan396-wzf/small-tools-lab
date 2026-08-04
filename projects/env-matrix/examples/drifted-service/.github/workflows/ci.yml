@@ -1,0 +1,9 @@
+name: CI
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - run: npm test

@@ -1,0 +1,6 @@
+{
+  "profile": "app",
+  "ignore": [
+    "projects/*/examples/**"
+  ]
+}

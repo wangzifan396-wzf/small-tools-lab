@@ -1,103 +1,213 @@
-const STORAGE_KEY = "todo-list";
-const defaultTodos = [
-  { id: 1, text: "整理项目文件", done: false },
-  { id: 2, text: "完成静态页面", done: true },
-  { id: 3, text: "检查渲染效果", done: false }
+"use strict";
+
+const TOOLS = [
+  {
+    id: "chromacraft",
+    name: "ChromaCraft",
+    category: "browser",
+    label: "Color systems",
+    description:
+      "Extract perceptual palettes, validate contrast, lock colors, and export CSS, JSON, or Tailwind tokens.",
+    tech: "Browser · OKLab · WCAG",
+    live: "projects/chromacraft/",
+    docs: "projects/chromacraft/README.md",
+    featured: true,
+  },
+  {
+    id: "schema-scout",
+    name: "Schema Scout",
+    category: "browser",
+    label: "JSON discovery",
+    description:
+      "Inspect real JSON samples, measure field coverage, and infer JSON Schema, TypeScript, or path catalogs.",
+    tech: "Browser · JSON Schema",
+    live: "projects/schema-scout/",
+    docs: "projects/schema-scout/README.md",
+    featured: false,
+  },
+  {
+    id: "timeweave",
+    name: "TimeWeave",
+    category: "browser",
+    label: "Time-zone planning",
+    description:
+      "Compare working hours across time zones, find shared slots, and export calendar-ready events.",
+    tech: "Browser · Intl API",
+    live: "projects/timeweave/",
+    docs: "projects/timeweave/README.md",
+    featured: false,
+  },
+  {
+    id: "readme-studio",
+    name: "README Studio",
+    category: "browser",
+    label: "Project documentation",
+    description:
+      "Build a structured project README with live preview, badges, optional sections, and Markdown export.",
+    tech: "Browser · Markdown",
+    live: "projects/readme-studio/",
+    docs: "projects/readme-studio/README.md",
+    featured: false,
+  },
+  {
+    id: "browser-todo",
+    name: "Browser Todo",
+    category: "browser",
+    label: "Local productivity",
+    description:
+      "A tiny local-first task list retained from the original Small Tools Lab.",
+    tech: "Browser · localStorage",
+    live: "projects/browser-todo/",
+    docs: "projects/browser-todo/README.md",
+    featured: false,
+  },
+  {
+    id: "harnesslint",
+    name: "HarnessLint",
+    category: "cli",
+    label: "Agent configuration",
+    description:
+      "Lint agent instructions, MCP configuration, permissions, pinned dependencies, and repository harness safety.",
+    tech: "Node.js CLI · SARIF",
+    docs: "projects/harnesslint/README.md",
+    featured: true,
+  },
+  {
+    id: "git-risk-map",
+    name: "Git Risk Map",
+    category: "cli",
+    label: "Review planning",
+    description:
+      "Turn a Git diff into a transparent, evidence-backed review order using path and change-risk signals.",
+    tech: "Node.js CLI · Git",
+    docs: "projects/git-risk-map/README.md",
+    featured: false,
+  },
+  {
+    id: "forge-ready",
+    name: "ForgeReady",
+    category: "cli",
+    label: "Release readiness",
+    description:
+      "Audit documentation, community health, quality, security, and release engineering before going public.",
+    tech: "Node.js CLI · GitHub Action",
+    docs: "projects/forge-ready/README.md",
+    featured: true,
+  },
+  {
+    id: "patchbrief",
+    name: "PatchBrief",
+    category: "cli",
+    label: "AI review context",
+    description:
+      "Build minimal, redacted, token-budgeted context packets around a Git change for agents and reviewers.",
+    tech: "Node.js CLI · Git",
+    docs: "projects/patchbrief/README.md",
+    featured: true,
+  },
+  {
+    id: "env-matrix",
+    name: "Env Matrix",
+    category: "cli",
+    label: "Configuration contracts",
+    description:
+      "Map environment variables across source, examples, CI, containers, deployment files, and docs.",
+    tech: "Node.js CLI · GitHub Action",
+    docs: "projects/env-matrix/README.md",
+    featured: true,
+  },
+  {
+    id: "action-budget",
+    name: "Action Budget",
+    category: "cli",
+    label: "CI cost exposure",
+    description:
+      "Expand GitHub Actions matrices and expose job fanout, concurrency, timeout limits, and unknown cost.",
+    tech: "Node.js CLI · YAML",
+    docs: "projects/action-budget/README.md",
+    featured: true,
+  },
+  {
+    id: "local-kb",
+    name: "Local KB",
+    category: "local-ai",
+    label: "Private RAG",
+    description:
+      "Index local documents with Ollama embeddings and SQLite, then answer questions with a local chat model.",
+    tech: "Python · Ollama · SQLite",
+    docs: "projects/local-kb/README.md",
+    featured: false,
+  },
+  {
+    id: "screenshot-qa",
+    name: "Screenshot QA",
+    category: "local-ai",
+    label: "OCR assistance",
+    description:
+      "Extract screenshot text locally and ask an Ollama or DeepSeek model for an actionable explanation.",
+    tech: "Python · OCR · Ollama",
+    docs: "projects/screenshot-qa/README.md",
+    featured: false,
+  },
 ];
-let todos = loadTodos();
 
-const input = document.querySelector("#todo-input");
-const addButton = document.querySelector(".todo-input button");
-const taskCount = document.querySelector("#task-count");
-const clearDoneButton = document.querySelector("#clear-done");
+const CATEGORY_NAMES = {
+  all: "All",
+  browser: "Browser",
+  cli: "CLI",
+  "local-ai": "Local AI",
+};
 
-function loadTodos() {
-  try {
-    const savedTodos = localStorage.getItem(STORAGE_KEY);
-
-    if (savedTodos) {
-      return JSON.parse(savedTodos);
-    }
-  } catch (error) {
-    return [];
-  }
-
-  return defaultTodos;
+function matchesTool(tool, query, category) {
+  const categoryMatch = category === "all" || tool.category === category;
+  const haystack =
+    `${tool.name} ${tool.label} ${tool.description} ${tool.tech}`.toLowerCase();
+  return categoryMatch && (!query || haystack.includes(query.toLowerCase()));
 }
 
-function saveTodos() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+function toolCard(tool) {
+  const primary = tool.live
+    ? `<a class="button primary" href="${tool.live}">Open tool <span aria-hidden="true">↗</span></a>`
+    : `<a class="button primary" href="${tool.docs}">Read docs <span aria-hidden="true">→</span></a>`;
+  const secondary = tool.live
+    ? `<a class="button ghost" href="${tool.docs}">Docs</a>`
+    : `<a class="button ghost" href="${tool.docs.replace("README.md", "")}">Source</a>`;
+  return `<article class="tool-card${tool.featured ? " featured" : ""}" data-category="${tool.category}">
+    <div class="card-top"><span class="category">${CATEGORY_NAMES[tool.category]}</span>${tool.featured ? '<span class="signal">Featured</span>' : ""}</div>
+    <h2>${tool.name}</h2><p class="label">${tool.label}</p><p class="description">${tool.description}</p>
+    <div class="tech">${tool.tech}</div><div class="actions">${primary}${secondary}</div>
+  </article>`;
 }
 
-function addTodo() {
-  const text = input.value.trim();
-
-  if (!text) {
-    return;
+function startPortal(documentObject) {
+  const grid = documentObject.querySelector("#tool-grid");
+  const search = documentObject.querySelector("#search");
+  const count = documentObject.querySelector("#visible-count");
+  let category = "all";
+  function render() {
+    const visible = TOOLS.filter((tool) =>
+      matchesTool(tool, search.value.trim(), category),
+    );
+    grid.innerHTML =
+      visible.map(toolCard).join("") ||
+      '<div class="empty">No tool matches this filter.</div>';
+    count.textContent = String(visible.length);
   }
-
-  todos.push({
-    id: Date.now(),
-    text,
-    done: false
-  });
-
-  input.value = "";
-  saveTodos();
+  search.addEventListener("input", render);
+  documentObject.querySelectorAll("[data-filter]").forEach((button) =>
+    button.addEventListener("click", () => {
+      category = button.dataset.filter;
+      documentObject
+        .querySelectorAll("[data-filter]")
+        .forEach((item) =>
+          item.setAttribute("aria-pressed", String(item === button)),
+        );
+      render();
+    }),
+  );
   render();
 }
 
-function clearDoneTodos() {
-  const activeTodos = todos.filter((todo) => !todo.done);
-
-  if (activeTodos.length === todos.length) {
-    return;
-  }
-
-  todos = activeTodos;
-  saveTodos();
-  render();
-}
-
-function render() {
-  const list = document.querySelector("#todo-list");
-  const doneCount = todos.filter((todo) => todo.done).length;
-
-  taskCount.textContent = `已完成 ${doneCount} / ${todos.length} 项`;
-  list.innerHTML = "";
-
-  todos.forEach((todo) => {
-    const item = document.createElement("li");
-    item.className = todo.done ? "todo-item done" : "todo-item";
-
-    const text = document.createElement("span");
-    text.textContent = todo.text;
-    text.addEventListener("click", () => {
-      todo.done = !todo.done;
-      saveTodos();
-      render();
-    });
-
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.textContent = "删除";
-    deleteButton.addEventListener("click", () => {
-      todos = todos.filter((item) => item.id !== todo.id);
-      saveTodos();
-      render();
-    });
-
-    item.append(text, deleteButton);
-    list.append(item);
-  });
-}
-
-addButton.addEventListener("click", addTodo);
-clearDoneButton.addEventListener("click", clearDoneTodos);
-input.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    addTodo();
-  }
-});
-
-render();
+if (typeof document !== "undefined") startPortal(document);
+if (typeof module !== "undefined")
+  module.exports = { CATEGORY_NAMES, TOOLS, matchesTool, toolCard };

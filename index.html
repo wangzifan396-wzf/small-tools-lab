@@ -1,33 +1,127 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>待办清单</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <main class="todo-app">
-    <h1>待办清单</h1>
-
-    <div class="todo-input">
-      <input id="todo-input" type="text" placeholder="输入新任务" aria-label="输入新任务">
-      <button type="button">添加</button>
-    </div>
-
-    <div class="filters">
-      <button class="filter-btn active" data-filter="all">全部</button>
-      <button class="filter-btn" data-filter="active">进行中</button>
-      <button class="filter-btn" data-filter="done">已完成</button>
-    </div>
-
-    <ul id="todo-list" class="todo-list"></ul>
-    <div class="status-bar">
-      <span id="task-count"></span>
-      <button id="clear-done" type="button">清除已完成</button>
-    </div>
-  </main>
-
-  <script src="app.js"></script>
-</body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="A practical toolbox of browser utilities, developer CLIs, and local AI experiments."
+    />
+    <title>Developer Toolbox · Small Tools Lab</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./"
+        ><span class="mark">ST</span><span>Small Tools Lab</span></a
+      >
+      <nav aria-label="Repository links">
+        <a href="README.md">About</a
+        ><a href="https://github.com/wangzifan396-wzf/small-tools-lab"
+          >GitHub ↗</a
+        >
+      </nav>
+    </header>
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow"
+            >Developer toolbox · Local-first by default</span
+          >
+          <h1>Small tools for real development work.</h1>
+          <p>
+            Browser utilities, explainable engineering CLIs, and local AI
+            experiments—kept in one repository, tested independently, and
+            designed to stay useful without a platform account.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary large" href="#catalog"
+              >Browse the toolbox</a
+            ><a class="button ghost large" href="README.md"
+              >How it is organized</a
+            >
+          </div>
+        </div>
+        <div class="hero-panel" aria-label="Toolbox summary">
+          <div><strong>13</strong><span>tools</span></div>
+          <div><strong>3</strong><span>categories</span></div>
+          <div><strong>103</strong><span>project tests</span></div>
+          <div><strong>1</strong><span>repository</span></div>
+        </div>
+      </section>
+      <section id="catalog" class="catalog">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Catalog</span>
+            <h2>Pick a tool, not a platform.</h2>
+          </div>
+          <p><strong id="visible-count">13</strong> visible projects</p>
+        </div>
+        <div class="toolbar">
+          <label
+            ><span class="sr-only">Search tools</span
+            ><input
+              id="search"
+              type="search"
+              placeholder="Search by problem or technology"
+          /></label>
+          <div class="filters" aria-label="Filter tools">
+            <button data-filter="all" aria-pressed="true">All</button
+            ><button data-filter="browser" aria-pressed="false">Browser</button
+            ><button data-filter="cli" aria-pressed="false">CLI</button
+            ><button data-filter="local-ai" aria-pressed="false">
+              Local AI
+            </button>
+          </div>
+        </div>
+        <div id="tool-grid" class="tool-grid">
+          <noscript
+            >Enable JavaScript to filter the catalog. Every project remains
+            available under <code>projects/</code>.</noscript
+          >
+        </div>
+      </section>
+      <section class="principles" aria-label="Project principles">
+        <div>
+          <span>01</span><strong>Useful in minutes</strong>
+          <p>
+            Every project solves one concrete job and documents its boundary.
+          </p>
+        </div>
+        <div>
+          <span>02</span><strong>Evidence over magic</strong>
+          <p>
+            Developer CLIs show how scores, selections, and findings were
+            produced.
+          </p>
+        </div>
+        <div>
+          <span>03</span><strong>Private by default</strong>
+          <p>
+            Browser and local AI tools keep data local unless a provider is
+            explicitly selected.
+          </p>
+        </div>
+      </section>
+      <section class="contribute">
+        <div>
+          <span class="eyebrow">Built to grow</span>
+          <h2>One repository. Independent projects.</h2>
+          <p>
+            Each folder owns its documentation and implementation. Maintained
+            tools add focused tests and release metadata; the root provides
+            discovery and shared verification.
+          </p>
+        </div>
+        <a class="button primary large" href="CONTRIBUTING.md"
+          >Contribute a tool</a
+        >
+      </section>
+    </main>
+    <footer>
+      <span>MIT licensed · Built by wangzifan396-wzf</span
+      ><span>No telemetry · No account required</span>
+    </footer>
+    <script src="app.js"></script>
+  </body>
 </html>

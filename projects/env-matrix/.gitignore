@@ -1,0 +1,9 @@
+node_modules/
+coverage/
+*.log
+env-matrix-report.html
+env-matrix-report.json
+env-matrix.md
+.env
+.env.local
+.env.*.local

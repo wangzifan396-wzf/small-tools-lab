@@ -40,3 +40,11 @@ screenshot-qa/data/screenshots/
 *.bak
 Thumbs.db
 .DS_Store
+
+# Node workspace and generated reports
+/node_modules/
+/coverage/
+**/node_modules/
+**/coverage/
+*-report.html
+*-report.json

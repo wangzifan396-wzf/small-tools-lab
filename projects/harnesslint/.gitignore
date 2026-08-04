@@ -1,0 +1,6 @@
+node_modules/
+coverage/
+*.log
+harnesslint-report.html
+harnesslint.sarif
+.harnesslint-baseline.json

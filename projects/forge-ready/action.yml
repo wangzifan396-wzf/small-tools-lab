@@ -1,0 +1,39 @@
+name: ForgeReady
+description: Audit open-source release readiness and publish an evidence-backed score
+branding:
+  icon: check-circle
+  color: green
+inputs:
+  path:
+    description: Repository path to audit
+    required: false
+    default: .
+  profile:
+    description: Audit profile
+    required: false
+    default: auto
+  min-score:
+    description: Minimum readiness score
+    required: false
+    default: "80"
+  report-output:
+    description: Markdown report path
+    required: false
+    default: forge-ready.md
+runs:
+  using: composite
+  steps:
+    - name: Audit release readiness
+      shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_PROFILE: ${{ inputs.profile }}
+        INPUT_MIN_SCORE: ${{ inputs.min-score }}
+        INPUT_REPORT: ${{ inputs.report-output }}
+      run: |
+        set +e
+        node "$GITHUB_ACTION_PATH/bin/forge-ready.js" "$INPUT_PATH" --profile "$INPUT_PROFILE" --format markdown --output "$INPUT_REPORT" --min-score "$INPUT_MIN_SCORE"
+        status=$?
+        set -e
+        if [[ -f "$INPUT_REPORT" && -n "$GITHUB_STEP_SUMMARY" ]]; then cat "$INPUT_REPORT" >> "$GITHUB_STEP_SUMMARY"; fi
+        exit "$status"

@@ -1,0 +1,17 @@
+{
+  "name": "timeweave",
+  "version": "1.0.0",
+  "description": "Local-first working-hour overlap planner for IANA time zones.",
+  "license": "MIT",
+  "private": false,
+  "repository": { "type": "git", "url": "git+https://github.com/wangzifan396-wzf/small-tools-lab.git", "directory": "projects/timeweave" },
+  "homepage": "https://wangzifan396-wzf.github.io/small-tools-lab/projects/timeweave/",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "keywords": ["timezone", "meeting-planner", "calendar", "remote-work"],
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "test": "node --test tests/time.test.js",
+    "check": "node --check src/time.js && node --check src/app.js && node --check scripts/serve.js"
+  },
+  "engines": { "node": ">=20" }
+}
