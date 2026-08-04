@@ -35,7 +35,7 @@
   ],
   "scripts": {
     "check": "node --check bin/env-matrix.js && node --check src/scanner.js && node --check src/reporters.js",
-    "test": "node --test tests/*.test.js",
+    "test": "node --test",
     "demo": "node bin/env-matrix.js examples/drifted-service --format html --output env-matrix-report.html --fail-on none"
   },
   "engines": {

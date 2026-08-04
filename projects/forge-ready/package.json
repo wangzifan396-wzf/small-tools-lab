@@ -35,7 +35,7 @@
   ],
   "scripts": {
     "check": "node --check bin/forge-ready.js && node --check src/scanner.js && node --check src/reporters.js",
-    "test": "node --test tests/*.test.js",
+    "test": "node --test",
     "audit:self": "node bin/forge-ready.js . --profile cli --min-score 80 --no-color",
     "demo": "node bin/forge-ready.js examples/unready-repo --profile cli --format html --output forge-ready-report.html --min-score 0"
   },

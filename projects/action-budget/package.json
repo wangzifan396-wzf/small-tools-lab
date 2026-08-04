@@ -34,7 +34,7 @@
   ],
   "scripts": {
     "check": "node --check bin/action-budget.js && node --check src/analyzer.js && node --check src/reporters.js",
-    "test": "node --test tests/*.test.js",
+    "test": "node --test",
     "demo": "node bin/action-budget.js examples/expensive-ci --format html --output action-budget-report.html --fail-on none"
   },
   "dependencies": {

@@ -37,7 +37,7 @@
     "check": "node --check bin/harnesslint.js && node --check src/scanner.js && node --check src/reporters.js",
     "lint:self": "node bin/harnesslint.js . --format pretty --fail-on high --no-color",
     "demo": "node bin/harnesslint.js examples/vulnerable-harness --format html --output harnesslint-report.html --fail-on none",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test"
   },
   "engines": {
     "node": ">=20"
