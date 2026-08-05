@@ -239,6 +239,28 @@ const TOOLS = [
     docs: "projects/quanty/README.md",
     featured: false,
   },
+  {
+    id: "hashforge",
+    name: "Hashforge",
+    category: "cli",
+    label: "Hash · HMAC · codec",
+    description:
+      "Zero-dependency hashing, HMAC and codec toolkit (SHA-1/256/384/512, HMAC, base64/hex) built on Web Crypto — runs in Node and the browser.",
+    tech: "Node.js · Web Crypto",
+    docs: "projects/hashforge/README.md",
+    featured: false,
+  },
+  {
+    id: "jsonq",
+    name: "Jsonq",
+    category: "cli",
+    label: "JSON query & transform",
+    description:
+      "Zero-dependency JSON query & transform: get by path, pick/omit keys, filter arrays, sort — for the CLI and the browser.",
+    tech: "Node.js CLI · ESM",
+    docs: "projects/jsonq/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {

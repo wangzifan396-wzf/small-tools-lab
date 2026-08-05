@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>jsonq · live playground</title>
+  <style>
+    :root { --bg:#0f1115; --panel:#171a21; --ink:#e7e9ee; --muted:#9aa3b2; --line:#262b36; --accent:#6ea8fe; --ok:#57c98a; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+    header { padding:18px 22px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+    header h1 { font-size:18px; margin:0; }
+    header span { color:var(--muted); }
+    main { padding:16px 22px; display:flex; flex-direction:column; gap:12px; max-width:880px; }
+    textarea, input, select, button { background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:13px; font-family:ui-monospace,Menlo,Consolas,monospace; }
+    textarea { width:100%; min-height:140px; resize:vertical; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    button.primary { background:var(--accent); color:#08121f; border-color:var(--accent); font-weight:600; cursor:pointer; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
+    .panel h3 { margin:0 0 8px; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; }
+    pre { white-space:pre-wrap; margin:0; word-break:break-word; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; }
+    .muted { color:var(--muted); }
+  </style>
+  <script>
+    (function () {
+      if (location.protocol !== 'file:') return;
+      var CMD = 'node playground/serve.js';
+      function show() {
+        var box = document.createElement('div');
+        box.setAttribute('style', 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;' +
+          'justify-content:center;padding:24px;background:#faf9f7;color:#22211e;' +
+          'font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif');
+        box.innerHTML =
+          '<div style="max-width:560px;background:#fff;border:1px solid #e7e4dd;border-radius:14px;' +
+          'box-shadow:0 24px 60px -12px rgba(28,25,20,.18);padding:28px 30px">' +
+          '<div style="font-size:28px;margin-bottom:10px">🔌</div>' +
+          '<h1 style="margin:0 0 12px;font-size:20px;font-weight:640">请通过本地服务打开</h1>' +
+          '<p style="margin:0 0 14px;color:#56534c">你现在是用 <code style="background:#f5f3ef;border:1px solid #e7e4dd;padding:2px 6px;border-radius:5px;font-size:12.5px">file://</code> 直接打开这个页面的。' +
+          '浏览器会按同源策略拦截模块脚本，页面里的按钮因此<b>全部不会响应</b>。</p>' +
+          '<ol style="margin:0 0 14px;padding-left:20px;color:#56534c">' +
+          '<li>Windows：双击项目根目录的 <b>start.cmd</b></li>' +
+          '<li>macOS / Linux：终端执行 <b>./start.sh</b></li>' +
+          '<li>或手动运行：<code style="background:#f5f3ef;border:1px solid #e7e4dd;padding:2px 6px;border-radius:5px;font-size:12.5px">' + CMD + '</code></li>' +
+          '</ol>' +
+          '<p style="margin:0;font-size:13px;color:#8b877e">启动后访问 <b>http://localhost:4173</b> 即可正常使用。</p>' +
+          '</div>';
+        document.body.appendChild(box);
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show);
+      else show();
+    })();
+  </script>
+</head>
+<body>
+  <header>
+    <h1>jsonq</h1>
+    <span>zero-dependency JSON query &amp; transform — runs entirely in your browser</span>
+  </header>
+
+  <main>
+    <textarea id="json" spellcheck="false">[
+  { "name": "bob",  "age": 30, "city": "NYC" },
+  { "name": "amy",  "age": 25, "city": "LA"  },
+  { "name": "carl", "age": 40, "city": "NYC" }
+]</textarea>
+
+    <div class="row">
+      <label>op
+        <select id="op">
+          <option value="get">get</option>
+          <option value="pick">pick</option>
+          <option value="omit">omit</option>
+          <option value="filter">filter</option>
+          <option value="sort">sort</option>
+          <option value="select">select</option>
+        </select>
+      </label>
+      <input id="arg1" type="text" placeholder="path / keys / key" value="age" style="flex:1;min-width:120px" />
+      <input id="arg2" type="text" placeholder="op (filter) / value" value="gt 26" style="flex:1;min-width:120px" />
+      <button class="primary" id="run">Run</button>
+    </div>
+
+    <div class="panel">
+      <h3>Result</h3>
+      <pre id="out">—</pre>
+    </div>
+  </main>
+
+  <script type="module">
+    import { get, pick, omit, filter, sortBy, select } from '../src/index.js';
+    const $ = (id) => document.getElementById(id);
+
+    function run() {
+      const raw = $('json').value.trim();
+      const op = $('op').value;
+      try {
+        const data = JSON.parse(raw);
+        const a1 = $('arg1').value.trim();
+        const a2 = $('arg2').value.trim();
+        let result;
+        if (op === 'get') result = get(data, a1);
+        else if (op === 'pick' || op === 'select') result = (op === 'pick' ? pick : select)(data, a1.split(',').map((s) => s.trim()).filter(Boolean));
+        else if (op === 'omit') result = omit(data, a1.split(',').map((s) => s.trim()).filter(Boolean));
+        else if (op === 'filter') {
+          const m = a2.match(/^(\S+)\s+(.*)$/);
+          if (!m) throw new Error('filter needs: <op> <value>  e.g. "gt 26"');
+          result = filter(data, a1, m[1], m[2]);
+        } else if (op === 'sort') result = sortBy(data, a1, a2 === 'desc' ? 'desc' : 'asc');
+        $('out').textContent = JSON.stringify(result, null, 2);
+      } catch (e) {
+        $('out').textContent = String(e.message);
+      }
+    }
+
+    $('run').addEventListener('click', run);
+    run();
+  </script>
+</body>
+</html>

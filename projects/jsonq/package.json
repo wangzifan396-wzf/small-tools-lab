@@ -1,0 +1,49 @@
+{
+  "name": "jsonq",
+  "version": "0.1.0",
+  "description": "Zero-dependency JSON query & transform toolkit — get by path, pick/omit keys, filter, sort — for CLI and the browser.",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": "./src/index.js",
+    "./playground": "./playground/index.html"
+  },
+  "bin": {
+    "jsonq": "bin/jsonq.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "types",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "demo": "node bin/jsonq.js get '{\"a\":{\"b\":[10,20]}}' a.b.0 && node bin/jsonq.js filter '[{\"n\":3},{\"n\":1}]' n gt 2",
+    "playground": "node playground/serve.js"
+  },
+  "keywords": [
+    "json",
+    "query",
+    "filter",
+    "select",
+    "transform",
+    "pick",
+    "omit",
+    "sort",
+    "zerodep",
+    "cli"
+  ],
+  "author": "WorkBuddy",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wangzifan396-wzf/small-tools-lab"
+  }
+}

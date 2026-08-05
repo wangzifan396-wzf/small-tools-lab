@@ -51,6 +51,8 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [Diffwords](projects/diffwords/README.md) | Word-level, CJK-aware text differ rendering inline, unified, HTML, and JSON |
 | [Cronly](projects/cronly/README.md) | Parse, validate, and describe cron expressions; compute next/previous runs with timezones |
 | [Quanty](projects/quanty/README.md) | Zero-dependency number and byte formatting: bytes, grouped numbers, compact, ordinals |
+| [Hashforge](projects/hashforge/README.md) | Zero-dependency hashing, HMAC and codec (SHA-1/256/384/512, HMAC, base64/hex) on Web Crypto |
+| [Jsonq](projects/jsonq/README.md) | Zero-dependency JSON query & transform: get by path, pick/omit, filter, sort |
 
 ### Local AI
 
