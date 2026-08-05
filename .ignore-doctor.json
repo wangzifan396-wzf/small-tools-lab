@@ -1,0 +1,4 @@
+{
+  "ignore": ["projects/*/examples/**", "projects/*/tests/**", "projects/*/test/**"],
+  "maxRulesPerFile": 250
+}

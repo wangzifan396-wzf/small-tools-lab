@@ -150,6 +150,28 @@ const TOOLS = [
     featured: true,
   },
   {
+    id: "ignore-doctor",
+    name: "Ignore Doctor",
+    category: "cli",
+    label: "Repository boundaries",
+    description:
+      "Audit Git, Docker, npm, and formatter ignore rules for leaks, dangerous negations, and context bloat.",
+    tech: "Node.js CLI · Ignore rules",
+    docs: "projects/ignore-doctor/README.md",
+    featured: true,
+  },
+  {
+    id: "port-matrix",
+    name: "Port Matrix",
+    category: "cli",
+    label: "Port contracts",
+    description:
+      "Map ports across code, environment files, containers, orchestration, and docs to expose drift and collisions.",
+    tech: "Node.js CLI · YAML",
+    docs: "projects/port-matrix/README.md",
+    featured: true,
+  },
+  {
     id: "local-kb",
     name: "Local KB",
     category: "local-ai",

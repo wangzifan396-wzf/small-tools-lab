@@ -1,0 +1,5 @@
+node_modules/
+coverage/
+*-report.html
+*-report.json
+ignore-doctor.md

@@ -1,0 +1,29 @@
+name: Ignore Doctor
+description: Audit Git, Docker, npm, and formatter ignore boundaries for leaks and context bloat
+branding:
+  icon: shield
+  color: green
+inputs:
+  path:
+    description: Repository path to analyze
+    required: false
+    default: .
+  fail-on:
+    description: Minimum finding severity that fails the job
+    required: false
+    default: high
+  format:
+    description: Report format
+    required: false
+    default: markdown
+  output:
+    description: Output report path
+    required: false
+    default: ignore-doctor.md
+  config:
+    description: Configuration path relative to the repository
+    required: false
+    default: .ignore-doctor.json
+runs:
+  using: node24
+  main: bin/action.js

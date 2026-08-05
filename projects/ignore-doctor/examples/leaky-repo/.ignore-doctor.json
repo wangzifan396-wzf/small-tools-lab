@@ -1,0 +1,4 @@
+{
+  "sensitivePatterns": ["credentials.txt"],
+  "requiredDockerPatterns": [".git", "node_modules", ".env"]
+}

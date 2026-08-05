@@ -1,0 +1,10 @@
+"use strict";
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const { spawnSync } = require("node:child_process");
+const test = require("node:test");
+const cli = path.resolve(__dirname, "../bin/port-matrix.js");
+test("CLI writes valid JSON and honors none", () => { const root = fs.mkdtempSync(path.join(os.tmpdir(), "port-matrix-cli-")); fs.writeFileSync(path.join(root, ".env.example"), "PORT=3000\n"); const result = spawnSync(process.execPath, [cli, root, "--format", "json", "--fail-on", "none"], { encoding: "utf8" }); assert.equal(result.status, 0); assert.equal(JSON.parse(result.stdout).tool, "port-matrix"); });
+test("CLI returns usage errors", () => { const result = spawnSync(process.execPath, [cli, "--fail-on", "critical"], { encoding: "utf8" }); assert.equal(result.status, 2); assert.match(result.stderr, /Unsupported severity/); });

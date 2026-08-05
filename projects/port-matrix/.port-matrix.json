@@ -1,0 +1,5 @@
+{
+  "ignore": ["examples/**", "tests/**", "node_modules/**"],
+  "allowedPrivilegedPorts": [80, 443],
+  "allowDocsOnlyPorts": [11434]
+}

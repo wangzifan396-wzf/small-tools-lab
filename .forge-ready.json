@@ -1,6 +1,8 @@
 {
   "profile": "app",
   "ignore": [
-    "projects/*/examples/**"
+    "projects/*/examples/**",
+    "projects/leafnote/dist/**",
+    "projects/sketchly/dist/**"
   ]
 }

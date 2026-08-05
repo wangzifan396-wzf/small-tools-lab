@@ -1,0 +1,21 @@
+{
+  "name": "port-matrix",
+  "version": "0.1.0",
+  "description": "Map and validate port contracts across code, containers, orchestration, environment files, and docs.",
+  "license": "MIT",
+  "private": false,
+  "type": "commonjs",
+  "repository": {"type": "git", "url": "git+https://github.com/wangzifan396-wzf/small-tools-lab.git", "directory": "projects/port-matrix"},
+  "homepage": "https://github.com/wangzifan396-wzf/small-tools-lab/tree/main/projects/port-matrix#readme",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "bin": {"port-matrix": "bin/port-matrix.js", "portmatrix": "bin/port-matrix.js"},
+  "files": ["bin/", "src/", "docs/port-matrix-report.png", "action.yml", "LICENSE", "README.md"],
+  "keywords": ["configuration-drift", "docker", "docker-compose", "kubernetes", "ports", "static-analysis"],
+  "scripts": {
+    "check": "node --check bin/port-matrix.js && node --check src/analyzer.js && node --check src/reporters.js",
+    "test": "node --test",
+    "demo": "node bin/port-matrix.js examples/drift-stack --format html --output port-matrix-report.html --fail-on none"
+  },
+  "dependencies": {"yaml": "^2.9.0"},
+  "engines": {"node": ">=20"}
+}

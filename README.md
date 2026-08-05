@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 15 focused tools in three categories
-- 12 Node.js projects with 126 project-level tests
+- 25 focused tools in three categories
+- 22 Node.js projects with 411 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -53,6 +53,8 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [Quanty](projects/quanty/README.md) | Zero-dependency number and byte formatting: bytes, grouped numbers, compact, ordinals |
 | [Hashforge](projects/hashforge/README.md) | Zero-dependency hashing, HMAC and codec (SHA-1/256/384/512, HMAC, base64/hex) on Web Crypto |
 | [Jsonq](projects/jsonq/README.md) | Zero-dependency JSON query & transform: get by path, pick/omit, filter, sort |
+| [Ignore Doctor](projects/ignore-doctor/README.md) | Audit ignore boundaries for leaks, dangerous negations, duplicate rules, and Docker context bloat |
+| [Port Matrix](projects/port-matrix/README.md) | Map port contracts across source, environment files, containers, orchestration, and docs |
 
 ### Local AI
 

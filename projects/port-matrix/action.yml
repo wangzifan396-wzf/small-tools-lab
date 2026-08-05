@@ -1,0 +1,37 @@
+name: Port Matrix
+description: Validate port contracts across source, Docker, Compose, Kubernetes, environment files, and docs
+branding:
+  icon: grid
+  color: blue
+inputs:
+  path:
+    description: Repository path to analyze
+    required: false
+    default: .
+  fail-on:
+    description: Minimum finding severity that fails the job
+    required: false
+    default: high
+  output:
+    description: Markdown report path
+    required: false
+    default: port-matrix.md
+runs:
+  using: composite
+  steps:
+    - name: Install locked YAML parser
+      shell: bash
+      run: npm ci --omit=dev --ignore-scripts --no-audit --no-fund --prefix "$GITHUB_ACTION_PATH"
+    - name: Analyze port contracts
+      shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_OUTPUT: ${{ inputs.output }}
+      run: |
+        set +e
+        node "$GITHUB_ACTION_PATH/bin/port-matrix.js" "$INPUT_PATH" --format markdown --output "$INPUT_OUTPUT" --fail-on "$INPUT_FAIL_ON"
+        status=$?
+        set -e
+        if [[ -f "$INPUT_OUTPUT" && -n "$GITHUB_STEP_SUMMARY" ]]; then cat "$INPUT_OUTPUT" >> "$GITHUB_STEP_SUMMARY"; fi
+        exit "$status"

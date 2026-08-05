@@ -8,6 +8,8 @@ All notable repository-level changes are recorded here. Individual tool releases
 
 - Lockfile Lens, an explainable npm lockfile supply-chain and pull-request reviewer.
 - Log Sift, a deterministic redacted log compactor with explicit context budgets.
+- Ignore Doctor, a cross-tool ignore-boundary auditor for disclosure and context-bloat risks.
+- Port Matrix, a structured port-contract map spanning source, containers, orchestration, and docs.
 
 ### Changed
 

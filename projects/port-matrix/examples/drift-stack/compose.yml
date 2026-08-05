@@ -1,0 +1,9 @@
+services:
+  api:
+    build: ./api
+    ports:
+      - "8080:3000"
+  worker:
+    image: example/worker
+    ports:
+      - "8080:4000"

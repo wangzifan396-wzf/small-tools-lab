@@ -1,0 +1,5 @@
+{
+  "name": "drift-stack",
+  "private": true,
+  "scripts": {"dev": "node server.js --port 3000"}
+}

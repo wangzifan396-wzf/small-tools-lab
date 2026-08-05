@@ -1,0 +1,27 @@
+{
+  "name": "ignore-doctor",
+  "version": "0.1.0",
+  "description": "Audit repository ignore boundaries for leaks and context bloat.",
+  "license": "MIT",
+  "private": false,
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wangzifan396-wzf/small-tools-lab.git",
+    "directory": "projects/ignore-doctor"
+  },
+  "homepage": "https://github.com/wangzifan396-wzf/small-tools-lab/tree/main/projects/ignore-doctor#readme",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "bin": {
+    "ignore-doctor": "bin/ignore-doctor.js",
+    "ignoredoctor": "bin/ignore-doctor.js"
+  },
+  "files": ["bin/", "src/", "docs/ignore-doctor-report.png", "action.yml", "LICENSE", "README.md"],
+  "keywords": ["dockerignore", "gitignore", "npmignore", "repository-hygiene", "security", "static-analysis"],
+  "scripts": {
+    "check": "node --check bin/ignore-doctor.js && node --check bin/action.js && node --check src/analyzer.js && node --check src/reporters.js",
+    "test": "node --test",
+    "demo": "node bin/ignore-doctor.js examples/leaky-repo --format html --output ignore-doctor-report.html --fail-on none"
+  },
+  "engines": {"node": ">=20"}
+}
