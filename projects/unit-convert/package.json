@@ -1,0 +1,18 @@
+{
+  "name": "unit-convert",
+  "version": "1.0.0",
+  "description": "Zero-dependency unit converter: length, mass, temperature, speed, data, time, area, volume, energy, pressure — for the CLI and the browser.",
+  "type": "module",
+  "bin": {
+    "unit-convert": "bin/unit-convert.js"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "start": "node ../playground/serve.js"
+  },
+  "keywords": ["unit", "convert", "converter", "cli", "units"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

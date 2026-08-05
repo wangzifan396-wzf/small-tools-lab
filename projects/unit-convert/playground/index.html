@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Unit Convert · 单位换算</title>
+<style>
+  :root { --bg:#f7f8fa; --card:#fff; --border:#e3e6eb; --text:#1f2430; --muted:#6b7280; --accent:#24735c; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+  .wrap { max-width:680px; margin:40px auto; padding:0 18px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 22px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+  label { font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
+  input, select { font:15px/1.4 system-ui; padding:9px 11px; border:1px solid var(--border); border-radius:9px; background:#fff; color:var(--text); }
+  input[type=number] { width:160px; }
+  select { min-width:120px; }
+  .result { margin-top:8px; font-size:20px; font-weight:600; color:var(--accent); min-height:28px; word-break:break-word; }
+  .hint { color:var(--muted); font-size:12.5px; margin-top:10px; }
+  code { background:#eef1f4; padding:1px 6px; border-radius:5px; font-size:12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Unit Convert · 单位换算</h1>
+  <p class="sub">零依赖 · 长度 / 质量 / 温度 / 速度 / 数据 / 时间 / 面积 / 体积 / 能量 / 压强</p>
+  <div class="card">
+    <div class="row">
+      <div><label>数值</label><input id="value" type="number" value="100" /></div>
+      <div><label>类别</label><select id="category"></select></div>
+    </div>
+    <div class="row">
+      <div><label>从</label><select id="from"></select></div>
+      <div><label>到</label><select id="to"></select></div>
+    </div>
+    <div class="result" id="result">—</div>
+    <p class="hint">数据单位区分二进制 <code>KiB/MiB/GiB</code>（1024）与十进制 <code>KB/MB/GB</code>（1000）。温度走 C/F/K 偏移换算。</p>
+  </div>
+</div>
+
+<script type="module">
+  import { listCategories, unitsInCategory, convert, formatNumber } from '../src/index.js';
+
+  const $ = (id) => document.getElementById(id);
+  const catSel = $('category'), fromSel = $('from'), toSel = $('to'), valEl = $('value'), resEl = $('result');
+
+  for (const c of listCategories()) {
+    const o = document.createElement('option'); o.value = c; o.textContent = c; catSel.appendChild(o);
+  }
+
+  function fillUnits() {
+    const units = unitsInCategory(catSel.value);
+    for (const sel of [fromSel, toSel]) {
+      sel.innerHTML = '';
+      for (const u of units) { const o = document.createElement('option'); o.value = u; o.textContent = u; sel.appendChild(o); }
+    }
+    if (units.length >= 2) toSel.selectedIndex = 1;
+  }
+
+  function update() {
+    const v = parseFloat(valEl.value);
+    if (!Number.isFinite(v)) { resEl.textContent = '请输入数值'; return; }
+    try {
+      const r = convert(v, fromSel.value, toSel.value);
+      resEl.textContent = formatNumber(r) + ' ' + toSel.value;
+    } catch (e) { resEl.textContent = e.message; }
+  }
+
+  catSel.addEventListener('change', () => { fillUnits(); update(); });
+  [fromSel, toSel, valEl].forEach((el) => el.addEventListener('input', update));
+  fillUnits(); update();
+</script>
+</body>
+</html>

@@ -283,6 +283,17 @@ const TOOLS = [
     docs: "projects/jsonq/README.md",
     featured: false,
   },
+  {
+    id: "unit-convert",
+    name: "Unit Convert",
+    category: "cli",
+    label: "Zero-dependency unit converter",
+    description:
+      "Convert across length, mass, temperature, speed, data (decimal + binary), time, area, volume, energy, pressure — for the CLI and the browser.",
+    tech: "Node.js CLI · ESM",
+    docs: "projects/unit-convert/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {
