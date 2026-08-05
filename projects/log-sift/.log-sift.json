@@ -1,0 +1,8 @@
+{
+  "budget": 2000,
+  "context": 2,
+  "head": 8,
+  "tail": 8,
+  "maxLineChars": 500,
+  "stripTimestamps": false
+}

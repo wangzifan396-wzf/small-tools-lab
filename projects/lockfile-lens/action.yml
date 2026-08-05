@@ -1,0 +1,27 @@
+name: Lockfile Lens
+description: Explain risky npm lockfile changes before they merge
+inputs:
+  path:
+    description: Repository directory to scan
+    default: .
+  base:
+    description: Git ref used as the lockfile baseline
+    default: ${{ github.event.pull_request.base.sha }}
+  fail-on:
+    description: Minimum severity that fails the action
+    default: high
+  format:
+    description: Report format
+    default: pretty
+  output:
+    description: Optional report output path
+    default: ""
+  config:
+    description: Configuration path relative to the scan root
+    default: .lockfile-lens.json
+runs:
+  using: node20
+  main: bin/action.js
+branding:
+  icon: eye
+  color: blue

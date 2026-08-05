@@ -1,0 +1,30 @@
+name: Log Sift
+description: Compact and redact an existing log file without executing commands
+inputs:
+  input:
+    description: Existing log file to read
+    required: true
+  budget:
+    description: Approximate output token budget
+    default: "2000"
+  context:
+    description: Context groups around errors and warnings
+    default: "2"
+  format:
+    description: Report format
+    default: markdown
+  output:
+    description: Optional report output path
+    default: ""
+  config:
+    description: Optional configuration file
+    default: .log-sift.json
+  fail-on-secret:
+    description: Fail if credential-like content is redacted
+    default: "false"
+runs:
+  using: node20
+  main: bin/action.js
+branding:
+  icon: filter
+  color: blue

@@ -4,6 +4,11 @@ All notable repository-level changes are recorded here. Individual tool releases
 
 ## [Unreleased]
 
+### Added
+
+- Lockfile Lens, an explainable npm lockfile supply-chain and pull-request reviewer.
+- Log Sift, a deterministic redacted log compactor with explicit context budgets.
+
 ### Planned
 
 - Continue adding focused tools based on validated developer workflows.

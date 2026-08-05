@@ -1,0 +1,31 @@
+2026-08-04T09:30:00.001Z build started for revision aabbccddeeff00112233
+2026-08-04T09:30:00.010Z restoring dependency cache
+2026-08-04T09:30:00.110Z cache download in progress
+2026-08-04T09:30:00.210Z cache download in progress
+2026-08-04T09:30:00.310Z cache download in progress
+2026-08-04T09:30:00.410Z cache download in progress
+2026-08-04T09:30:00.510Z cache download in progress
+2026-08-04T09:30:00.610Z cache download in progress
+2026-08-04T09:30:00.710Z cache download in progress
+2026-08-04T09:30:00.810Z cache download in progress
+2026-08-04T09:30:00.910Z cache download in progress
+2026-08-04T09:30:01.010Z cache download in progress
+2026-08-04T09:30:01.110Z cache restored
+2026-08-04T09:30:01.210Z warning deprecated configuration key: legacyMode
+2026-08-04T09:30:01.310Z running 48 tests
+2026-08-04T09:30:01.410Z test worker online
+2026-08-04T09:30:01.510Z test worker online
+2026-08-04T09:30:01.610Z test worker online
+2026-08-04T09:30:01.710Z test worker online
+2026-08-04T09:30:01.810Z api_key=synthetic_demo_token_1234567890
+2026-08-04T09:30:02.010Z ERROR request handler failed
+TypeError: Cannot read properties of undefined (reading 'id')
+    at loadAccount (src/account.js:42:17)
+    at async handleRequest (src/server.js:88:5)
+2026-08-04T09:30:02.110Z retrying failed test
+2026-08-04T09:30:02.210Z retrying failed test
+2026-08-04T09:30:02.310Z retrying failed test
+2026-08-04T09:30:02.410Z retrying failed test
+2026-08-04T09:30:02.510Z retrying failed test
+2026-08-04T09:30:02.610Z tests 47 passed, 1 failed
+2026-08-04T09:30:02.710Z build completed with failure

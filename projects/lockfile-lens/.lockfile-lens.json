@@ -1,0 +1,10 @@
+{
+  "ignore": [
+    "fixtures/**"
+  ],
+  "allowedRegistries": [
+    "registry.npmjs.org"
+  ],
+  "maxNewPackages": 25,
+  "maxVersionsPerPackage": 3
+}

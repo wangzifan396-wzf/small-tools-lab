@@ -1,0 +1,21 @@
+{
+  "name": "risky-app",
+  "version": "1.0.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "risky-app",
+      "version": "1.0.0",
+      "dependencies": {
+        "safe-lib": "^1.0.0"
+      }
+    },
+    "node_modules/safe-lib": {
+      "name": "safe-lib",
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/safe-lib/-/safe-lib-1.0.0.tgz",
+      "integrity": "sha512-original-demo-digest"
+    }
+  }
+}

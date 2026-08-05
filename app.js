@@ -128,6 +128,28 @@ const TOOLS = [
     featured: true,
   },
   {
+    id: "lockfile-lens",
+    name: "Lockfile Lens",
+    category: "cli",
+    label: "Dependency review",
+    description:
+      "Explain npm lockfile risk across sources, integrity, install scripts, registry drift, and pull-request changes.",
+    tech: "Node.js CLI · Supply chain",
+    docs: "projects/lockfile-lens/README.md",
+    featured: true,
+  },
+  {
+    id: "log-sift",
+    name: "Log Sift",
+    category: "cli",
+    label: "Agent-ready logs",
+    description:
+      "Compress noisy logs into deterministic, redacted, error-first context within an explicit token budget.",
+    tech: "Node.js CLI · Redaction",
+    docs: "projects/log-sift/README.md",
+    featured: true,
+  },
+  {
     id: "local-kb",
     name: "Local KB",
     category: "local-ai",

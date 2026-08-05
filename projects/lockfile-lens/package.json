@@ -1,0 +1,43 @@
+{
+  "name": "lockfile-lens",
+  "version": "0.1.0",
+  "description": "Explain risky npm lockfile changes before they merge.",
+  "license": "MIT",
+  "private": false,
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wangzifan396-wzf/small-tools-lab.git",
+    "directory": "projects/lockfile-lens"
+  },
+  "homepage": "https://github.com/wangzifan396-wzf/small-tools-lab/tree/main/projects/lockfile-lens#readme",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "bin": {
+    "lockfile-lens": "bin/lockfile-lens.js",
+    "locklens": "bin/lockfile-lens.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "docs/lockfile-lens-report.png",
+    "action.yml",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "dependency-review",
+    "lockfile",
+    "npm",
+    "security",
+    "software-supply-chain",
+    "static-analysis"
+  ],
+  "scripts": {
+    "check": "node --check bin/lockfile-lens.js && node --check bin/action.js && node --check src/analyzer.js && node --check src/reporters.js",
+    "test": "node --test",
+    "demo": "node bin/lockfile-lens.js examples/risky-app --before examples/risky-app/package-lock.before.json --format html --output lockfile-lens-report.html --fail-on none"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

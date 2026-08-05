@@ -1,0 +1,6 @@
+{
+  "ignore": ["projects/*/examples/**"],
+  "allowedRegistries": ["registry.npmjs.org"],
+  "maxNewPackages": 40,
+  "maxVersionsPerPackage": 3
+}

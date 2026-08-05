@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 13 focused tools in three categories
-- 10 Node.js projects with 103 project-level tests
+- 15 focused tools in three categories
+- 12 Node.js projects with 126 project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -43,6 +43,8 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [PatchBrief](projects/patchbrief/README.md) | Build minimal, redacted, token-budgeted context around a Git diff |
 | [Env Matrix](projects/env-matrix/README.md) | Map environment-variable contracts across source, examples, CI, containers, and docs |
 | [Action Budget](projects/action-budget/README.md) | Expose GitHub Actions matrix fanout, concurrency, and timeout exposure |
+| [Lockfile Lens](projects/lockfile-lens/README.md) | Explain npm lockfile risk across sources, integrity, install scripts, registries, and diffs |
+| [Log Sift](projects/log-sift/README.md) | Compact noisy logs into deterministic, redacted, error-first context for humans and agents |
 
 ### Local AI
 

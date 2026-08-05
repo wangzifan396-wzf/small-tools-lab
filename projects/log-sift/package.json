@@ -1,0 +1,42 @@
+{
+  "name": "log-sift",
+  "version": "0.1.0",
+  "description": "Deterministic, redacted, token-budgeted log compaction for humans and coding agents.",
+  "license": "MIT",
+  "private": false,
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wangzifan396-wzf/small-tools-lab.git",
+    "directory": "projects/log-sift"
+  },
+  "homepage": "https://github.com/wangzifan396-wzf/small-tools-lab/tree/main/projects/log-sift#readme",
+  "bugs": "https://github.com/wangzifan396-wzf/small-tools-lab/issues",
+  "bin": {
+    "log-sift": "bin/log-sift.js",
+    "logsift": "bin/log-sift.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "docs/log-sift-report.png",
+    "action.yml",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "ai-agents",
+    "ci-logs",
+    "log-analysis",
+    "redaction",
+    "token-budget"
+  ],
+  "scripts": {
+    "check": "node --check bin/log-sift.js && node --check bin/action.js && node --check src/sifter.js && node --check src/reporters.js",
+    "test": "node --test",
+    "demo": "node bin/log-sift.js examples/ci-output.txt --budget 500 --format html --output log-sift-report.html"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
