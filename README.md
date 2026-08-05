@@ -32,6 +32,8 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [TimeWeave](projects/timeweave/README.md) | Find shared working hours across time zones and export events | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/timeweave/) |
 | [README Studio](projects/readme-studio/README.md) | Compose structured project documentation with live preview | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/readme-studio/) |
 | [Browser Todo](projects/browser-todo/README.md) | Tiny localStorage task list retained from the original lab | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/browser-todo/) |
+| [Leafnote](projects/leafnote/README.md) | Local-first Markdown notes & knowledge base with wiki-links, backlinks, tags, and search | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/leafnote/) |
+| [Sketchly](projects/sketchly/README.md) | Local-first infinite-canvas whiteboard with a hand-drawn renderer and PNG/JSON export | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/sketchly/) |
 
 ### Developer CLIs
 
@@ -45,6 +47,10 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [Action Budget](projects/action-budget/README.md) | Expose GitHub Actions matrix fanout, concurrency, and timeout exposure |
 | [Lockfile Lens](projects/lockfile-lens/README.md) | Explain npm lockfile risk across sources, integrity, install scripts, registries, and diffs |
 | [Log Sift](projects/log-sift/README.md) | Compact noisy logs into deterministic, redacted, error-first context for humans and agents |
+| [Subzen](projects/subzen/README.md) | Zero-dependency subtitle parser, quality linter, and auto-fixer with first-class CJK typography |
+| [Diffwords](projects/diffwords/README.md) | Word-level, CJK-aware text differ rendering inline, unified, HTML, and JSON |
+| [Cronly](projects/cronly/README.md) | Parse, validate, and describe cron expressions; compute next/previous runs with timezones |
+| [Quanty](projects/quanty/README.md) | Zero-dependency number and byte formatting: bytes, grouped numbers, compact, ordinals |
 
 ### Local AI
 

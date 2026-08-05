@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leafnote — local-first Markdown notes</title>
+  <link rel="stylesheet" href="src/styles.css" />
+  <!--
+    file:// guard. A classic script keeps working when module scripts are
+    blocked by CORS on the file: protocol — which is exactly what makes every
+    button on the page look dead. Explain it instead of failing silently.
+  -->
+  <script>
+    (function () {
+      if (location.protocol !== 'file:') return;
+      var CMD = 'node serve.js';
+      function show() {
+        var box = document.createElement('div');
+        box.setAttribute('style', 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;' +
+          'justify-content:center;padding:24px;background:#faf9f7;color:#22211e;' +
+          'font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif');
+        box.innerHTML =
+          '<div style="max-width:560px;background:#fff;border:1px solid #e7e4dd;border-radius:14px;' +
+          'box-shadow:0 24px 60px -12px rgba(28,25,20,.18);padding:28px 30px">' +
+          '<div style="font-size:28px;margin-bottom:10px">🔌</div>' +
+          '<h1 style="margin:0 0 12px;font-size:20px;font-weight:640">请通过本地服务打开</h1>' +
+          '<p style="margin:0 0 14px;color:#56534c">你现在是用 <code style="background:#f5f3ef;border:1px solid #e7e4dd;padding:2px 6px;border-radius:5px;font-size:12.5px">file://</code> 直接打开这个页面的。' +
+          '浏览器会按同源策略拦截模块脚本，页面里的按钮因此<b>全部不会响应</b>。</p>' +
+          '<ol style="margin:0 0 14px;padding-left:20px;color:#56534c">' +
+          '<li>Windows：双击项目根目录的 <b>start.cmd</b></li>' +
+          '<li>macOS / Linux：终端执行 <b>./start.sh</b></li>' +
+          '<li>或手动运行：<code id="fg-cmd" style="background:#f5f3ef;border:1px solid #e7e4dd;padding:2px 6px;border-radius:5px;font-size:12.5px">' + CMD + '</code>' +
+          ' <button id="fg-copy" type="button" style="font-size:12px;padding:3px 9px;margin-left:6px;border-radius:6px;border:1px solid #e7e4dd;background:#f3f1ec;color:#56534c;cursor:pointer">复制</button></li>' +
+          '<li>或者<b>直接双击 dist/leafnote.html</b> —— 那是内联好的单文件版，不需要服务。</li>' +
+          '</ol>' +
+          '<p style="margin:0;font-size:13px;color:#8b877e">启动后访问 <b>http://localhost:4173</b> 即可正常使用。</p>' +
+          '</div>';
+        document.body.appendChild(box);
+        var b = document.getElementById('fg-copy');
+        if (b) b.onclick = function () {
+          try { navigator.clipboard.writeText(CMD); b.textContent = '已复制'; }
+          catch (e) { b.textContent = '请手动复制'; }
+        };
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show);
+      else show();
+    })();
+  </script>
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <div class="brand">
+        <span class="leaf">❧</span> Leafnote
+      </div>
+      <div class="sidebar-top">
+        <button id="new-note" class="primary">+ New note</button>
+        <input id="search" type="search" placeholder="Search notes…" autocomplete="off" />
+      </div>
+      <div id="tags" class="tags" aria-label="tags"></div>
+      <ul id="note-list" class="note-list"></ul>
+      <div class="sidebar-bottom">
+        <button id="export-md">Export .md</button>
+        <button id="export-json">Backup JSON</button>
+        <label class="import-btn">Import .md
+          <input id="import" type="file" accept=".md,.markdown,.txt" multiple hidden />
+        </label>
+      </div>
+    </aside>
+
+    <main id="editor-pane">
+      <div class="editor-bar">
+        <input id="title" type="text" placeholder="Note title" />
+        <button id="theme-toggle" title="Toggle light/dark">🌓</button>
+        <button id="delete-note" title="Delete note">🗑</button>
+      </div>
+      <div class="editor-body">
+        <textarea id="body" spellcheck="false"
+          placeholder="Write in Markdown…  #tags  [[wiki links]]  **bold** *italic* `code`"></textarea>
+        <div id="preview" class="preview"></div>
+      </div>
+    </main>
+
+    <aside id="meta-pane">
+      <h3>Backlinks</h3>
+      <ul id="backlinks" class="backlinks"></ul>
+      <h3>Tags in this note</h3>
+      <div id="note-tags" class="tags"></div>
+      <div id="meta-info" class="meta-info"></div>
+    </aside>
+  </div>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

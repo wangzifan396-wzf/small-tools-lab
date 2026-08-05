@@ -1,0 +1,63 @@
+{
+  "name": "cronly",
+  "version": "0.1.0",
+  "description": "Zero-dependency cron toolkit: parse & validate expressions, describe them in English or Chinese, and compute the next/previous run times (timezone-aware).",
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "cronly": "./bin/cronly.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "types",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "test:watch": "node --test --watch \"test/*.test.js\"",
+    "demo": "node bin/cronly.js next \"0 9 * * 1-5\" --count 5",
+    "playground": "node playground/serve.js"
+  },
+  "keywords": [
+    "cron",
+    "crontab",
+    "schedule",
+    "scheduler",
+    "parser",
+    "next-run",
+    "cron-expression",
+    "timezone",
+    "cjk",
+    "中文",
+    "定时任务",
+    "零依赖",
+    "zero-dependency",
+    "cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/cronly.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OWNER/cronly/issues"
+  },
+  "homepage": "https://github.com/OWNER/cronly#readme",
+  "dependencies": {},
+  "devDependencies": {},
+  "sideEffects": false
+}

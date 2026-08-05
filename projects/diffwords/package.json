@@ -1,0 +1,66 @@
+{
+  "name": "diffwords",
+  "version": "0.1.0",
+  "description": "Word-level, CJK-aware text differ. Zero dependencies, runs in Node.js and the browser. Compares drafts, shows what actually changed.",
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "diffwords": "./bin/diffwords.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "types",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "test:watch": "node --test --watch \"test/*.test.js\"",
+    "demo": "node bin/diffwords.js examples/before.txt examples/after.txt",
+    "playground": "node playground/serve.js"
+  },
+  "keywords": [
+    "diff",
+    "difference",
+    "text",
+    "word-diff",
+    "compare",
+    "lcs",
+    "unified-diff",
+    "cjk",
+    "chinese",
+    "japanese",
+    "korean",
+    "revision",
+    "draft",
+    "zero-dependency",
+    "cli",
+    "字幕",
+    "文本对比"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/diffwords.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OWNER/diffwords/issues"
+  },
+  "homepage": "https://github.com/OWNER/diffwords#readme",
+  "dependencies": {},
+  "devDependencies": {},
+  "sideEffects": false
+}

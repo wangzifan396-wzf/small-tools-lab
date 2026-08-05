@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>subzen · live playground</title>
+  <style>
+    :root {
+      --bg: #0f1115; --panel: #171a21; --ink: #e7e9ee; --muted: #9aa3b2;
+      --line: #262b36; --accent: #6ea8fe; --warn: #e6b450; --err: #ef6f6f;
+      --ok: #57c98a; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink);
+           font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    header { padding: 18px 22px; border-bottom: 1px solid var(--line);
+             display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    header h1 { font-size: 18px; margin: 0; letter-spacing: .3px; }
+    header span { color: var(--muted); }
+    main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 18px 22px; }
+    @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+    .col { display: flex; flex-direction: column; gap: 10px; }
+    textarea { width: 100%; min-height: 300px; resize: vertical; background: var(--panel);
+               color: var(--ink); border: 1px solid var(--line); border-radius: 10px;
+               padding: 12px; font: 13px/1.5 var(--mono); }
+    pre { white-space: pre-wrap; }
+    .bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    select, button { background: var(--panel); color: var(--ink); border: 1px solid var(--line);
+                     border-radius: 8px; padding: 7px 12px; font-size: 13px; cursor: pointer; }
+    button.primary { background: var(--accent); color: #08121f; border-color: var(--accent); font-weight: 600; }
+    button:active { transform: translateY(1px); }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+    .summary { font-family: var(--mono); font-size: 13px; }
+    .ok { color: var(--ok); } .warn { color: var(--warn); } .err { color: var(--err); }
+    .diag { border-left: 3px solid var(--line); padding: 4px 10px; margin: 6px 0; font-family: var(--mono); font-size: 12.5px; }
+    .diag.warn { border-color: var(--warn); }
+    .diag.error { border-color: var(--err); }
+    .diag.info { border-color: var(--muted); }
+    .sug { color: var(--ok); }
+    h3 { margin: 0 0 8px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+  </style>
+  <!--
+    file:// guard. A classic script keeps working when module scripts are
+    blocked by CORS on the file: protocol — which is exactly what makes every
+    button on the page look dead. Explain it instead of failing silently.
+  -->
+  <script>
+    (function () {
+      if (location.protocol !== 'file:') return;
+      var CMD = 'node playground/serve.js';
+      function show() {
+        var box = document.createElement('div');
+        box.setAttribute('style', 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;' +
+          'justify-content:center;padding:24px;background:#faf9f7;color:#22211e;' +
+          'font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif');
+        box.innerHTML =
+          '<div style="max-width:560px;background:#fff;border:1px solid #e7e4dd;border-radius:14px;' +
+          'box-shadow:0 24px 60px -12px rgba(28,25,20,.18);padding:28px 30px">' +
+          '<div style="font-size:28px;margin-bottom:10px">🔌</div>' +
+          '<h1 style="margin:0 0 12px;font-size:20px;font-weight:640">请通过本地服务打开</h1>' +
+          '<p style="margin:0 0 14px;color:#56534c">你现在是用 <code style="background:#f5f3ef;border:1px solid #e7e4dd;padding:2px 6px;border-radius:5px;font-size:12.5px">file://</code> 直接打开这个页面的。' +
+          '浏览器会按同源策略拦截模块脚本，页面里的按钮因此<b>全部不会响应</b>。</p>' +
+          '<ol style="margin:0 0 14px;padding-left:20px;color:#56534c">' +
+          '<li>Windows：双击项目根目录的 <b>start.cmd</b></li>' +
+          '<li>macOS / Linux：终端执行 <b>./start.sh</b></li>' +
+          '<li>或手动运行：<code id="fg-cmd" style="background:#f5f3ef;border:1px solid #e7e4dd;padding:2px 6px;border-radius:5px;font-size:12.5px">' + CMD + '</code>' +
+          ' <button id="fg-copy" type="button" style="font-size:12px;padding:3px 9px;margin-left:6px;border-radius:6px;border:1px solid #e7e4dd;background:#f3f1ec;color:#56534c;cursor:pointer">复制</button></li>' +
+          
+          '</ol>' +
+          '<p style="margin:0;font-size:13px;color:#8b877e">启动后访问 <b>http://localhost:4173</b> 即可正常使用。</p>' +
+          '</div>';
+        document.body.appendChild(box);
+        var b = document.getElementById('fg-copy');
+        if (b) b.onclick = function () {
+          try { navigator.clipboard.writeText(CMD); b.textContent = '已复制'; }
+          catch (e) { b.textContent = '请手动复制'; }
+        };
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show);
+      else show();
+    })();
+  </script>
+</head>
+<body>
+  <header>
+    <h1>subzen</h1>
+    <span>zero-dependency subtitle linter &amp; fixer — runs entirely in your browser</span>
+  </header>
+
+  <main>
+    <section class="col">
+      <div class="bar">
+        <label>preset
+          <select id="preset">
+            <option value="recommended">recommended</option>
+            <option value="cjk" selected>cjk</option>
+            <option value="strict">strict</option>
+            <option value="loose">loose</option>
+            <option value="netflix">netflix</option>
+          </select>
+        </label>
+        <label>format
+          <select id="format">
+            <option value="srt" selected>srt</option>
+            <option value="vtt">vtt</option>
+            <option value="ass">ass</option>
+            <option value="lrc">lrc</option>
+          </select>
+        </label>
+      </div>
+      <textarea id="input" spellcheck="false"></textarea>
+      <div class="bar">
+        <button class="primary" id="lint">Lint</button>
+        <button id="fix">Fix &amp; convert</button>
+        <button id="sample">Load sample</button>
+      </div>
+    </section>
+
+    <section class="col">
+      <div class="panel">
+        <h3>Report</h3>
+        <div id="summary" class="summary">—</div>
+        <div id="diags"></div>
+      </div>
+      <div class="panel">
+        <h3>Output</h3>
+        <pre id="output">—</pre>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { parse, serialize, lint, fix } from '../src/index.js';
+
+    const $ = (id) => document.getElementById(id);
+    const SAMPLE = `1
+00:00:01,000 --> 00:00:02,100
+大家好，欢迎收看这期video
+
+2
+00:00:02,100 --> 00:00:06,000
+今天我们要聊的是关于大语言模型推理成本的问题，这是一个非常复杂而且值得深入探讨的话题
+
+3
+00:00:06,000 --> 00:00:07,000
+Let's begin.`;
+
+    function run() {
+      const text = $('input').value;
+      const preset = $('preset').value;
+      const fmt = $('format').value;
+      let cues;
+      try {
+        cues = parse(text);
+      } catch (e) {
+        $('summary').innerHTML = `<span class="err">parse error: ${e.message}</span>`;
+        $('diags').innerHTML = '';
+        return;
+      }
+      const report = lint(cues, { preset });
+      const ec = report.errorCount, wc = report.warningCount, ic = report.infoCount;
+      const cls = ec ? 'err' : wc ? 'warn' : 'ok';
+      const label = ec || wc || ic ? `<span class="${cls}">${report.problemCount} problem(s)</span>` : `<span class="ok">no problems found</span>`;
+      $('summary').innerHTML = `${label} · ${report.cueCount} cues · ${ec} error · ${wc} warn · ${ic} info`;
+      $('diags').innerHTML = report.diagnostics.map((d) => {
+        const c = d.severity;
+        const where = d.line ? `L${d.line} ` : '';
+        const sug = d.data && d.data.suggestion ? ` → <span class="sug">${escape(d.data.suggestion)}</span>` : '';
+        return `<div class="diag ${c}"><b>${d.ruleId}</b> ${where}${escape(d.message)}${sug}</div>`;
+      }).join('') || '<div class="diag info">clean — nothing to report.</div>';
+      return { cues, fmt };
+    }
+
+    function doFix() {
+      const r = run();
+      if (!r) return;
+      const { cues, fmt } = r;
+      const preset = $('preset').value;
+      const out = fix(cues, { preset });
+      $('output').textContent = serialize(out.cues, fmt);
+    }
+
+    function escape(s) {
+      return String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    }
+
+    $('lint').addEventListener('click', run);
+    $('fix').addEventListener('click', doFix);
+    $('sample').addEventListener('click', () => { $('input').value = SAMPLE; run(); });
+    $('input').value = SAMPLE;
+    run();
+  </script>
+</body>
+</html>

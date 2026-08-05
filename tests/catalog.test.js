@@ -9,7 +9,7 @@ const { TOOLS, matchesTool, toolCard } = require("../app.js");
 const root = path.resolve(__dirname, "..");
 
 test("catalog has unique projects and valid local targets", () => {
-  assert.equal(TOOLS.length, 15);
+  assert.equal(TOOLS.length, 21);
   assert.equal(new Set(TOOLS.map((tool) => tool.id)).size, TOOLS.length);
   for (const tool of TOOLS) {
     assert.equal(fs.existsSync(path.join(root, "projects", tool.id)), true, `missing project ${tool.id}`);
@@ -20,15 +20,15 @@ test("catalog has unique projects and valid local targets", () => {
 
 test("catalog covers all supported categories", () => {
   assert.deepEqual([...new Set(TOOLS.map((tool) => tool.category))].sort(), ["browser", "cli", "local-ai"]);
-  assert.equal(TOOLS.filter((tool) => tool.category === "browser").length, 5);
-  assert.equal(TOOLS.filter((tool) => tool.category === "cli").length, 8);
+  assert.equal(TOOLS.filter((tool) => tool.category === "browser").length, 7);
+  assert.equal(TOOLS.filter((tool) => tool.category === "cli").length, 12);
   assert.equal(TOOLS.filter((tool) => tool.category === "local-ai").length, 2);
 });
 
 test("search and category filtering are deterministic", () => {
   assert.deepEqual(TOOLS.filter((tool) => matchesTool(tool, "fanout", "all")).map((tool) => tool.id), ["action-budget"]);
   assert.equal(TOOLS.filter((tool) => matchesTool(tool, "local", "browser")).some((tool) => tool.id === "browser-todo"), true);
-  assert.equal(TOOLS.filter((tool) => matchesTool(tool, "", "cli")).length, 8);
+  assert.equal(TOOLS.filter((tool) => matchesTool(tool, "", "cli")).length, 12);
 });
 
 test("cards expose commands as links without inline handlers", () => {

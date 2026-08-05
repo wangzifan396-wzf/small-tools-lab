@@ -1,0 +1,33 @@
+{
+  "name": "sketchly",
+  "version": "0.1.0",
+  "description": "Local-first hand-drawn whiteboard. Infinite canvas, zero dependencies, works offline — data never leaves your device.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "serve": "node serve.js",
+    "build": "node build.js",
+    "demo": "node serve.js"
+  },
+  "keywords": [
+    "whiteboard",
+    "drawing",
+    "canvas",
+    "excalidraw",
+    "local-first",
+    "offline",
+    "infinite-canvas",
+    "pkm"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/sketchly.git"
+  },
+  "bin": {
+    "sketchly": "serve.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

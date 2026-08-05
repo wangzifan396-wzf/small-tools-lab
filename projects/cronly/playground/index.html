@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>cronly · live playground</title>
+  <style>
+    :root { --bg:#0f1115; --panel:#171a21; --ink:#e7e9ee; --muted:#9aa3b2; --line:#262b36; --accent:#6ea8fe; --ok:#57c98a; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+    header { padding:18px 22px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+    header h1 { font-size:18px; margin:0; }
+    header span { color:var(--muted); }
+    main { padding:16px 22px; display:flex; flex-direction:column; gap:12px; max-width:760px; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    input, select, button { background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:13px; font-family:ui-monospace,Menlo,Consolas,monospace; }
+    input[type=text] { flex:1; min-width:200px; }
+    button.primary { background:var(--accent); color:#08121f; border-color:var(--accent); font-weight:600; cursor:pointer; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
+    .panel h3 { margin:0 0 8px; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; }
+    .ok { color:var(--ok); }
+    pre { white-space:pre-wrap; margin:0; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; }
+    .muted { color:var(--muted); }
+  </style>
+  <!--
+    file:// guard. A classic script keeps working when module scripts are
+    blocked by CORS on the file: protocol — which is exactly what makes every
+    button on the page look dead. Explain it instead of failing silently.
+  -->
+  <script>
+    (function () {
+      if (location.protocol !== 'file:') return;
+      var CMD = 'node playground/serve.js';
+      function show() {
+        var box = document.createElement('div');
+        box.setAttribute('style', 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;' +
+          'justify-content:center;padding:24px;background:#faf9f7;color:#22211e;' +
+          'font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif');
+        box.innerHTML =
+          '<div style="max-width:560px;background:#fff;border:1px solid #e7e4dd;border-radius:14px;' +
+          'box-shadow:0 24px 60px -12px rgba(28,25,20,.18);padding:28px 30px">' +
+          '<div style="font-size:28px;margin-bottom:10px">🔌</div>' +
+          '<h1 style="margin:0 0 12px;font-size:20px;font-weight:640">请通过本地服务打开</h1>' +
+          '<p style="margin:0 0 14px;color:#56534c">你现在是用 <code style="background:#f5f3ef;border:1px solid #e7e4dd;padding:2px 6px;border-radius:5px;font-size:12.5px">file://</code> 直接打开这个页面的。' +
+          '浏览器会按同源策略拦截模块脚本，页面里的按钮因此<b>全部不会响应</b>。</p>' +
+          '<ol style="margin:0 0 14px;padding-left:20px;color:#56534c">' +
+          '<li>Windows：双击项目根目录的 <b>start.cmd</b></li>' +
+          '<li>macOS / Linux：终端执行 <b>./start.sh</b></li>' +
+          '<li>或手动运行：<code id="fg-cmd" style="background:#f5f3ef;border:1px solid #e7e4dd;padding:2px 6px;border-radius:5px;font-size:12.5px">' + CMD + '</code>' +
+          ' <button id="fg-copy" type="button" style="font-size:12px;padding:3px 9px;margin-left:6px;border-radius:6px;border:1px solid #e7e4dd;background:#f3f1ec;color:#56534c;cursor:pointer">复制</button></li>' +
+          
+          '</ol>' +
+          '<p style="margin:0;font-size:13px;color:#8b877e">启动后访问 <b>http://localhost:4173</b> 即可正常使用。</p>' +
+          '</div>';
+        document.body.appendChild(box);
+        var b = document.getElementById('fg-copy');
+        if (b) b.onclick = function () {
+          try { navigator.clipboard.writeText(CMD); b.textContent = '已复制'; }
+          catch (e) { b.textContent = '请手动复制'; }
+        };
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show);
+      else show();
+    })();
+  </script>
+</head>
+<body>
+  <header>
+    <h1>cronly</h1>
+    <span>zero-dependency cron toolkit — runs entirely in your browser</span>
+  </header>
+
+  <main>
+    <div class="row">
+      <input id="expr" type="text" value="0 9 * * 1-5" spellcheck="false" />
+      <label>lang
+        <select id="lang"><option value="en">en</option><option value="zh">zh</option></select>
+      </label>
+      <label>tz
+        <input id="tz" type="text" value="UTC" style="width:160px" spellcheck="false" />
+      </label>
+      <button class="primary" id="run">Run</button>
+    </div>
+
+    <div class="panel">
+      <h3>Description</h3>
+      <pre id="desc">—</pre>
+    </div>
+    <div class="panel">
+      <h3>Next 5 runs</h3>
+      <pre id="runs">—</pre>
+    </div>
+    <div class="panel">
+      <h3>Parsed fields</h3>
+      <pre id="parsed">—</pre>
+    </div>
+  </main>
+
+  <script type="module">
+    import { parse, describe, nextRuns } from '../src/index.js';
+
+    const $ = (id) => document.getElementById(id);
+    const ERROR = (m) => `<span style="color:#ef6f6f">${m}</span>`;
+
+    function run() {
+      const expr = $('expr').value.trim();
+      const lang = $('lang').value;
+      const tz = $('tz').value.trim() || undefined;
+      const opts = { timeZone: tz };
+      try {
+        const c = parse(expr, { seconds: expr.split(/\s+/).length === 6 });
+        const sorted = (s) => [...s].sort((a, b) => a - b);
+        $('parsed').textContent = JSON.stringify({
+          minute: sorted(c.minute), hour: sorted(c.hour),
+          dom: sorted(c.dom), month: sorted(c.month), dow: sorted(c.dow),
+        }, null, 2);
+        $('desc').textContent = describe(expr, { lang, seconds: c.hasSeconds });
+        const from = new Date();
+        const runs = nextRuns(expr, 5, from, opts);
+        if (!runs.length) { $('runs').textContent = 'no upcoming run within 5 years'; }
+        else {
+          $('runs').textContent = runs
+            .map((d) => d.toISOString().replace('T', ' ').replace('.000Z', 'Z') + (tz ? ` (${tz})` : ''))
+            .join('\n');
+        }
+      } catch (e) {
+        $('desc').innerHTML = ERROR(e.message);
+        $('runs').textContent = '—';
+        $('parsed').textContent = '—';
+      }
+    }
+
+    $('run').addEventListener('click', run);
+    run();
+  </script>
+</body>
+</html>

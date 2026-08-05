@@ -1,0 +1,23 @@
+1
+00:00:02,120 --> 00:00:04,400
+Are you sure this is the right way?
+
+2
+00:00:05,100 --> 00:00:06,400
+The map says
+
+3
+00:00:06,450 --> 00:00:07,900
+three more kilometres.
+
+4
+00:00:08,300 --> 00:00:10,900
+But it is already dark.
+
+5
+00:00:11,600 --> 00:00:14,100
+We should get there before sunrise.
+
+6
+00:00:15,100 --> 00:00:17,900
+Then stop wasting time.

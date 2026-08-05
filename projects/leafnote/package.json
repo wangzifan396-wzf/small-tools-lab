@@ -1,0 +1,33 @@
+{
+  "name": "leafnote",
+  "version": "0.1.0",
+  "description": "Local-first Markdown notes & knowledge base. Zero dependencies, works offline, data stays on your device.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "serve": "node serve.js",
+    "build": "node build.js",
+    "demo": "node serve.js"
+  },
+  "keywords": [
+    "notes",
+    "markdown",
+    "local-first",
+    "knowledge-base",
+    "offline",
+    "wikilinks",
+    "backlinks",
+    "pkm"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/leafnote.git"
+  },
+  "bin": {
+    "leafnote": "serve.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

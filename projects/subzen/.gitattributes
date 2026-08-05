@@ -1,0 +1,6 @@
+* text=auto eol=lf
+
+*.srt text eol=lf
+*.vtt text eol=lf
+*.ass text eol=lf
+*.lrc text eol=lf

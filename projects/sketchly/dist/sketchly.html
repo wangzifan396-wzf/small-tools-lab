@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sketchly — 本地手绘白板</title>
+  <style>
+:root {
+  --bg: #f4f4f5;
+  --panel: #ffffff;
+  --panel-2: #fafafa;
+  --border: #e2e2e6;
+  --text: #1f2024;
+  --muted: #6b6f76;
+  --accent: #4263eb;
+  --accent-weak: #e7ecff;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
+  --radius: 10px;
+}
+
+[data-theme="dark"] {
+  --bg: #16161a;
+  --panel: #1f1f24;
+  --panel-2: #26262c;
+  --border: #34343c;
+  --text: #e8e8ea;
+  --muted: #9a9ba3;
+  --accent: #5aa2ff;
+  --accent-weak: #233152;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- toolbar ---- */
+#toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  z-index: 5;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sep {
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+button, .filebtn {
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 9px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+
+button:hover, .filebtn:hover { background: var(--accent-weak); }
+
+.tool {
+  width: 34px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.tool.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.style label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
+input[type="color"] {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+input[type="range"] { width: 78px; accent-color: var(--accent); }
+input[type="checkbox"] { accent-color: var(--accent); }
+
+#zoom-label {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--muted);
+  min-width: 42px;
+  text-align: center;
+}
+
+.filebtn { display: inline-flex; align-items: center; }
+
+/* ---- stage / canvas ---- */
+#stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#board {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: default;
+}
+
+#text-editor {
+  position: absolute;
+  display: none;
+  margin: 0;
+  padding: 2px 4px;
+  border: 1px dashed var(--accent);
+  background: transparent;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.25;
+  font-family: "Segoe Print", "Comic Sans MS", cursive;
+  white-space: pre;
+  min-width: 40px;
+  min-height: 1.4em;
+}
+
+/* ---- footer status ---- */
+#status {
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 720px) {
+  .style label { flex-direction: column; align-items: flex-start; gap: 2px; }
+  input[type="range"] { width: 64px; }
+}
+
+</style>
+</head>
+<body>
+  <header id="toolbar">
+    <div class="group tools">
+      <button data-tool="select" class="tool active" title="选择 (V)">⤢</button>
+      <button data-tool="hand" class="tool" title="平移 (H / 空格)">✋</button>
+      <span class="sep"></span>
+      <button data-tool="pen" class="tool" title="画笔 (P)">✏️</button>
+      <button data-tool="rect" class="tool" title="矩形 (R)">▭</button>
+      <button data-tool="ellipse" class="tool" title="椭圆 (O)">◯</button>
+      <button data-tool="diamond" class="tool" title="菱形 (D)">◇</button>
+      <button data-tool="arrow" class="tool" title="箭头 (A)">↗</button>
+      <button data-tool="line" class="tool" title="直线 (L)">／</button>
+      <button data-tool="text" class="tool" title="文本 (T，双击也可)">T</button>
+    </div>
+
+    <div class="group style">
+      <label title="描边颜色">🖊
+        <input id="stroke" type="color" value="#1e1e1e" />
+      </label>
+      <label title="填充颜色">🪣
+        <input id="fill" type="color" value="#ffd866" />
+        <input id="no-fill" type="checkbox" checked title="不填充" /> 空
+      </label>
+      <label title="线宽">线宽
+        <input id="width" type="range" min="1" max="20" value="2" />
+      </label>
+      <label title="手绘程度">手绘
+        <input id="rough" type="range" min="0" max="2" step="0.1" value="1" />
+      </label>
+      <label title="不透明度">透明
+        <input id="opacity" type="range" min="0.1" max="1" step="0.05" value="1" />
+      </label>
+    </div>
+
+    <div class="group actions">
+      <button id="undo" title="撤销 (Ctrl+Z)">↶</button>
+      <button id="redo" title="重做 (Ctrl+Shift+Z)">↷</button>
+      <span class="sep"></span>
+      <button id="zoom-out" title="缩小">－</button>
+      <span id="zoom-label">100%</span>
+      <button id="zoom-in" title="放大">＋</button>
+      <button id="zoom-reset" title="重置视图 (0)">⤢</button>
+      <span class="sep"></span>
+      <button id="export-png" title="导出 PNG 图片">PNG</button>
+      <button id="export-json" title="导出场景 JSON">场景</button>
+      <label class="filebtn" title="导入场景 JSON">导入
+        <input id="import" type="file" accept=".json,application/json" hidden />
+      </label>
+      <button id="clear" title="清空画布">清空</button>
+      <button id="theme-toggle" title="切换明暗">🌓</button>
+    </div>
+  </header>
+
+  <main id="stage">
+    <canvas id="board"></canvas>
+    <textarea id="text-editor" spellcheck="false"></textarea>
+  </main>
+
+  <footer id="status"></footer>
+
+  <script>
+
+/* ===== geometry.js ===== */
+/**
+ * Pure geometry helpers for Sketchly. No DOM, no canvas — safe to unit
+ * test in Node. All math is in *world* coordinates unless a function name
+ * says otherwise.
+ *
+ * @module geometry
+ */
+function clamp(v, min, max) {
+  return v < min ? min : v > max ? max : v;
+}
+function dist(ax, ay, bx, by) {
+  return Math.hypot(ax - bx, ay - by);
+}
+
+/** Shortest distance from point P to segment AB. */
+function distanceToSegment(px, py, ax, ay, bx, by) {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const len2 = dx * dx + dy * dy;
+  if (len2 === 0) return dist(px, py, ax, ay);
+  let t = ((px - ax) * dx + (py - ay) * dy) / len2;
+  t = clamp(t, 0, 1);
+  const cx = ax + t * dx;
+  const cy = ay + t * dy;
+  return dist(px, py, cx, cy);
+}
+
+/** Convert a possibly-negative box to a normalized one. */
+function normalizeBox(x, y, w, h) {
+  const minX = w < 0 ? x + w : x;
+  const minY = h < 0 ? y + h : y;
+  return { x: minX, y: minY, w: Math.abs(w), h: Math.abs(h) };
+}
+
+/** Axis-aligned bounding box of an element in world coordinates. */
+function getBounds(el) {
+  if (el.type === 'pen') {
+    const pts = el.points || [];
+    if (!pts.length) return { x: el.x, y: el.y, w: 0, h: 0, minX: el.x, minY: el.y, maxX: el.x, maxY: el.y };
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const [px, py] of pts) {
+      if (px < minX) minX = px;
+      if (py < minY) minY = py;
+      if (px > maxX) maxX = px;
+      if (py > maxY) maxY = py;
+    }
+    return { x: minX, y: minY, w: maxX - minX, h: maxY - minY, minX, minY, maxX, maxY };
+  }
+  const b = normalizeBox(el.x, el.y, el.w || 0, el.h || 0);
+  return { ...b, minX: b.x, minY: b.y, maxX: b.x + b.w, maxY: b.y + b.h };
+}
+
+/** World -> screen given view {x, y, zoom}. */
+function worldToScreen(wx, wy, view) {
+  return { x: wx * view.zoom + view.x, y: wy * view.zoom + view.y };
+}
+
+/** Screen -> world given view {x, y, zoom}. */
+function screenToWorld(sx, sy, view) {
+  return { x: (sx - view.x) / view.zoom, y: (sy - view.y) / view.zoom };
+}
+
+/** Do two axis-aligned boxes intersect? */
+function boxesIntersect(a, b) {
+  return !(a.maxX < b.minX || a.minX > b.maxX || a.maxY < b.minY || a.minY > b.maxY);
+}
+
+/** Hit test an element at world point (wx, wy) with a world-space threshold. */
+function hitTest(el, wx, wy, threshold = 6) {
+  const t = threshold;
+  switch (el.type) {
+    case 'pen': {
+      const pts = el.points || [];
+      for (let i = 0; i < pts.length - 1; i++) {
+        if (distanceToSegment(wx, wy, pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]) <= t) return true;
+      }
+      if (pts.length === 1) return dist(wx, wy, pts[0][0], pts[0][1]) <= t;
+      return false;
+    }
+    case 'line':
+    case 'arrow':
+      return distanceToSegment(wx, wy, el.x, el.y, el.x + (el.w || 0), el.y + (el.h || 0)) <= t;
+    case 'ellipse': {
+      const b = getBounds(el);
+      const rx = Math.max(b.w / 2, 0.001);
+      const ry = Math.max(b.h / 2, 0.001);
+      const cx = b.x + rx;
+      const cy = b.y + ry;
+      const norm = ((wx - cx) / rx) ** 2 + ((wy - cy) / ry) ** 2;
+      return norm <= 1 + t / Math.max(rx, ry);
+    }
+    case 'rect':
+    case 'diamond':
+    case 'text':
+    default: {
+      const b = getBounds(el);
+      return wx >= b.minX - t && wx <= b.maxX + t && wy >= b.minY - t && wy <= b.maxY + t;
+    }
+  }
+}
+
+/** Elements whose bounding box intersects the marquee box. */
+function elementsInBox(elements, box) {
+  const nb = normalizeBox(box.x, box.y, box.w, box.h);
+  const query = { minX: nb.x, minY: nb.y, maxX: nb.x + nb.w, maxY: nb.y + nb.h };
+  return elements.filter((el) => boxesIntersect(getBounds(el), query));
+}
+
+const HANDLES = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
+function isHandle(name) {
+  return HANDLES.includes(name);
+}
+
+/**
+ * Compute new x/y/w/h when dragging a resize handle by world deltas dx,dy.
+ * Handle names: n, s, e, w, ne, nw, se, sw.
+ */
+function resizeBox(x, y, w, h, handle, dx, dy) {
+  let nx = x, ny = y, nw = w, nh = h;
+  if (handle.includes('e')) nw = w + dx;
+  if (handle.includes('s')) nh = h + dy;
+  if (handle.includes('w')) {
+    nx = x + dx;
+    nw = w - dx;
+  }
+  if (handle.includes('n')) {
+    ny = y + dy;
+    nh = h - dy;
+  }
+  return { x: nx, y: ny, w: nw, h: nh };
+}
+
+/* ===== scene.js ===== */
+/**
+ * Scene model: element creation, (de)serialization, and mutations that
+ * stay pure (no DOM). Boxes are in world coordinates.
+ *
+ * @module scene
+ */
+
+const SCHEMA_VERSION = 1;
+const TYPES = ['pen', 'rect', 'ellipse', 'diamond', 'arrow', 'line', 'text'];
+function uid() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return 'e_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+function now() {
+  return Date.now();
+}
+
+/** Rough text-size estimate so scene logic stays canvas-free. */
+function measureTextBounds(text, fontSize) {
+  const font = fontSize || 20;
+  const lines = String(text || '').split('\n');
+  let maxW = 0;
+  for (const line of lines) maxW = Math.max(maxW, line.length * font * 0.6);
+  return {
+    w: Math.max(maxW, 10),
+    h: Math.max(lines.length * font * 1.25, font * 1.25),
+  };
+}
+function createElement(type, props = {}) {
+  const el = {
+    id: props.id || uid(),
+    type,
+    x: Number(props.x) || 0,
+    y: Number(props.y) || 0,
+    w: Number(props.w) || 0,
+    h: Number(props.h) || 0,
+    stroke: typeof props.stroke === 'string' ? props.stroke : '#1e1e1e',
+    fill: typeof props.fill === 'string' ? props.fill : 'transparent',
+    strokeWidth: Number(props.strokeWidth) > 0 ? Number(props.strokeWidth) : 2,
+    roughness: Number(props.roughness) >= 0 ? Number(props.roughness) : 1,
+    opacity: Number(props.opacity) >= 0 && Number(props.opacity) <= 1 ? Number(props.opacity) : 1,
+    seed: Number(props.seed) || Math.floor(Math.random() * 2 ** 31),
+    updatedAt: now(),
+  };
+  if (type === 'pen') {
+    el.points = props.points ? props.points.map((p) => [Number(p[0]) || 0, Number(p[1]) || 0]) : [];
+    const b = getBounds(el);
+    el.x = b.x;
+    el.y = b.y;
+    el.w = b.w;
+    el.h = b.h;
+  }
+  if (type === 'text') {
+    el.text = typeof props.text === 'string' ? props.text : '';
+    el.fontSize = Number(props.fontSize) > 0 ? Number(props.fontSize) : 20;
+    const m = measureTextBounds(el.text, el.fontSize);
+    el.w = m.w;
+    el.h = m.h;
+  }
+  return el;
+}
+
+function normalizeElement(raw) {
+  const e = raw && typeof raw === 'object' ? raw : {};
+  const type = TYPES.includes(e.type) ? e.type : 'rect';
+  const out = {
+    id: typeof e.id === 'string' && e.id ? e.id : uid(),
+    type,
+    x: Number(e.x) || 0,
+    y: Number(e.y) || 0,
+    w: Number(e.w) || 0,
+    h: Number(e.h) || 0,
+    stroke: typeof e.stroke === 'string' ? e.stroke : '#1e1e1e',
+    fill: typeof e.fill === 'string' ? e.fill : 'transparent',
+    strokeWidth: Number(e.strokeWidth) > 0 ? Number(e.strokeWidth) : 2,
+    roughness: Number(e.roughness) >= 0 ? Number(e.roughness) : 1,
+    opacity: Number(e.opacity) >= 0 && Number(e.opacity) <= 1 ? Number(e.opacity) : 1,
+    seed: Number(e.seed) || 1,
+    updatedAt: Number(e.updatedAt) || now(),
+  };
+  if (type === 'pen') {
+    out.points = Array.isArray(e.points)
+      ? e.points.map((p) => [Number(p && p[0]) || 0, Number(p && p[1]) || 0])
+      : [];
+  }
+  if (type === 'text') {
+    out.text = typeof e.text === 'string' ? e.text : '';
+    out.fontSize = Number(e.fontSize) > 0 ? Number(e.fontSize) : 20;
+  }
+  return out;
+}
+function serializeScene(scene) {
+  return JSON.stringify({
+    version: SCHEMA_VERSION,
+    elements: scene.elements || [],
+    view: scene.view || { x: 0, y: 0, zoom: 1 },
+  });
+}
+function deserializeScene(str) {
+  let data;
+  try {
+    data = JSON.parse(str);
+  } catch {
+    throw new Error('Invalid Sketchly scene: not valid JSON');
+  }
+  if (!data || !Array.isArray(data.elements)) {
+    throw new Error('Invalid Sketchly scene: missing elements array');
+  }
+  const elements = data.elements.map(normalizeElement);
+  const view =
+    data.view && typeof data.view === 'object'
+      ? {
+          x: Number(data.view.x) || 0,
+          y: Number(data.view.y) || 0,
+          zoom: Number(data.view.zoom) > 0 ? Number(data.view.zoom) : 1,
+        }
+      : { x: 0, y: 0, zoom: 1 };
+  return { elements, view };
+}
+
+/**
+ * Resize an element by dragging `handle` (n/s/e/w/ne/nw/se/sw) with world
+ * deltas dx,dy. Mutates and returns the element.
+ */
+function resizeElement(el, handle, dx, dy) {
+  if (el.type === 'pen') {
+    const b = getBounds(el);
+    const nb = resizeBox(b.x, b.y, b.w, b.h, handle, dx, dy);
+    const sx = b.w === 0 ? 1 : nb.w / b.w;
+    const sy = b.h === 0 ? 1 : nb.h / b.h;
+    el.points = el.points.map(([px, py]) => [nb.x + (px - b.x) * sx, nb.y + (py - b.y) * sy]);
+    const nb2 = getBounds(el);
+    el.x = nb2.x;
+    el.y = nb2.y;
+    el.w = nb2.w;
+    el.h = nb2.h;
+    el.updatedAt = now();
+    return el;
+  }
+  if (el.type === 'text') {
+    const b = getBounds(el);
+    const nb = resizeBox(b.x, b.y, b.w, b.h, handle, dx, dy);
+    const scale = Math.max(
+      Math.abs(nb.w) / Math.max(b.w, 1),
+      Math.abs(nb.h) / Math.max(b.h, 1)
+    );
+    el.fontSize = Math.max(6, el.fontSize * scale);
+    const m = measureTextBounds(el.text, el.fontSize);
+    el.w = m.w;
+    el.h = m.h;
+    el.updatedAt = now();
+    return el;
+  }
+  const b = getBounds(el);
+  const nb = resizeBox(b.x, b.y, b.w, b.h, handle, dx, dy);
+  el.x = nb.x;
+  el.y = nb.y;
+  el.w = nb.w;
+  el.h = nb.h;
+  el.updatedAt = now();
+  return el;
+}
+
+/** Translate an element by a world delta. */
+function translateElement(el, dx, dy) {
+  el.x += dx;
+  el.y += dy;
+  if (el.type === 'pen') el.points = el.points.map(([px, py]) => [px + dx, py + dy]);
+  el.updatedAt = now();
+  return el;
+}
+
+/* ===== render.js ===== */
+/**
+ * Canvas rendering for Sketchly. Draws each element with either a clean or
+ * a hand-drawn ("rough") style. The hand-drawn look is produced by a tiny
+ * seeded PRNG so a given element renders identically on every frame (no
+ * jitter while panning/zooming). Takes a CanvasRenderingContext2D.
+ *
+ * @module render
+ */
+
+function mulberry32(a) {
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Draw a slightly wobbly line in `passes` strokes (hand-drawn feel). */
+function roughLine(ctx, x1, y1, x2, y2, rng, roughness) {
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  const amp = Math.min(roughness, 2) * Math.min(len, 60) / 12;
+  if (amp < 0.4) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    return;
+  }
+  for (let p = 0; p < 2; p++) {
+    const jx1 = (rng() * 2 - 1) * amp;
+    const jy1 = (rng() * 2 - 1) * amp;
+    const jx2 = (rng() * 2 - 1) * amp;
+    const jy2 = (rng() * 2 - 1) * amp;
+    const mx = (x1 + x2) / 2 + (rng() * 2 - 1) * amp * 1.2;
+    const my = (y1 + y2) / 2 + (rng() * 2 - 1) * amp * 1.2;
+    ctx.beginPath();
+    ctx.moveTo(x1 + jx1, y1 + jy1);
+    ctx.quadraticCurveTo(mx, my, x2 + jx2, y2 + jy2);
+    ctx.stroke();
+  }
+}
+
+function drawArrowHead(ctx, x, y, angle, size) {
+  const a1 = angle + Math.PI - 0.45;
+  const a2 = angle + Math.PI + 0.45;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + Math.cos(a1) * size, y + Math.sin(a1) * size);
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + Math.cos(a2) * size, y + Math.sin(a2) * size);
+  ctx.stroke();
+}
+
+function renderRect(ctx, el, rough, rng) {
+  const b = getBounds(el);
+  const { x, y, w, h } = b;
+  if (rough) {
+    roughLine(ctx, x, y, x + w, y, rng, rough);
+    roughLine(ctx, x + w, y, x + w, y + h, rng, rough);
+    roughLine(ctx, x + w, y + h, x, y + h, rng, rough);
+    roughLine(ctx, x, y + h, x, y, rng, rough);
+  } else {
+    ctx.strokeRect(x, y, w, h);
+  }
+}
+
+function renderEllipse(ctx, el, rough, rng) {
+  const b = getBounds(el);
+  const cx = b.x + b.w / 2;
+  const cy = b.y + b.h / 2;
+  const rx = b.w / 2;
+  const ry = b.h / 2;
+  if (rough && rx > 2 && ry > 2) {
+    for (let p = 0; p < 2; p++) {
+      const sx = 1 + (rng() * 2 - 1) * 0.02 * Math.min(rough, 2);
+      const sy = 1 + (rng() * 2 - 1) * 0.02 * Math.min(rough, 2);
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx * sx, ry * sy, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  } else {
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function renderDiamond(ctx, el, rough, rng) {
+  const b = getBounds(el);
+  const cx = b.x + b.w / 2;
+  const cy = b.y + b.h / 2;
+  const pts = [
+    [cx, b.y],
+    [b.x + b.w, cy],
+    [cx, b.y + b.h],
+    [b.x, cy],
+  ];
+  if (rough) {
+    for (let i = 0; i < 4; i++) {
+      const a = pts[i];
+      const c = pts[(i + 1) % 4];
+      roughLine(ctx, a[0], a[1], c[0], c[1], rng, rough);
+    }
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < 4; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.closePath();
+    ctx.stroke();
+  }
+}
+
+function renderLine(ctx, el, rough, rng) {
+  const x2 = el.x + (el.w || 0);
+  const y2 = el.y + (el.h || 0);
+  roughLine(ctx, el.x, el.y, x2, y2, rng, rough);
+  if (el.type === 'arrow') {
+    const angle = Math.atan2(el.h || 0, el.w || 0);
+    const size = Math.max(12, (el.strokeWidth || 2) * 4);
+    drawArrowHead(ctx, x2, y2, angle, size);
+  }
+}
+
+function renderPen(ctx, el) {
+  const pts = el.points || [];
+  if (!pts.length) return;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  if (pts.length === 1) {
+    ctx.lineTo(pts[0][0] + 0.1, pts[0][1] + 0.1);
+  } else {
+    for (let i = 1; i < pts.length - 1; i++) {
+      const mx = (pts[i][0] + pts[i + 1][0]) / 2;
+      const my = (pts[i][1] + pts[i + 1][1]) / 2;
+      ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
+    }
+    const last = pts[pts.length - 1];
+    ctx.lineTo(last[0], last[1]);
+  }
+  ctx.stroke();
+}
+
+function renderText(ctx, el) {
+  const fontFamily = el.roughness > 0 ? '"Segoe Print","Comic Sans MS",cursive' : 'system-ui, sans-serif';
+  ctx.font = `${el.fontSize || 20}px ${fontFamily}`;
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = el.stroke;
+  const lines = String(el.text || '').split('\n');
+  const lh = (el.fontSize || 20) * 1.25;
+  lines.forEach((line, i) => ctx.fillText(line, el.x, el.y + i * lh));
+}
+
+/** Render a single element at full opacity (caller manages transform). */
+function renderElement(ctx, el) {
+  const rough = el.roughness > 0 ? el.roughness : 0;
+  const rng = mulberry32(el.seed || 1);
+  ctx.save();
+  ctx.globalAlpha = el.opacity != null ? el.opacity : 1;
+  ctx.strokeStyle = el.stroke;
+  ctx.fillStyle = el.fill && el.fill !== 'transparent' ? el.fill : el.stroke;
+  ctx.lineWidth = el.strokeWidth || 2;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  const hasFill = el.fill && el.fill !== 'transparent';
+
+  switch (el.type) {
+    case 'rect':
+      if (hasFill) {
+        const b = getBounds(el);
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+      }
+      renderRect(ctx, el, rough, rng);
+      break;
+    case 'ellipse':
+      if (hasFill) {
+        const b = getBounds(el);
+        ctx.beginPath();
+        ctx.ellipse(b.x + b.w / 2, b.y + b.h / 2, b.w / 2, b.h / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      renderEllipse(ctx, el, rough, rng);
+      break;
+    case 'diamond':
+      if (hasFill) {
+        const b = getBounds(el);
+        const cx = b.x + b.w / 2;
+        const cy = b.y + b.h / 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, b.y);
+        ctx.lineTo(b.x + b.w, cy);
+        ctx.lineTo(cx, b.y + b.h);
+        ctx.lineTo(b.x, cy);
+        ctx.closePath();
+        ctx.fill();
+      }
+      renderDiamond(ctx, el, rough, rng);
+      break;
+    case 'line':
+    case 'arrow':
+      renderLine(ctx, el, rough, rng);
+      break;
+    case 'pen':
+      renderPen(ctx, el);
+      break;
+    case 'text':
+      renderText(ctx, el);
+      break;
+    default:
+      break;
+  }
+  ctx.restore();
+}
+
+/**
+ * Render every element. The caller is responsible for applying the
+ * world->screen transform (translate + scale) before calling this, since
+ * both the main canvas and PNG export need different setups.
+ */
+function renderScene(ctx, elements) {
+  for (const el of elements) renderElement(ctx, el);
+}
+
+/* ===== theme.js ===== */
+/**
+ * Theme handling (light/dark) for Sketchly, persisted to localStorage.
+ * @module theme
+ */
+
+const THEME_KEY = 'sketchly:theme';
+function getInitialTheme() {
+  const saved = (typeof localStorage !== 'undefined' && localStorage.getItem(THEME_KEY)) || '';
+  if (saved === 'light' || saved === 'dark') return saved;
+  const prefersDark =
+    typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return prefersDark ? 'dark' : 'light';
+}
+function applyTheme(theme) {
+  if (typeof document !== 'undefined') document.documentElement.setAttribute('data-theme', theme);
+  if (typeof localStorage !== 'undefined') localStorage.setItem(THEME_KEY, theme);
+}
+function toggleTheme() {
+  const current =
+    (typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme')) || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  return next;
+}
+
+/* ===== store.js ===== */
+/**
+ * Scene persistence to a localStorage-compatible backend (pluggable for
+ * testing in Node). Pure serialization lives in scene.js.
+ *
+ * @module store
+ */
+
+const KEY = 'sketchly:v1';
+class Store {
+  constructor(storage) {
+    this.storage =
+      storage || (typeof globalThis !== 'undefined' && globalThis.localStorage) || null;
+  }
+
+  load() {
+    if (!this.storage) return { elements: [], view: { x: 0, y: 0, zoom: 1 } };
+    const raw = this.storage.getItem(KEY);
+    if (!raw) return { elements: [], view: { x: 0, y: 0, zoom: 1 } };
+    try {
+      return deserializeScene(raw);
+    } catch {
+      return { elements: [], view: { x: 0, y: 0, zoom: 1 } };
+    }
+  }
+
+  save(scene) {
+    if (!this.storage) return;
+    try {
+      this.storage.setItem(KEY, serializeScene(scene));
+    } catch {
+      /* quota / private mode — ignore */
+    }
+  }
+
+  clear() {
+    if (this.storage) this.storage.removeItem(KEY);
+  }
+}
+
+/* ===== app.js ===== */
+/**
+ * Sketchly browser controller. Wires the pure core (geometry, scene,
+ * store, render, theme) to the canvas and DOM declared in index.html.
+ *
+ * Loaded as an ES module in dev. The single-file build inlines this with
+ * the other src/*.js modules (import/export lines stripped), so it must
+ * contain no top-level await and no syntax a bundler would be required for.
+ *
+ * @module app
+ */
+  screenToWorld,
+  worldToScreen,
+  hitTest,
+  getBounds,
+  normalizeBox,
+  elementsInBox,
+} from './geometry.js';
+  createElement,
+  serializeScene,
+  deserializeScene,
+  resizeElement,
+  translateElement,
+} from './scene.js';
+
+const $ = (id) => document.getElementById(id);
+
+// ---- state ------------------------------------------------------------
+const canvas = $('board');
+const ctx = canvas.getContext('2d');
+const store = new Store();
+
+let elements = [];
+let view = { x: 0, y: 0, zoom: 1 };
+let tool = 'select';
+let selectedIds = new Set();
+let theme = getInitialTheme();
+
+let action = 'idle'; // idle | creating | moving | resizing | panning | marquee
+let draft = null;
+let draftStart = null;
+let moveStart = null;
+let resizeHandle = null;
+let resizeStart = null;
+let panStart = null;
+let marqueeStart = null;
+let marqueeCur = null;
+let editingId = null;
+let spaceDown = false;
+
+const history = [];
+let hIndex = -1;
+
+// style defaults (kept in sync with the toolbar inputs)
+const styleInputs = {
+  stroke: $('stroke'),
+  fill: $('fill'),
+  noFill: $('no-fill'),
+  width: $('width'),
+  rough: $('rough'),
+  opacity: $('opacity'),
+};
+
+// ---- theme colors (canvas needs explicit values, not CSS vars) --------
+function themeBg() {
+  return theme === 'dark' ? '#1b1b1f' : '#fcfcfc';
+}
+function gridColor() {
+  return theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+}
+function selectionColor() {
+  return theme === 'dark' ? '#5aa2ff' : '#4263eb';
+}
+
+// ---- helpers ----------------------------------------------------------
+function getEl(id) {
+  return elements.find((e) => e.id === id) || null;
+}
+
+function currentStyle() {
+  return {
+    stroke: styleInputs.stroke.value,
+    fill: styleInputs.noFill.checked ? 'transparent' : styleInputs.fill.value,
+    strokeWidth: Number(styleInputs.width.value),
+    roughness: Number(styleInputs.rough.value),
+    opacity: Number(styleInputs.opacity.value),
+  };
+}
+
+function screenPoint(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+function topmostAt(wp) {
+  const threshold = 8 / view.zoom;
+  for (let i = elements.length - 1; i >= 0; i--) {
+    if (hitTest(elements[i], wp.x, wp.y, threshold)) return elements[i].id;
+  }
+  return null;
+}
+
+function handlePositions(box) {
+  const { x, y, w, h } = box;
+  return {
+    n: { x: x + w / 2, y },
+    s: { x: x + w / 2, y: y + h },
+    e: { x: x + w, y: y + h / 2 },
+    w: { x, y: y + h / 2 },
+    ne: { x: x + w, y },
+    nw: { x, y },
+    se: { x: x + w, y: y + h },
+    sw: { x, y: y + h },
+  };
+}
+
+function hitHandle(sp) {
+  if (selectedIds.size !== 1) return null;
+  const el = getEl([...selectedIds][0]);
+  if (!el) return null;
+  const b = getBounds(el);
+  const handles = handlePositions(b);
+  for (const [name, pt] of Object.entries(handles)) {
+    const s = worldToScreen(pt.x, pt.y, view);
+    if (Math.abs(sp.x - s.x) <= 8 && Math.abs(sp.y - s.y) <= 8) return name;
+  }
+  return null;
+}
+
+function measureText(el) {
+  const fontFamily = el.roughness > 0 ? '"Segoe Print","Comic Sans MS",cursive' : 'system-ui, sans-serif';
+  ctx.font = `${el.fontSize || 20}px ${fontFamily}`;
+  const lines = String(el.text || '').split('\n');
+  let maxW = 0;
+  for (const line of lines) maxW = Math.max(maxW, ctx.measureText(line).width);
+  el.w = Math.max(maxW, 10);
+  el.h = Math.max(lines.length * (el.fontSize || 20) * 1.25, (el.fontSize || 20) * 1.25);
+}
+
+function isDraftValid(d, type) {
+  if (type === 'pen') return (d.points || []).length >= 1;
+  if (type === 'line' || type === 'arrow') return Math.hypot(d.w || 0, d.h || 0) > 3;
+  return Math.abs(d.w || 0) > 2 && Math.abs(d.h || 0) > 2;
+}
+
+function zoomAt(sp, factor) {
+  const newZoom = Math.min(8, Math.max(0.1, view.zoom * factor));
+  const before = screenToWorld(sp.x, sp.y, view);
+  view.zoom = newZoom;
+  view.x = sp.x - before.x * newZoom;
+  view.y = sp.y - before.y * newZoom;
+  render();
+  scheduleSave();
+}
+
+function zoomAtCenter(factor) {
+  zoomAt({ x: canvas.clientWidth / 2, y: canvas.clientHeight / 2 }, factor);
+}
+
+function zoomReset() {
+  view = { x: 0, y: 0, zoom: 1 };
+  render();
+  scheduleSave();
+}
+
+// ---- history ----------------------------------------------------------
+function pushHistory() {
+  const snap = serializeScene({ elements, view });
+  history.splice(hIndex + 1);
+  history.push(snap);
+  if (history.length > 100) history.shift();
+  hIndex = history.length - 1;
+}
+
+function restore(snap) {
+  const s = deserializeScene(snap);
+  elements = s.elements;
+  view = s.view;
+  selectedIds = new Set();
+  render();
+  scheduleSave();
+}
+
+function undo() {
+  if (hIndex > 0) {
+    hIndex--;
+    restore(history[hIndex]);
+  }
+}
+
+function redo() {
+  if (hIndex < history.length - 1) {
+    hIndex++;
+    restore(history[hIndex]);
+  }
+}
+
+// ---- persistence (debounced) -----------------------------------------
+let saveTimer = null;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => store.save({ elements, view }), 500);
+}
+
+// ---- rendering --------------------------------------------------------
+function drawGrid(w, h) {
+  if (view.zoom < 0.3) return;
+  const tl = screenToWorld(0, 0, view);
+  const br = screenToWorld(w, h, view);
+  const step = 24;
+  ctx.fillStyle = gridColor();
+  const startX = Math.floor(tl.x / step) * step;
+  const startY = Math.floor(tl.y / step) * step;
+  for (let gx = startX; gx < br.x; gx += step) {
+    for (let gy = startY; gy < br.y; gy += step) {
+      const s = worldToScreen(gx, gy, view);
+      ctx.fillRect(s.x, s.y, 1, 1);
+    }
+  }
+}
+
+function drawSelection() {
+  if (!selectedIds.size) return;
+  ctx.save();
+  ctx.strokeStyle = selectionColor();
+  ctx.fillStyle = themeBg();
+  ctx.lineWidth = 1;
+  for (const id of selectedIds) {
+    const el = getEl(id);
+    if (!el) continue;
+    const b = getBounds(el);
+    const a = worldToScreen(b.x, b.y, view);
+    const bw = b.w * view.zoom;
+    const bh = b.h * view.zoom;
+    ctx.strokeRect(a.x - 4, a.y - 4, bw + 8, bh + 8);
+  }
+  if (selectedIds.size === 1) {
+    const el = getEl([...selectedIds][0]);
+    const b = getBounds(el);
+    const handles = handlePositions(b);
+    for (const pt of Object.values(handles)) {
+      const s = worldToScreen(pt.x, pt.y, view);
+      ctx.fillRect(s.x - 4, s.y - 4, 8, 8);
+      ctx.strokeRect(s.x - 4, s.y - 4, 8, 8);
+    }
+  }
+  ctx.restore();
+}
+
+function render() {
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = themeBg();
+  ctx.fillRect(0, 0, w, h);
+  drawGrid(w, h);
+
+  ctx.save();
+  ctx.translate(view.x, view.y);
+  ctx.scale(view.zoom, view.zoom);
+  renderScene(ctx, elements);
+  if (draft) renderElement(ctx, draft);
+  ctx.restore();
+
+  drawSelection();
+
+  if (action === 'marquee' && marqueeStart && marqueeCur) {
+    const b = normalizeBox(marqueeStart.x, marqueeStart.y, marqueeCur.x - marqueeStart.x, marqueeCur.y - marqueeStart.y);
+    ctx.save();
+    ctx.strokeStyle = selectionColor();
+    ctx.fillStyle = theme === 'dark' ? 'rgba(90,162,255,0.12)' : 'rgba(66,99,235,0.10)';
+    ctx.lineWidth = 1;
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+    ctx.strokeRect(b.x, b.y, b.w, b.h);
+    ctx.restore();
+  }
+
+  updateStatus();
+}
+
+function updateStatus() {
+  const z = $('zoom-label');
+  if (z) z.textContent = `${Math.round(view.zoom * 100)}%`;
+  const st = $('status');
+  if (st) {
+    const toolName = { select: '选择', hand: '平移', pen: '画笔', rect: '矩形', ellipse: '椭圆', diamond: '菱形', arrow: '箭头', line: '直线', text: '文本' }[tool] || tool;
+    st.textContent = `工具: ${toolName} · 已选 ${selectedIds.size} · 元素 ${elements.length}`;
+  }
+}
+
+// ---- text editing overlay --------------------------------------------
+const textEditor = $('text-editor');
+
+function startTextEdit(el) {
+  editingId = el.id;
+  const sp = worldToScreen(el.x, el.y, view);
+  textEditor.style.left = sp.x + 'px';
+  textEditor.style.top = sp.y + 'px';
+  textEditor.style.fontSize = Math.max(12, el.fontSize * view.zoom) + 'px';
+  textEditor.style.color = el.stroke;
+  textEditor.style.width = Math.max(80, el.w * view.zoom + 20) + 'px';
+  textEditor.value = el.text;
+  textEditor.style.display = 'block';
+  textEditor.focus();
+}
+
+function startTextAt(wp) {
+  const el = createElement('text', { x: wp.x, y: wp.y, text: '', fontSize: 20, ...currentStyle() });
+  elements.push(el);
+  selectedIds = new Set([el.id]);
+  startTextEdit(el);
+  render();
+}
+
+textEditor.addEventListener('input', () => {
+  const el = getEl(editingId);
+  if (!el) return;
+  el.text = textEditor.value;
+  measureText(el);
+  render();
+});
+
+function commitText() {
+  const el = getEl(editingId);
+  if (el) {
+    if (!el.text.trim()) {
+      elements = elements.filter((e) => e.id !== el.id);
+    } else {
+      pushHistory();
+    }
+  }
+  editingId = null;
+  textEditor.style.display = 'none';
+  render();
+  scheduleSave();
+}
+
+textEditor.addEventListener('blur', commitText);
+textEditor.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    textEditor.blur();
+  } else if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    textEditor.blur();
+  }
+});
+
+// ---- pointer interaction ---------------------------------------------
+canvas.addEventListener('pointerdown', (e) => {
+  if (editingId) textEditor.blur();
+  canvas.setPointerCapture(e.pointerId);
+  const sp = screenPoint(e);
+  const wp = screenToWorld(sp.x, sp.y, view);
+
+  if (e.button === 1 || spaceDown || tool === 'hand') {
+    action = 'panning';
+    panStart = { x: sp.x, y: sp.y, vx: view.x, vy: view.y };
+    return;
+  }
+
+  if (tool === 'select') {
+    const h = hitHandle(sp);
+    if (h && selectedIds.size === 1) {
+      action = 'resizing';
+      resizeHandle = h;
+      resizeStart = { wp };
+      return;
+    }
+    const hitId = topmostAt(wp);
+    if (hitId) {
+      if (e.shiftKey) {
+        if (selectedIds.has(hitId)) selectedIds.delete(hitId);
+        else selectedIds.add(hitId);
+      } else if (!selectedIds.has(hitId)) {
+        selectedIds = new Set([hitId]);
+      }
+      action = 'moving';
+      moveStart = { last: wp };
+      render();
+      return;
+    }
+    if (!e.shiftKey) selectedIds = new Set();
+    action = 'marquee';
+    marqueeStart = sp;
+    marqueeCur = sp;
+    render();
+    return;
+  }
+
+  if (tool === 'text') {
+    startTextAt(wp);
+    return;
+  }
+
+  // drawing tools
+  action = 'creating';
+  draftStart = wp;
+  draft = createElement(tool, { x: wp.x, y: wp.y, w: 0, h: 0, ...currentStyle() });
+  if (tool === 'pen') draft.points = [[wp.x, wp.y]];
+  render();
+});
+
+canvas.addEventListener('pointermove', (e) => {
+  const sp = screenPoint(e);
+  const wp = screenToWorld(sp.x, sp.y, view);
+
+  if (action === 'panning') {
+    view.x = panStart.vx + (sp.x - panStart.x);
+    view.y = panStart.vy + (sp.y - panStart.y);
+    render();
+    scheduleSave();
+    return;
+  }
+  if (action === 'creating') {
+    if (tool === 'pen') {
+      draft.points.push([wp.x, wp.y]);
+      const b = getBounds(draft);
+      draft.x = b.x;
+      draft.y = b.y;
+      draft.w = b.w;
+      draft.h = b.h;
+    } else {
+      draft.w = wp.x - draftStart.x;
+      draft.h = wp.y - draftStart.y;
+    }
+    render();
+    return;
+  }
+  if (action === 'moving') {
+    const dx = wp.x - moveStart.last.x;
+    const dy = wp.y - moveStart.last.y;
+    for (const id of selectedIds) {
+      const el = getEl(id);
+      if (el) translateElement(el, dx, dy);
+    }
+    moveStart.last = wp;
+    render();
+    return;
+  }
+  if (action === 'resizing') {
+    const el = getEl([...selectedIds][0]);
+    if (el) {
+      const dx = wp.x - resizeStart.wp.x;
+      const dy = wp.y - resizeStart.wp.y;
+      resizeElement(el, resizeHandle, dx, dy);
+      resizeStart.wp = wp;
+    }
+    render();
+    return;
+  }
+  if (action === 'marquee') {
+    marqueeCur = sp;
+    render();
+    return;
+  }
+});
+
+function endPointer(e) {
+  try {
+    canvas.releasePointerCapture(e.pointerId);
+  } catch {
+    /* ignore */
+  }
+  if (action === 'creating') {
+    if (isDraftValid(draft, tool)) {
+      elements.push(draft);
+      selectedIds = new Set([draft.id]);
+      pushHistory();
+    }
+    draft = null;
+    action = 'idle';
+    render();
+    scheduleSave();
+    return;
+  }
+  if (action === 'moving' || action === 'resizing') {
+    pushHistory();
+    action = 'idle';
+    render();
+    scheduleSave();
+    return;
+  }
+  if (action === 'marquee') {
+    const box = normalizeBox(
+      marqueeStart.x,
+      marqueeStart.y,
+      marqueeCur.x - marqueeStart.x,
+      marqueeCur.y - marqueeStart.y
+    );
+    const wb = {
+      x: screenToWorld(box.x, box.y, view).x,
+      y: screenToWorld(box.x, box.y, view).y,
+      w: box.w / view.zoom,
+      h: box.h / view.zoom,
+    };
+    const found = elementsInBox(elements, wb).map((el) => el.id);
+    selectedIds = new Set(found);
+    action = 'idle';
+    marqueeCur = null;
+    render();
+    return;
+  }
+  action = 'idle';
+}
+
+canvas.addEventListener('pointerup', endPointer);
+canvas.addEventListener('pointercancel', endPointer);
+
+canvas.addEventListener('dblclick', (e) => {
+  const sp = screenPoint(e);
+  const wp = screenToWorld(sp.x, sp.y, view);
+  const id = topmostAt(wp);
+  if (id) {
+    const el = getEl(id);
+    if (el && el.type === 'text') {
+      selectedIds = new Set([id]);
+      startTextEdit(el);
+    }
+  }
+});
+
+canvas.addEventListener(
+  'wheel',
+  (e) => {
+    e.preventDefault();
+    if (e.ctrlKey || e.metaKey) {
+      zoomAt(screenPoint(e), Math.exp(-e.deltaY * 0.0015));
+    } else {
+      view.x -= e.deltaX;
+      view.y -= e.deltaY;
+      render();
+      scheduleSave();
+    }
+  },
+  { passive: false }
+);
+
+// ---- selection / deletion --------------------------------------------
+function deleteSelected() {
+  if (!selectedIds.size) return;
+  elements = elements.filter((e) => !selectedIds.has(e.id));
+  selectedIds = new Set();
+  pushHistory();
+  render();
+  scheduleSave();
+}
+
+function applyStyleToSelection() {
+  if (!selectedIds.size) return;
+  const s = currentStyle();
+  for (const id of selectedIds) {
+    const el = getEl(id);
+    if (!el) continue;
+    el.stroke = s.stroke;
+    if (el.type !== 'text') {
+      el.fill = s.fill;
+      el.strokeWidth = s.strokeWidth;
+      el.roughness = s.roughness;
+    }
+    el.opacity = s.opacity;
+  }
+  pushHistory();
+  render();
+}
+
+// ---- export / import --------------------------------------------------
+function downloadText(filename, text, mime) {
+  const blob = new Blob([text], { type: mime + ';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function exportPNG() {
+  if (!elements.length) {
+    window.alert('画布为空，没有可导出的内容。');
+    return;
+  }
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const el of elements) {
+    const b = getBounds(el);
+    minX = Math.min(minX, b.minX);
+    minY = Math.min(minY, b.minY);
+    maxX = Math.max(maxX, b.maxX);
+    maxY = Math.max(maxY, b.maxY);
+  }
+  const pad = 40;
+  const scale = 2;
+  const w = maxX - minX + pad * 2;
+  const h = maxY - minY + pad * 2;
+  const c = document.createElement('canvas');
+  c.width = Math.round(w * scale);
+  c.height = Math.round(h * scale);
+  const cx = c.getContext('2d');
+  cx.setTransform(scale, 0, 0, scale, 0, 0);
+  cx.fillStyle = themeBg();
+  cx.fillRect(0, 0, w, h);
+  cx.save();
+  cx.translate(-minX + pad, -minY + pad);
+  renderScene(cx, elements);
+  cx.restore();
+  c.toBlob((blob) => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sketchly.png';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+}
+
+function exportJSON() {
+  downloadText('sketchly.json', serializeScene({ elements, view }), 'application/json');
+}
+
+function importJSON(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const s = deserializeScene(String(reader.result));
+      elements = s.elements;
+      view = s.view;
+      selectedIds = new Set();
+      pushHistory();
+      render();
+      scheduleSave();
+    } catch (err) {
+      window.alert('导入失败: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearAll() {
+  if (!elements.length) return;
+  if (!window.confirm('清空整个画布？此操作可以撤销（Ctrl+Z）。')) return;
+  elements = [];
+  selectedIds = new Set();
+  pushHistory();
+  render();
+  scheduleSave();
+}
+
+// ---- toolbar / inputs -------------------------------------------------
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll('[data-tool]').forEach((b) => {
+    b.classList.toggle('active', b.getAttribute('data-tool') === t);
+  });
+  canvas.style.cursor =
+    t === 'hand' ? 'grab' : t === 'select' ? 'default' : t === 'text' ? 'text' : 'crosshair';
+  updateStatus();
+}
+
+function wireUI() {
+  document.querySelectorAll('[data-tool]').forEach((b) => {
+    b.addEventListener('click', () => setTool(b.getAttribute('data-tool')));
+  });
+  $('undo').addEventListener('click', undo);
+  $('redo').addEventListener('click', redo);
+  $('zoom-in').addEventListener('click', () => zoomAtCenter(1.1));
+  $('zoom-out').addEventListener('click', () => zoomAtCenter(1 / 1.1));
+  $('zoom-reset').addEventListener('click', zoomReset);
+  $('export-png').addEventListener('click', exportPNG);
+  $('export-json').addEventListener('click', exportJSON);
+  $('clear').addEventListener('click', clearAll);
+  $('theme-toggle').addEventListener('click', () => {
+    theme = toggleTheme();
+    render();
+  });
+
+  const imp = $('import');
+  imp.addEventListener('change', () => {
+    if (imp.files && imp.files[0]) importJSON(imp.files[0]);
+    imp.value = '';
+  });
+
+  ['stroke', 'fill', 'no-fill', 'width', 'rough', 'opacity'].forEach((k) => {
+    styleInputs[k].addEventListener('input', applyStyleToSelection);
+  });
+}
+
+// ---- keyboard ---------------------------------------------------------
+window.addEventListener('keydown', (e) => {
+  if (editingId) return;
+  const tag = e.target && e.target.tagName;
+  if (tag === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'color') return;
+  if (tag === 'TEXTAREA') return;
+
+  const mod = e.ctrlKey || e.metaKey;
+  const key = e.key.toLowerCase();
+
+  if (mod && key === 'z') {
+    e.preventDefault();
+    e.shiftKey ? redo() : undo();
+    return;
+  }
+  if (mod && key === 'y') {
+    e.preventDefault();
+    redo();
+    return;
+  }
+  if (mod && key === 'a') {
+    e.preventDefault();
+    selectedIds = new Set(elements.map((el) => el.id));
+    render();
+    return;
+  }
+  if (key === 'delete' || key === 'backspace') {
+    e.preventDefault();
+    deleteSelected();
+    return;
+  }
+  if (key === ' ') {
+    spaceDown = true;
+    canvas.style.cursor = 'grab';
+    return;
+  }
+  if (!mod) {
+    const map = {
+      v: 'select', h: 'hand', p: 'pen', r: 'rect', o: 'ellipse',
+      d: 'diamond', a: 'arrow', l: 'line', t: 'text',
+    };
+    if (map[key]) setTool(map[key]);
+    if (key === '+' || key === '=') zoomAtCenter(1.1);
+    if (key === '-' || key === '_') zoomAtCenter(1 / 1.1);
+    if (key === '0') zoomReset();
+  }
+  if (key === 'escape') {
+    if (draft) {
+      draft = null;
+      action = 'idle';
+    }
+    selectedIds = new Set();
+    render();
+  }
+});
+
+window.addEventListener('keyup', (e) => {
+  if (e.key === ' ') {
+    spaceDown = false;
+    canvas.style.cursor = tool === 'hand' ? 'grab' : tool === 'select' ? 'default' : 'crosshair';
+  }
+});
+
+window.addEventListener('resize', render);
+
+// ---- boot -------------------------------------------------------------
+function seedWelcome() {
+  if (elements.length) return;
+  const t = createElement('text', {
+    x: -40, y: -120, text: '欢迎使用 Sketchly ✦\n选上方工具开始画，双击任意处加文字', fontSize: 24,
+  });
+  measureText(t);
+  elements.push(t);
+}
+
+function init() {
+  applyTheme(theme);
+  theme = document.documentElement.getAttribute('data-theme') || 'light';
+  wireUI();
+  setTool('select');
+
+  const loaded = store.load();
+  elements = loaded.elements;
+  view = loaded.view;
+  seedWelcome();
+  pushHistory();
+  render();
+}
+
+init();
+
+</script>
+</body>
+</html>

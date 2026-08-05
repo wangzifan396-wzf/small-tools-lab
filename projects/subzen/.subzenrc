@@ -1,0 +1,6 @@
+{
+  "preset": "cjk",
+  "rules": {
+    "max-line-width": ["warn", { "max": 32 }]
+  }
+}

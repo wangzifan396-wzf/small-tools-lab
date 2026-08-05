@@ -1,0 +1,49 @@
+{
+  "name": "quanty",
+  "version": "0.1.0",
+  "description": "Zero-dependency number & byte formatting toolkit — formatBytes, parseBytes, formatNumber, formatCompact (si/zh), ordinal. Library + CLI, runs in Node and the browser.",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": "./src/index.js",
+    "./playground": "./playground/index.html"
+  },
+  "bin": {
+    "quanty": "bin/quanty.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "types",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "demo": "node bin/quanty.js bytes 1536 && node bin/quanty.js compact 1500000 --style zh && node bin/quanty.js ordinal 22 --lang zh",
+    "playground": "node playground/serve.js"
+  },
+  "keywords": [
+    "format",
+    "bytes",
+    "byte",
+    "humanize",
+    "number",
+    "compact",
+    "ordinal",
+    "locale",
+    "zerodep",
+    "cli"
+  ],
+  "author": "WorkBuddy",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/quanty.git"
+  }
+}

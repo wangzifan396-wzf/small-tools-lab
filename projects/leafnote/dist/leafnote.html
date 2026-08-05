@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leafnote — local-first Markdown notes</title>
+  <style>
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f6f7f9;
+  --panel: #ffffff;
+  --ink: #1f2430;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --accent: #2f7d5b;
+  --accent-soft: #e7f3ec;
+  --code-bg: #f1f3f5;
+  --tag-bg: #eef2f7;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] {
+  --bg: #161922;
+  --bg-soft: #1d2230;
+  --panel: #1b2030;
+  --ink: #e7e9ee;
+  --muted: #9aa3b2;
+  --line: #2a2f3c;
+  --accent: #5fcf97;
+  --accent-soft: #1e3a2c;
+  --code-bg: #11141d;
+  --tag-bg: #232a39;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; margin: 0; }
+
+body {
+  font: 14px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 264px 1fr 248px;
+  height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+#sidebar {
+  background: var(--bg-soft);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 16px;
+  padding: 16px 16px 8px;
+  letter-spacing: 0.3px;
+}
+.brand .leaf { color: var(--accent); margin-right: 4px; }
+
+.sidebar-top { padding: 6px 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+.sidebar-bottom {
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#search, #title {
+  width: 100%;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+#search:focus, #title:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+
+button {
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+.import-btn {
+  display: block;
+  text-align: center;
+  background: var(--panel);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.import-btn:hover { border-color: var(--accent); }
+
+/* ---------- Note list ---------- */
+.note-list { list-style: none; margin: 0; padding: 4px 8px; overflow-y: auto; flex: 1; min-height: 0; }
+.note-item {
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.note-item:hover { background: var(--bg); }
+.note-item.active { background: var(--accent-soft); border-color: var(--accent); }
+.note-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note-snippet { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 12px 8px; }
+.tag-chip {
+  background: var(--tag-bg);
+  border: 1px solid transparent;
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+}
+.tag-chip.active { background: var(--accent); color: #fff; }
+
+/* ---------- Editor ---------- */
+#editor-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.editor-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  align-items: center;
+}
+.editor-bar #title { flex: 1; font-size: 15px; font-weight: 600; }
+.editor-bar button { padding: 8px 10px; }
+
+.editor-body { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 0; }
+#body {
+  border: none;
+  border-right: 1px solid var(--line);
+  resize: none;
+  padding: 18px;
+  font: 13px/1.7 ui-monospace, Menlo, Consolas, monospace;
+  background: var(--bg);
+  color: var(--ink);
+}
+#body:focus { outline: none; }
+.preview { padding: 18px 22px; overflow-y: auto; min-height: 0; }
+
+/* ---------- Markdown preview styling ---------- */
+.preview h1, .preview h2, .preview h3 { line-height: 1.3; margin: 0.8em 0 0.4em; }
+.preview h1 { font-size: 1.6em; border-bottom: 1px solid var(--line); padding-bottom: 0.2em; }
+.preview h2 { font-size: 1.3em; }
+.preview p { margin: 0.5em 0; }
+.preview a { color: var(--accent); }
+.preview code {
+  background: var(--code-bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+.preview pre.code {
+  background: var(--code-bg);
+  padding: 12px 14px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+.preview pre.code code { background: none; padding: 0; }
+.preview pre.code[data-lang]:before {
+  content: attr(data-lang);
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.preview blockquote {
+  margin: 0.6em 0;
+  padding: 4px 14px;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+}
+.preview table { border-collapse: collapse; margin: 0.6em 0; width: 100%; }
+.preview th, .preview td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+.preview th { background: var(--bg-soft); }
+.preview ul, .preview ol { padding-left: 1.4em; }
+.preview li { margin: 0.2em 0; }
+.preview hr { border: none; border-top: 1px solid var(--line); margin: 1em 0; }
+.preview .wikilink { color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); cursor: pointer; }
+.preview .tag {
+  background: var(--tag-bg);
+  color: var(--muted);
+  border-radius: 4px;
+  padding: 0 4px;
+  font-size: 0.9em;
+}
+
+/* ---------- Meta pane ---------- */
+#meta-pane {
+  background: var(--bg-soft);
+  border-left: 1px solid var(--line);
+  padding: 16px 14px;
+  overflow-y: auto;
+  min-height: 0;
+}
+#meta-pane h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin: 14px 0 8px; }
+#meta-pane h3:first-child { margin-top: 0; }
+.backlinks { list-style: none; margin: 0; padding: 0; }
+.backlinks li { padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.backlinks li:hover { background: var(--bg); }
+.meta-info { margin-top: 16px; font-size: 12px; color: var(--muted); }
+
+.muted { color: var(--muted); }
+
+@media (max-width: 920px) {
+  #app { grid-template-columns: 220px 1fr; }
+  #meta-pane { display: none; }
+}
+@media (max-width: 640px) {
+  #app { grid-template-columns: 1fr; }
+  #sidebar { display: none; }
+  .editor-body { grid-template-columns: 1fr; }
+  #body { border-right: none; border-bottom: 1px solid var(--line); }
+}
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <div class="brand">
+        <span class="leaf">❧</span> Leafnote
+      </div>
+      <div class="sidebar-top">
+        <button id="new-note" class="primary">+ New note</button>
+        <input id="search" type="search" placeholder="Search notes…" autocomplete="off" />
+      </div>
+      <div id="tags" class="tags" aria-label="tags"></div>
+      <ul id="note-list" class="note-list"></ul>
+      <div class="sidebar-bottom">
+        <button id="export-md">Export .md</button>
+        <button id="export-json">Backup JSON</button>
+        <label class="import-btn">Import .md
+          <input id="import" type="file" accept=".md,.markdown,.txt" multiple hidden />
+        </label>
+      </div>
+    </aside>
+
+    <main id="editor-pane">
+      <div class="editor-bar">
+        <input id="title" type="text" placeholder="Note title" />
+        <button id="theme-toggle" title="Toggle light/dark">🌓</button>
+        <button id="delete-note" title="Delete note">🗑</button>
+      </div>
+      <div class="editor-body">
+        <textarea id="body" spellcheck="false"
+          placeholder="Write in Markdown…  #tags  [[wiki links]]  **bold** *italic* `code`"></textarea>
+        <div id="preview" class="preview"></div>
+      </div>
+    </main>
+
+    <aside id="meta-pane">
+      <h3>Backlinks</h3>
+      <ul id="backlinks" class="backlinks"></ul>
+      <h3>Tags in this note</h3>
+      <div id="note-tags" class="tags"></div>
+      <div id="meta-info" class="meta-info"></div>
+    </aside>
+  </div>
+
+  <script>
+
+/* ===== util.js ===== */
+/**
+ * Small pure utilities shared across Leafnote. No DOM, no side effects —
+ * safe to import in Node tests.
+ *
+ * @module util
+ */
+
+/** Generate a unique id. Uses crypto.randomUUID when available. */
+function uid() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return 'n_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+/** Escape a string for safe insertion into HTML text/attribute. */
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
+ * Normalize a title for case-insensitive wiki-link matching.
+ * Lowercases and collapses internal whitespace.
+ */
+function normalizeTitle(title) {
+  return String(title || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/** Debounce a function by `ms` milliseconds. */
+function debounce(fn, ms = 300) {
+  let t;
+  return function debounced(...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), ms);
+  };
+}
+
+/** Current epoch milliseconds. */
+function now() {
+  return Date.now();
+}
+
+/** Strip a leading markdown heading to derive a title from body, if needed. */
+function titleFromBody(body) {
+  const first = String(body || '').split('\n').find((l) => l.trim() !== '');
+  const m = first && first.match(/^#{1,6}\s+(.*)$/);
+  const base = m ? m[1] : first || 'Untitled';
+  return base.trim().slice(0, 80) || 'Untitled';
+}
+
+/* ===== markdown.js ===== */
+/**
+ * Minimal-but-capable Markdown -> HTML renderer (pure, no DOM).
+ *
+ * Covers the subset a notes app needs: headings, bold/italic/strike,
+ * inline & fenced code, links, images, wiki-links ([[Title]]), #tags,
+ * blockquotes, horizontal rules, ordered/unordered/task lists, tables,
+ * and paragraphs. Output is HTML-escaped and `javascript:` URLs are
+ * neutralized, so it is safe to inject into the DOM.
+ *
+ * @module markdown
+ */
+
+const INLINE_CODE = /`([^`]+)`/g;
+const WIKILINK_RE = /\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g;
+const TAG_RE = /(^|[\s(])#([\p{L}\p{N}_-]+)/gu;
+const CODE_FENCE = /```(\w*)\n([\s\S]*?)```/g;
+
+/** Reject `javascript:` and other dangerous URL schemes. */
+function sanitizeUrl(url) {
+  const u = String(url).trim();
+  if (/^(javascript|data|vbscript):/i.test(u)) return '#';
+  return u;
+}
+
+/** Extract #tags from raw text (skips headings `# x` and hex colors `#fff`). */
+function extractTags(text) {
+  const tags = new Set();
+  const re = new RegExp(TAG_RE.source, 'gu');
+  let m;
+  const str = String(text || '');
+  while ((m = re.exec(str))) {
+    const tag = m[2];
+    if (/^[\da-fA-F]{3,8}$/.test(tag)) continue; // hex color
+    if (!/[a-zA-Z]/.test(tag)) continue; // must contain a letter
+    tags.add(tag);
+  }
+  return [...tags];
+}
+
+/** Extract [[wiki-link]] target titles from raw text. */
+function extractWikilinks(text) {
+  const out = [];
+  const re = new RegExp(WIKILINK_RE.source, 'gu');
+  let m;
+  const str = String(text || '');
+  while ((m = re.exec(str))) out.push(m[1].trim());
+  return out;
+}
+
+/** Apply inline Markdown formatting to a single line/segment of text. */
+function inline(text) {
+  const codes = [];
+  let t = escapeHtml(text);
+
+  // protect inline code first (content is already escaped)
+  t = t.replace(INLINE_CODE, (_, c) => {
+    const idx = codes.push(c) - 1;
+    return `\u0001${idx}\u0001`;
+  });
+
+  // images
+  t = t.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g,
+    (_, alt, url) => `<img src="${sanitizeUrl(url)}" alt="${alt}">`);
+  // links
+  t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,
+    (_, txt, url) => `<a href="${sanitizeUrl(url)}" target="_blank" rel="noopener">${txt}</a>`);
+  // wiki-links
+  t = t.replace(WIKILINK_RE, (_, title, alias) => {
+    const target = title.trim();
+    const label = (alias || title).trim();
+    return `<a class="wikilink" data-note="${target}" href="#note:${encodeURIComponent(target)}">${label}</a>`;
+  });
+  // bold, then italic
+  t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  // strike
+  t = t.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+  // tags
+  t = t.replace(/(^|[\s(])#([\p{L}\p{N}_-]+)/gu, (m, pre, tag) => {
+    if (/^[\da-fA-F]{3,8}$/.test(tag) || !/[a-zA-Z]/.test(tag)) return m;
+    return `${pre}<span class="tag" data-tag="${tag}">#${tag}</span>`;
+  });
+  // restore inline code
+  t = t.replace(/\u0001(\d+)\u0001/g, (_, idx) => `<code>${codes[Number(idx)]}</code>`);
+  return t;
+}
+
+/** Render Markdown source to an HTML string. */
+function renderMarkdown(src) {
+  const text = String(src == null ? '' : src).replace(/\r\n?/g, '\n');
+  const codeBlocks = [];
+  const s = text.replace(CODE_FENCE, (_, lang, code) => {
+    const idx = codeBlocks.push({ lang: lang || '', code }) - 1;
+    return `\n\u0000CODE${idx}\u0000\n`;
+  });
+  const lines = s.split('\n');
+  const out = [];
+  let i = 0;
+
+  const splitRow = (r) =>
+    r.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    const codeMatch = line.trim().match(/^\u0000CODE(\d+)\u0000$/);
+    if (codeMatch) {
+      const { lang, code } = codeBlocks[Number(codeMatch[1])];
+      out.push(`<pre class="code" data-lang="${escapeHtml(lang)}"><code>${escapeHtml(code.replace(/\n$/, ''))}</code></pre>`);
+      i += 1;
+      continue;
+    }
+    if (line.trim() === '') { i += 1; continue; }
+
+    // horizontal rule: 3+ of the same divider char
+    if (/^(\s*[-*_]){3,}$/.test(line) && new Set(line.replace(/\s/g, '')).size === 1) {
+      out.push('<hr>'); i += 1; continue;
+    }
+    // heading
+    const h = line.match(/^(#{1,6})\s+(.*)$/);
+    if (h) {
+      const lvl = h[1].length;
+      out.push(`<h${lvl}>${inline(h[2].trim())}</h${lvl}>`);
+      i += 1; continue;
+    }
+    // blockquote
+    if (/^\s*>/.test(line)) {
+      const buf = [];
+      while (i < lines.length && /^\s*>/.test(lines[i])) {
+        buf.push(lines[i].replace(/^\s*>\s?/, ''));
+        i += 1;
+      }
+      out.push(`<blockquote>${renderMarkdown(buf.join('\n'))}</blockquote>`);
+      continue;
+    }
+    // table
+    if (line.includes('|') && i + 1 < lines.length &&
+        /^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(lines[i + 1]) && lines[i + 1].includes('-')) {
+      const header = splitRow(line);
+      i += 2;
+      const rows = [];
+      while (i < lines.length && lines[i].includes('|') && lines[i].trim() !== '') {
+        rows.push(splitRow(lines[i])); i += 1;
+      }
+      const thead = `<thead><tr>${header.map((c) => `<th>${inline(c)}</th>`).join('')}</tr></thead>`;
+      const tbody = `<tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody>`;
+      out.push(`<table>${thead}${tbody}</table>`);
+      continue;
+    }
+    // list (ul / ol / task)
+    if (/^\s*([-*+]|\d+\.)\s+/.test(line)) {
+      const ordered = /^\s*\d+\.\s+/.test(line);
+      const items = [];
+      while (i < lines.length && /^\s*([-*+]|\d+\.)\s+/.test(lines[i])) {
+        const item = lines[i].replace(/^\s*([-*+]|\d+\.)\s+/, '');
+        const task = item.match(/^\[([ xX])\]\s+(.*)$/);
+        if (task) {
+          const checked = task[1].toLowerCase() === 'x';
+          items.push(`<li><input type="checkbox" disabled${checked ? ' checked' : ''}> ${inline(task[2])}</li>`);
+        } else {
+          items.push(`<li>${inline(item)}</li>`);
+        }
+        i += 1;
+      }
+      out.push(`<${ordered ? 'ol' : 'ul'}>${items.join('')}</${ordered ? 'ol' : 'ul'}>`);
+      continue;
+    }
+    // paragraph
+    const buf = [];
+    while (i < lines.length && lines[i].trim() !== '' &&
+           !/^(#{1,6}\s|>\s*|\d+\.\s|[-*+]\s)/.test(lines[i]) &&
+           !/^(\s*[-*_]){3,}$/.test(lines[i]) &&
+           !/^\u0000CODE\d+\u0000$/.test(lines[i].trim())) {
+      buf.push(lines[i]); i += 1;
+    }
+    if (buf.length) out.push(`<p>${inline(buf.join(' '))}</p>`);
+  }
+  return out.join('\n');
+}
+
+/* ===== search.js ===== */
+/**
+ * Full-text search over notes (pure, no DOM).
+ *
+ * @module search
+ */
+
+/**
+ * Rank notes against a query string.
+ * @param {Array<{id:string,title:string,body:string}>} notes
+ * @param {string} query
+ * @returns {Array<object>} notes that match, sorted by descending score
+ */
+function rankNotes(notes, query) {
+  const q = String(query || '').trim().toLowerCase();
+  if (!q) return [...notes];
+  const terms = q.split(/\s+/).filter(Boolean);
+  const scored = [];
+  for (const note of notes) {
+    const title = (note.title || '').toLowerCase();
+    const body = (note.body || '').toLowerCase();
+    let score = 0;
+    let allMatch = true;
+    for (const term of terms) {
+      const inTitle = title.includes(term);
+      const inBody = body.includes(term);
+      if (!inTitle && !inBody) { allMatch = false; break; }
+      if (inTitle) score += 10 + (title.startsWith(term) ? 5 : 0);
+      if (inBody) score += 1;
+    }
+    if (allMatch) {
+      scored.push({ note, score });
+    }
+  }
+  scored.sort((a, b) => b.score - a.score || (a.note.title || '').localeCompare(b.note.title || ''));
+  return scored.map((s) => s.note);
+}
+
+/**
+ * Find notes that contain a [[wiki-link]] to `title`.
+ * @param {Array<{id:string,title:string,body:string}>} notes
+ * @param {string} title
+ * @returns {Array<object>}
+ */
+function backlinks(notes, title) {
+  const target = normalizeTitle(title);
+  if (!target) return [];
+  return notes.filter((n) => {
+    const body = n.body || '';
+    const re = /\[\[([^\]|]+?)(?:\|[^\]]+?)?\]\]/g;
+    let m;
+    while ((m = re.exec(body))) {
+      if (normalizeTitle(m[1]) === target) return true;
+    }
+    return false;
+  });
+}
+
+/* ===== theme.js ===== */
+/**
+ * Theme handling (light/dark), persisted to localStorage.
+ * @module theme
+ */
+
+const THEME_KEY = 'leafnote:theme';
+function getInitialTheme() {
+  const saved = (typeof localStorage !== 'undefined' && localStorage.getItem(THEME_KEY)) || '';
+  if (saved === 'light' || saved === 'dark') return saved;
+  const prefersDark =
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return prefersDark ? 'dark' : 'light';
+}
+function applyTheme(theme) {
+  if (typeof document !== 'undefined') document.documentElement.setAttribute('data-theme', theme);
+  if (typeof localStorage !== 'undefined') localStorage.setItem(THEME_KEY, theme);
+}
+function toggleTheme() {
+  const current = (typeof document !== 'undefined' &&
+    document.documentElement.getAttribute('data-theme')) || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  return next;
+}
+
+/* ===== store.js ===== */
+/**
+ * Note storage. Persists notes to a localStorage-compatible backend
+ * (pluggable so it is testable in Node). Pure serialization helpers
+ * (`serialize` / `deserialize`) are exported separately.
+ *
+ * @module store
+ */
+
+const KEY = 'leafnote:v1';
+const VERSION = 1;
+
+/** Serialize a notes array to a versioned JSON string. */
+function serialize(notes) {
+  return JSON.stringify({ version: VERSION, notes: notes || [] }, null, 2);
+}
+
+/** Parse a Leafnote backup string into a normalized notes array. */
+function deserialize(str) {
+  let data;
+  try {
+    data = JSON.parse(str);
+  } catch {
+    throw new Error('Invalid Leafnote backup: not valid JSON');
+  }
+  if (data && !Array.isArray(data.notes)) {
+    if (Array.isArray(data)) data = { notes: data };
+    else throw new Error('Invalid Leafnote backup: missing notes array');
+  }
+  return (data.notes || []).map(normalizeNote);
+}
+
+function normalizeNote(n) {
+  const note = n && typeof n === 'object' ? n : {};
+  return {
+    id: typeof note.id === 'string' && note.id ? note.id : uid(),
+    title: typeof note.title === 'string' ? note.title : 'Untitled',
+    body: typeof note.body === 'string' ? note.body : '',
+    createdAt: typeof note.createdAt === 'number' ? note.createdAt : now(),
+    updatedAt: typeof note.updatedAt === 'number' ? note.updatedAt : now(),
+  };
+}
+
+/** A localStorage-backed notes store. */
+class Store {
+  constructor(storage) {
+    this.storage =
+      storage || (typeof globalThis !== 'undefined' && globalThis.localStorage) || null;
+    this.notes = [];
+  }
+
+  load() {
+    if (!this.storage) return this.notes;
+    const raw = this.storage.getItem(KEY);
+    if (!raw) {
+      this.notes = [];
+      return this.notes;
+    }
+    try {
+      this.notes = deserialize(raw);
+    } catch {
+      this.notes = [];
+    }
+    return this.notes;
+  }
+
+  _save() {
+    if (this.storage) this.storage.setItem(KEY, serialize(this.notes));
+  }
+
+  all() {
+    return this.notes;
+  }
+
+  get(id) {
+    return this.notes.find((n) => n.id === id) || null;
+  }
+
+  create(data = {}) {
+    const note = normalizeNote({ ...data, id: uid(), createdAt: now(), updatedAt: now() });
+    this.notes.unshift(note);
+    this._save();
+    return note;
+  }
+
+  update(id, patch = {}) {
+    const note = this.get(id);
+    if (!note) return null;
+    Object.assign(note, patch, { updatedAt: now() });
+    this._save();
+    return note;
+  }
+
+  remove(id) {
+    const before = this.notes.length;
+    this.notes = this.notes.filter((n) => n.id !== id);
+    const removed = this.notes.length < before;
+    if (removed) this._save();
+    return removed;
+  }
+
+  exportJSON() {
+    return serialize(this.notes);
+  }
+
+  /** Merge an imported backup into the current store (by id). */
+    const incoming = deserialize(str);
+    const byId = new Map(this.notes.map((n) => [n.id, n]));
+    for (const n of incoming) {
+      const existing = byId.get(n.id);
+      if (existing) Object.assign(existing, n);
+      else {
+        this.notes.push(n);
+        byId.set(n.id, n);
+      }
+    }
+    this._save();
+    return this.notes;
+  }
+}
+
+/* ===== app.js ===== */
+/**
+ * Leafnote browser controller. Wires the pure core modules (Store,
+ * markdown, search, theme) to the DOM declared in index.html.
+ *
+ * Loaded as an ES module in dev (index.html). The single-file build
+ * (npm run build) inlines this with the other src/*.js modules and
+ * strips the import/export lines, so it must contain no top-level await
+ * and no syntax that only a bundler could resolve.
+ *
+ * @module app
+ */
+
+const store = new Store();
+let currentId = null;
+let activeTag = null;
+let query = '';
+
+// ---- DOM refs ---------------------------------------------------------
+const $ = (id) => document.getElementById(id);
+const noteListEl = $('note-list');
+const tagsEl = $('tags');
+const searchEl = $('search');
+const titleEl = $('title');
+const bodyEl = $('body');
+const previewEl = $('preview');
+const backlinksEl = $('backlinks');
+const noteTagsEl = $('note-tags');
+const metaInfoEl = $('meta-info');
+const newBtn = $('new-note');
+const deleteBtn = $('delete-note');
+const themeBtn = $('theme-toggle');
+const exportMdBtn = $('export-md');
+const exportJsonBtn = $('export-json');
+const importInput = $('import');
+
+// ---- helpers ----------------------------------------------------------
+function fmt(ts) {
+  try {
+    return new Date(ts).toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+  } catch {
+    return String(ts);
+  }
+}
+
+function slug(s) {
+  return String(s || 'note')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60) || 'note';
+}
+
+function snippetOf(body) {
+  const text = String(body || '')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/[*`_~]/g, '')
+    .replace(/\[\[|\]\]/g, '')
+    .replace(/^>\s?/gm, '')
+    .trim();
+  const first = text.split(/\n/).find((l) => l.trim()) || '';
+  return first.slice(0, 90);
+}
+
+function download(filename, content, mime) {
+  const blob = new Blob([content], { type: mime + ';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function dateStamp() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// ---- filtering --------------------------------------------------------
+function visibleNotes() {
+  let notes = store.all();
+  if (activeTag) notes = notes.filter((n) => extractTags(n.body).includes(activeTag));
+  notes = rankNotes(notes, query);
+  notes.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  return notes;
+}
+
+// ---- rendering --------------------------------------------------------
+function renderList() {
+  const notes = visibleNotes();
+  if (!notes.length) {
+    noteListEl.innerHTML = '<li class="empty">No notes</li>';
+    return;
+  }
+  noteListEl.innerHTML = notes
+    .map((n) => {
+      const title = n.title && n.title.trim() ? n.title : titleFromBody(n.body);
+      return (
+        `<li class="${n.id === currentId ? 'active' : ''}" data-id="${n.id}">` +
+        `<div class="nl-title">${escapeHtml(title || 'Untitled')}</div>` +
+        `<div class="nl-snippet">${escapeHtml(snippetOf(n.body))}</div>` +
+        `<div class="nl-date">${escapeHtml(fmt(n.updatedAt))}</div>` +
+        `</li>`
+      );
+    })
+    .join('');
+}
+
+function renderTags() {
+  const counts = new Map();
+  for (const n of store.all()) {
+    for (const t of extractTags(n.body)) counts.set(t, (counts.get(t) || 0) + 1);
+  }
+  const tags = [...counts.keys()].sort((a, b) => a.localeCompare(b));
+  if (!tags.length) {
+    tagsEl.innerHTML = '<span class="empty">no tags</span>';
+    return;
+  }
+  tagsEl.innerHTML = tags
+    .map(
+      (t) =>
+        `<button class="tag-chip${activeTag === t ? ' active' : ''}" data-tag="${escapeHtml(t)}">` +
+        `#${escapeHtml(t)} <span class="count">${counts.get(t)}</span></button>`
+    )
+    .join(' ');
+}
+
+function renderPreview() {
+  previewEl.innerHTML = renderMarkdown(bodyEl.value);
+}
+
+function renderMeta(id) {
+  const note = store.get(id);
+  if (!note) {
+    backlinksEl.innerHTML = '';
+    noteTagsEl.innerHTML = '';
+    metaInfoEl.textContent = '';
+    return;
+  }
+  const tags = extractTags(note.body + '\n' + (note.title || ''));
+  noteTagsEl.innerHTML = tags.length
+    ? tags.map((t) => `<span class="tag" data-tag="${escapeHtml(t)}">#${escapeHtml(t)}</span>`).join(' ')
+    : '<span class="empty">none</span>';
+
+  const bl = backlinks(store.all(), note.title);
+  backlinksEl.innerHTML = bl.length
+    ? bl
+        .map(
+          (n) =>
+            `<li><a class="wikilink" data-note="${escapeHtml(n.title)}" href="#note:${encodeURIComponent(
+              n.title
+            )}">${escapeHtml(n.title || 'Untitled')}</a></li>`
+        )
+        .join('')
+    : '<li class="empty">none yet</li>';
+
+  metaInfoEl.innerHTML = `Created ${escapeHtml(fmt(note.createdAt))}<br>Updated ${escapeHtml(fmt(note.updatedAt))}`;
+}
+
+function clearEditor() {
+  currentId = null;
+  titleEl.value = '';
+  bodyEl.value = '';
+  titleEl.disabled = true;
+  bodyEl.disabled = true;
+  previewEl.innerHTML = '<p class="placeholder">Create a note to get started.</p>';
+  renderMeta(null);
+}
+
+// ---- navigation -------------------------------------------------------
+function selectNote(id) {
+  const note = store.get(id);
+  if (!note) return;
+  currentId = id;
+  titleEl.value = note.title || '';
+  bodyEl.value = note.body || '';
+  titleEl.disabled = false;
+  bodyEl.disabled = false;
+  renderPreview();
+  renderMeta(id);
+  renderList();
+}
+
+function navTo(title) {
+  const target = normalizeTitle(title);
+  let found = store.all().find((n) => normalizeTitle(n.title) === target);
+  if (!found) found = store.all().find((n) => normalizeTitle(titleFromBody(n.body)) === target);
+  if (found) {
+    selectNote(found.id);
+    return;
+  }
+  const clean = (title || '').trim() || 'Untitled';
+  const note = store.create({ title: clean, body: `# ${clean}\n\n` });
+  selectNote(note.id);
+  renderTags();
+  renderList();
+}
+
+// ---- persistence ------------------------------------------------------
+const schedulePersist = debounce(() => {
+  const note = store.get(currentId);
+  if (!note) return;
+  store.update(currentId, { title: titleEl.value.trim(), body: bodyEl.value });
+  renderList();
+  renderMeta(currentId);
+}, 200);
+
+// ---- events -----------------------------------------------------------
+noteListEl.addEventListener('click', (e) => {
+  const li = e.target.closest('li[data-id]');
+  if (li) selectNote(li.getAttribute('data-id'));
+});
+
+tagsEl.addEventListener('click', (e) => {
+  const chip = e.target.closest('button[data-tag]');
+  if (!chip) return;
+  const tag = chip.getAttribute('data-tag');
+  activeTag = activeTag === tag ? null : tag;
+  renderTags();
+  renderList();
+});
+
+searchEl.addEventListener('input', () => {
+  query = searchEl.value.trim();
+  renderList();
+});
+
+titleEl.addEventListener('input', () => {
+  const note = store.get(currentId);
+  if (note) store.update(currentId, { title: titleEl.value.trim() });
+  renderList();
+});
+
+bodyEl.addEventListener('input', () => {
+  renderPreview();
+  schedulePersist();
+});
+
+function onWikilinkClick(e) {
+  const a = e.target.closest('a.wikilink, a[data-note]');
+  if (!a) return;
+  e.preventDefault();
+  navTo(a.getAttribute('data-note'));
+}
+previewEl.addEventListener('click', onWikilinkClick);
+backlinksEl.addEventListener('click', onWikilinkClick);
+
+newBtn.addEventListener('click', () => {
+  const note = store.create({ title: '', body: '' });
+  selectNote(note.id);
+  renderTags();
+  renderList();
+  titleEl.focus();
+});
+
+deleteBtn.addEventListener('click', () => {
+  const note = store.get(currentId);
+  if (!note) return;
+  const label = note.title && note.title.trim() ? note.title : 'Untitled';
+  if (!window.confirm(`Delete "${label}"? This cannot be undone.`)) return;
+  store.remove(currentId);
+  const remaining = store.all();
+  if (remaining.length) selectNote(remaining[0].id);
+  else clearEditor();
+  renderList();
+  renderTags();
+});
+
+themeBtn.addEventListener('click', () => {
+  const next = toggleTheme();
+  themeBtn.textContent = next === 'dark' ? '☀' : '🌓';
+});
+
+exportMdBtn.addEventListener('click', () => {
+  const note = store.get(currentId);
+  if (!note) return;
+  const name = note.title && note.title.trim() ? note.title : titleFromBody(note.body);
+  download(`${slug(name)}.md`, note.body, 'text/markdown');
+});
+
+exportJsonBtn.addEventListener('click', () => {
+  download(`leafnote-backup-${dateStamp()}.json`, store.exportJSON(), 'application/json');
+});
+  const files = importInput.files;
+  if (!files || !files.length) return;
+  for (const f of files) {
+    const text = await f.text();
+    const title = f.name.replace(/\.(md|markdown|txt)$/i, '');
+    store.create({ title, body: text });
+  }
+  renderList();
+  renderTags();
+});
+
+// ---- seed + boot ------------------------------------------------------
+function seedIfEmpty() {
+  if (store.all().length) return;
+  store.create({
+    title: 'Welcome to Leafnote',
+    body: [
+      '# Welcome to Leafnote',
+      '',
+      'Leafnote is a **local-first** Markdown notes app. Everything you write',
+      'stays in your browser — no account, no server, no tracking.',
+      '',
+      '## Try the basics',
+      '',
+      '- Write in **Markdown**: `**bold**`, `*italic*`, `~~strike~~`, `code`',
+      '- Link notes with `[[Double brackets]]` (wiki-links)',
+      '- Tag notes with `#topics` like #welcome or #how-to',
+      '- Make a task list:',
+      '  - [x] Open the app',
+      '  - [ ] Write your first note',
+      '',
+      '> Tip: click a [[Getting Started]] link to jump (or create) a note.',
+      '',
+      '## Where is my data?',
+      '',
+      'Notes are saved in `localStorage`. Use **Backup JSON** to export everything',
+      'and **Import .md** to bring files back in.',
+      '',
+    ].join('\n'),
+  });
+}
+
+function init() {
+  applyTheme(getInitialTheme());
+  themeBtn.textContent = (document.documentElement.getAttribute('data-theme') || 'light') === 'dark' ? '☀' : '🌓';
+  store.load();
+  seedIfEmpty();
+  if (store.all().length) selectNote(store.all()[0].id);
+  else clearEditor();
+  renderList();
+  renderTags();
+}
+
+init();
+
+</script>
+</body>
+</html>

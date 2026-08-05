@@ -171,6 +171,74 @@ const TOOLS = [
     docs: "projects/screenshot-qa/README.md",
     featured: false,
   },
+  {
+    id: "leafnote",
+    name: "Leafnote",
+    category: "browser",
+    label: "Local Markdown notes",
+    description:
+      "Local-first Markdown notes & knowledge base with wiki-links, backlinks, tags, full-text search, and XSS-safe rendering. Data stays in your browser.",
+    tech: "Browser · localStorage",
+    live: "projects/leafnote/",
+    docs: "projects/leafnote/README.md",
+    featured: false,
+  },
+  {
+    id: "sketchly",
+    name: "Sketchly",
+    category: "browser",
+    label: "Hand-drawn whiteboard",
+    description:
+      "Local-first infinite-canvas whiteboard with a hand-drawn renderer, shapes, undo/redo, and PNG/JSON export. Works offline.",
+    tech: "Browser · Canvas",
+    live: "projects/sketchly/",
+    docs: "projects/sketchly/README.md",
+    featured: false,
+  },
+  {
+    id: "subzen",
+    name: "Subzen",
+    category: "cli",
+    label: "Subtitle toolkit",
+    description:
+      "Zero-dependency subtitle parser, quality linter and auto-fixer with first-class CJK typography (line width, spacing, kinsoku).",
+    tech: "Node.js CLI · SRT/VTT/ASS",
+    docs: "projects/subzen/README.md",
+    featured: false,
+  },
+  {
+    id: "diffwords",
+    name: "Diffwords",
+    category: "cli",
+    label: "Word-level text diff",
+    description:
+      "Word-level, CJK-aware text differ that renders inline, unified, standalone HTML, and JSON — far finer than line-based diff for prose.",
+    tech: "Node.js CLI · LCS",
+    docs: "projects/diffwords/README.md",
+    featured: false,
+  },
+  {
+    id: "cronly",
+    name: "Cronly",
+    category: "cli",
+    label: "Cron toolkit",
+    description:
+      "Parse, validate, and describe cron expressions in English or Chinese, and compute next/previous run times with timezone and DST handling.",
+    tech: "Node.js CLI · Intl",
+    docs: "projects/cronly/README.md",
+    featured: false,
+  },
+  {
+    id: "quanty",
+    name: "Quanty",
+    category: "cli",
+    label: "Number & byte formatting",
+    description:
+      "Zero-dependency number and byte formatting: formatBytes/parseBytes, grouped numbers, SI or Chinese compact notation, and ordinals.",
+    tech: "Node.js CLI · Intl",
+    docs: "projects/quanty/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {

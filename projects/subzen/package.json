@@ -1,0 +1,73 @@
+{
+  "name": "subzen",
+  "version": "0.1.0",
+  "description": "Zero-dependency subtitle toolkit and quality linter with first-class CJK (Chinese/Japanese/Korean) typography support. Works in Node.js and the browser.",
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "subzen": "./bin/subzen.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "types",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "test:watch": "node --test --watch \"test/*.test.js\"",
+    "lint:self": "node bin/subzen.js lint examples/messy.zh.srt || true",
+    "demo": "node bin/subzen.js stats examples/messy.zh.srt",
+    "playground": "node playground/serve.js"
+  },
+  "keywords": [
+    "subtitle",
+    "subtitles",
+    "srt",
+    "vtt",
+    "webvtt",
+    "ass",
+    "ssa",
+    "lrc",
+    "caption",
+    "captions",
+    "linter",
+    "lint",
+    "cjk",
+    "chinese",
+    "japanese",
+    "korean",
+    "bilingual",
+    "timecode",
+    "resync",
+    "cli",
+    "zero-dependency",
+    "字幕",
+    "双语字幕"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/subzen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OWNER/subzen/issues"
+  },
+  "homepage": "https://github.com/OWNER/subzen#readme",
+  "dependencies": {},
+  "devDependencies": {},
+  "sideEffects": false
+}
