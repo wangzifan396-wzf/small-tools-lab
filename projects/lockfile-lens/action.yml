@@ -20,7 +20,7 @@ inputs:
     description: Configuration path relative to the scan root
     default: .lockfile-lens.json
 runs:
-  using: node20
+  using: node24
   main: bin/action.js
 branding:
   icon: eye

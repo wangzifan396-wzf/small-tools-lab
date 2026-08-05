@@ -100,7 +100,7 @@ permissions:
   contents: read
 
 steps:
-  - uses: actions/checkout@v4
+  - uses: actions/checkout@v7
   - uses: wangzifan396-wzf/small-tools-lab/projects/env-matrix@main
     with:
       fail-on: medium

@@ -23,7 +23,7 @@ inputs:
     description: Fail if credential-like content is redacted
     default: "false"
 runs:
-  using: node20
+  using: node24
   main: bin/action.js
 branding:
   icon: filter

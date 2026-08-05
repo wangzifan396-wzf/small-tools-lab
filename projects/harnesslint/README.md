@@ -97,7 +97,7 @@ permissions:
   security-events: write
 
 steps:
-  - uses: actions/checkout@v4
+  - uses: actions/checkout@v7
   - uses: wangzifan396-wzf/small-tools-lab/projects/harnesslint@main
     with:
       fail-on: high

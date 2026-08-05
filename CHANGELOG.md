@@ -9,6 +9,10 @@ All notable repository-level changes are recorded here. Individual tool releases
 - Lockfile Lens, an explainable npm lockfile supply-chain and pull-request reviewer.
 - Log Sift, a deterministic redacted log compactor with explicit context budgets.
 
+### Changed
+
+- Upgraded repository workflows and JavaScript Actions to the current Node 24-based GitHub Actions runtime.
+
 ### Planned
 
 - Continue adding focused tools based on validated developer workflows.
