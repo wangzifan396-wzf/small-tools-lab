@@ -1,0 +1,18 @@
+{
+  "name": "password-strength",
+  "version": "1.0.0",
+  "description": "Zero-dependency password strength analyzer: entropy-based scoring, offline crack-time estimate, and a checklist of weaknesses — for the CLI and the browser.",
+  "type": "module",
+  "bin": {
+    "password-strength": "bin/password-strength.js"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "start": "node playground/serve.js"
+  },
+  "keywords": ["password", "strength", "entropy", "security", "cli"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

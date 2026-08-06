@@ -1,0 +1,18 @@
+{
+  "name": "regex-visualizer",
+  "version": "1.0.0",
+  "description": "Zero-dependency regular-expression explainer: token-by-token explanations, live match highlighting, and HTML-safe output — for the CLI and the browser.",
+  "type": "module",
+  "bin": {
+    "regex-visualizer": "bin/regex-visualizer.js"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "start": "node playground/serve.js"
+  },
+  "keywords": ["regex", "regular-expression", "visualizer", "explainer", "cli"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

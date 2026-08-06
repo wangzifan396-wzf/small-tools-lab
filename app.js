@@ -294,6 +294,41 @@ const TOOLS = [
     docs: "projects/unit-convert/README.md",
     featured: false,
   },
+  {
+    id: "regex-visualizer",
+    name: "Regex Visualizer",
+    category: "browser",
+    label: "Regex explainer",
+    description:
+      "Explain a regular expression token by token, find every match, and render an HTML-safe highlight — pure, zero-dependency, in the CLI and the browser.",
+    tech: "Browser · RegExp",
+    live: "projects/regex-visualizer/",
+    docs: "projects/regex-visualizer/README.md",
+    featured: false,
+  },
+  {
+    id: "password-strength",
+    name: "Password Strength",
+    category: "browser",
+    label: "Password strength",
+    description:
+      "Estimate password strength from character-class entropy, with a rough offline crack-time estimate and a checklist of weaknesses. Weak = red, strong = green.",
+    tech: "Browser · Entropy",
+    live: "projects/password-strength/",
+    docs: "projects/password-strength/README.md",
+    featured: false,
+  },
+  {
+    id: "text-forge",
+    name: "Text Forge",
+    category: "cli",
+    label: "Text toolkit",
+    description:
+      "Zero-dependency text toolkit: slugify, case conversion, Unicode normalization, diacritic removal, full/half-width conversion, and whitespace cleaning — for the CLI and the browser.",
+    tech: "Node.js CLI · Unicode",
+    docs: "projects/text-forge/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {

@@ -1,0 +1,18 @@
+{
+  "name": "text-forge",
+  "version": "1.0.0",
+  "description": "Zero-dependency text transformation toolkit: slugify, case conversion, Unicode normalization, diacritic removal, full/half-width conversion, and whitespace cleaning — for the CLI and the browser.",
+  "type": "module",
+  "bin": {
+    "text-forge": "bin/text-forge.js"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "start": "node playground/serve.js"
+  },
+  "keywords": ["text", "slugify", "unicode", "transform", "cli"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

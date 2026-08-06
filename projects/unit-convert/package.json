@@ -9,7 +9,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "node --test \"test/*.test.js\"",
-    "start": "node ../playground/serve.js"
+    "start": "node playground/serve.js"
   },
   "keywords": ["unit", "convert", "converter", "cli", "units"],
   "license": "MIT",
