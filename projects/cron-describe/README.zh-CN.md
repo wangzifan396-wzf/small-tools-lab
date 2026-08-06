@@ -26,5 +26,5 @@ const r = nextRuns('0 0 1 * *', 5); // { ok: true, runs: Date[] }
 
 ## 试一试
 
-直接用浏览器打开 `playground/index.html`（也支持 `file://`），或 `npm start`
+直接用浏览器打开 `index.html`（也支持 `file://`），或 `npm start`
 启动本地服务。

@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "Zero-dependency JWT decoder. Decode the header and payload of a JSON Web Token, surface expiry/issued/not-before timing, and show a human verdict — all locally, no signature verification, no dependencies.",
   "type": "module",
+  "engines": { "node": ">=20" },
+  "types": "types/index.d.ts",
+  "exports": { ".": { "types": "./types/index.d.ts", "import": "./src/index.js" } },
+  "files": ["bin", "src", "types", "index.html", "playground", "README.md", "README.zh-CN.md", "LICENSE", "CONTRIBUTING.md", "SECURITY.md"],
   "bin": {
     "jwtpeek": "bin/jwtpeek.js"
   },
   "main": "src/index.js",
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test",
     "start": "node playground/serve.js"
   },
   "keywords": ["jwt", "token", "decode", "auth", "jose", "cli"],

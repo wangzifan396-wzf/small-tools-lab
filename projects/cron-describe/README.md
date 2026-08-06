@@ -35,5 +35,5 @@ const r = nextRuns('0 0 1 * *', 5);  // { ok: true, runs: Date[] }
 
 ## Try it
 
-Open `playground/index.html` directly in a browser (works over `file://` too),
+Open `index.html` directly in a browser (works over `file://` too),
 or run `npm start` for the localhost server.

@@ -163,7 +163,15 @@ function render(){
   if(t.hasExpiry) html += `<div><b>过期</b> ${fmtDate(t.expAt)}</div>`; else html += `<div><b>过期</b> 无 exp（永不过期）</div>`;
   if(t.iatAt) html += `<div><b>签发</b> ${fmtDate(t.iatAt)}</div>`;
   if(t.notYet && t.nbfAt) html += `<div><b>生效</b> ${fmtDate(t.nbfAt)}（尚未生效）</div>`;
-  meta.innerHTML=html;
+  meta.textContent = [
+    `Algorithm: ${r.header&&r.header.alg?r.header.alg:'?'}`,
+    `Type: ${r.header&&r.header.typ?r.header.typ:'?'}`,
+    `Signature: ${r.hasSignature ? `present (${r.signature.length} chars)` : 'missing'}`,
+    `Claims: ${r.claimCount}`,
+    t.hasExpiry ? `Expires: ${fmtDate(t.expAt)}` : 'Expires: none',
+    t.iatAt ? `Issued: ${fmtDate(t.iatAt)}` : '',
+    t.notYet && t.nbfAt ? `Not before: ${fmtDate(t.nbfAt)}` : '',
+  ].filter(Boolean).join(' | ');
   warn.textContent='⚠️ 仅解码，未校验签名 — 不可据此信任身份。';
   $('header').textContent = r.header?JSON.stringify(r.header,null,2):'(无法解析)';
   $('payload').textContent = JSON.stringify(r.payload,null,2);

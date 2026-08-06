@@ -30,5 +30,5 @@ const r = preview('你好 world', 'claude-3.7-sonnet', 500);
 
 ## 试试看
 
-直接用浏览器打开 `playground/index.html`（也支持 `file://` 双击打开），
+直接用浏览器打开 `index.html`（也支持 `file://` 双击打开），
 或运行 `npm start` 启动本地服务。

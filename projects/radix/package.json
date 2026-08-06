@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "Zero-dependency number base converter. Convert between arbitrary bases (2..36), show binary / octal / decimal / hex, and a bit & byte view — for the CLI and the browser, BigInt-safe for large values.",
   "type": "module",
+  "engines": { "node": ">=20" },
+  "types": "types/index.d.ts",
+  "exports": { ".": { "types": "./types/index.d.ts", "import": "./src/index.js" } },
+  "files": ["bin", "src", "types", "index.html", "playground", "README.md", "README.zh-CN.md", "LICENSE", "CONTRIBUTING.md", "SECURITY.md"],
   "bin": {
     "radix": "bin/radix.js"
   },
   "main": "src/index.js",
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test",
     "start": "node playground/serve.js"
   },
   "keywords": ["base", "radix", "convert", "binary", "hex", "bigint", "cli"],

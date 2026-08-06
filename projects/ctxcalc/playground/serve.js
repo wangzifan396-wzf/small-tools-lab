@@ -7,11 +7,16 @@
 
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { join, normalize, extname } from 'node:path';
+import { dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = normalize(join(fileURLToPath(import.meta.url), '..', '..'));
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.argv[2] || process.env.PORT || 4173);
+
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
+  console.error('port must be an integer between 1 and 65535');
+  process.exit(2);
+}
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -27,11 +32,11 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://localhost:${PORT}`);
     let pathname = decodeURIComponent(url.pathname);
-    if (pathname === '/') pathname = '/playground/index.html';
-    if (pathname === '/index.html') pathname = '/playground/index.html';
+    if (pathname === '/' || pathname === '/index.html') pathname = '/index.html';
 
-    const target = normalize(join(ROOT, pathname));
-    if (!target.startsWith(ROOT)) {
+    const target = resolve(ROOT, `.${pathname}`);
+    const targetRelative = relative(ROOT, target);
+    if (targetRelative.startsWith('..') || isAbsolute(targetRelative)) {
       res.writeHead(403).end('forbidden');
       return;
     }
@@ -53,6 +58,6 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`ctxcalc playground → http://localhost:${PORT}/`);
+  console.log(`ctxcalc playground -> http://localhost:${PORT}/`);
   console.log('press Ctrl+C to stop');
 });

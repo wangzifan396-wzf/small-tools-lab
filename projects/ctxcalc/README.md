@@ -42,5 +42,5 @@ const r = preview('你好 world', 'claude-3.7-sonnet', 500);
 
 ## Try it
 
-Open `playground/index.html` directly in a browser (works over `file://` too),
+Open `index.html` directly in a browser (works over `file://` too),
 or run `npm start` for the localhost server.

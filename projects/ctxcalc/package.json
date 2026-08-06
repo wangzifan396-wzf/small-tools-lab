@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "Zero-dependency context / token estimator + multi-model context-window and cost preview. Works in the CLI and the browser.",
   "type": "module",
+  "engines": { "node": ">=20" },
+  "types": "types/index.d.ts",
+  "exports": { ".": { "types": "./types/index.d.ts", "import": "./src/index.js" } },
+  "files": ["bin", "src", "types", "index.html", "playground", "README.md", "README.zh-CN.md", "LICENSE", "CONTRIBUTING.md", "SECURITY.md"],
   "bin": {
     "ctxcalc": "bin/ctxcalc.js"
   },
   "main": "src/index.js",
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test",
     "start": "node playground/serve.js"
   },
   "keywords": ["token", "context-window", "llm", "cost", "estimator", "cli"],

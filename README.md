@@ -15,7 +15,7 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
 - 33 focused tools across three categories (13 browser, 18 CLI, 2 local-AI)
-- 31 Node.js projects and 2 Python local-AI experiments with 389 focused project-level tests
+- 31 Node.js projects and 2 Python local-AI experiments with 549 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages

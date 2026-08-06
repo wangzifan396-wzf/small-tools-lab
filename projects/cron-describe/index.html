@@ -145,18 +145,19 @@ function nextRuns(expr,count,from){
   return {ok:true,runs:out};
 }
 function fmt(d){ const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+function escapeHtml(value){ return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
 function render(){
   const expr=document.getElementById('expr').value.trim();
   const count=Math.max(1,Math.min(20,parseInt(document.getElementById('count').value,10)||5));
   const out=document.getElementById('out');
   const p=parse(expr);
-  if(!p.ok){ out.innerHTML='<div class="card err">解析失败：'+p.error+'</div>'; return; }
+  if(!p.ok){ out.textContent='解析失败：'+p.error; out.className='card err'; return; }
   const nr=nextRuns(expr,count,Date.now());
-  let html='<div class="card"><div class="desc">'+describe(p)+'</div>';
+  let html='<div class="card"><div class="desc">'+escapeHtml(describe(p))+'</div>';
   html+='<div class="label">下次运行（最多 '+count+' 次）</div>';
   if(nr.ok&&nr.runs.length){
-    html+='<ol>'+nr.runs.map(d=>'<li>'+fmt(d)+'</li>').join('')+'</ol>';
-  } else { html+='<div class="err">'+(nr.error||'未找到')+'</div>'; }
+    html+='<ol>'+nr.runs.map(d=>'<li>'+escapeHtml(fmt(d))+'</li>').join('')+'</ol>';
+  } else { html+='<div class="err">'+escapeHtml(nr.error||'未找到')+'</div>'; }
   html+='</div>';
   out.innerHTML=html;
 }
