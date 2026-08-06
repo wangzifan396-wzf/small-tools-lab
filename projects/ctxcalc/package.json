@@ -1,0 +1,18 @@
+{
+  "name": "ctxcalc",
+  "version": "1.0.0",
+  "description": "Zero-dependency context / token estimator + multi-model context-window and cost preview. Works in the CLI and the browser.",
+  "type": "module",
+  "bin": {
+    "ctxcalc": "bin/ctxcalc.js"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "start": "node playground/serve.js"
+  },
+  "keywords": ["token", "context-window", "llm", "cost", "estimator", "cli"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

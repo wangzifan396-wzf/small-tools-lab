@@ -341,6 +341,18 @@ const TOOLS = [
     docs: "projects/cron-describe/README.md",
     featured: false,
   },
+  {
+    id: "ctxcalc",
+    name: "CtxCalc",
+    category: "browser",
+    label: "上下文 / Token 估算",
+    description:
+      "Zero-dependency context / token estimator: estimate prompt tokens (mixed CJK + Latin), check fit against a model's context window, and preview illustrative cost — in the browser, no build step.",
+    tech: "Browser · Estimator",
+    live: "projects/ctxcalc/",
+    docs: "projects/ctxcalc/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {
