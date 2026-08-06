@@ -1,0 +1,18 @@
+{
+  "name": "radix",
+  "version": "1.0.0",
+  "description": "Zero-dependency number base converter. Convert between arbitrary bases (2..36), show binary / octal / decimal / hex, and a bit & byte view — for the CLI and the browser, BigInt-safe for large values.",
+  "type": "module",
+  "bin": {
+    "radix": "bin/radix.js"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "start": "node playground/serve.js"
+  },
+  "keywords": ["base", "radix", "convert", "binary", "hex", "bigint", "cli"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

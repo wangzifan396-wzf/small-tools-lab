@@ -10,6 +10,8 @@ All notable repository-level changes are recorded here. Individual tool releases
 - Log Sift, a deterministic redacted log compactor with explicit context budgets.
 - Ignore Doctor, a cross-tool ignore-boundary auditor for disclosure and context-bloat risks.
 - Port Matrix, a structured port-contract map spanning source, containers, orchestration, and docs.
+- JwtPeek, a zero-dependency JWT decoder that surfaces expiry / issued / not-before timing (decode only, no signature verification).
+- Radix, a BigInt-exact number base converter (bases 2–36) with a binary / byte view.
 
 ### Changed
 

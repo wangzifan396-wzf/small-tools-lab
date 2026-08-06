@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>radix · 进制 / 数位转换</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --border: #e7e4dd; --border-strong: #d8d4ca;
+    --text: #22211e; --text-2: #56534c; --muted: #8b877e;
+    --accent: #6a5acd; --accent-soft: #ece9f9; --ok: #3d8f61; --warn: #c0792b; --bad: #c0392b;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --border: #232b3a; --border-strong: #34415a;
+      --text: #e9edf5; --text-2: #aab3c6; --muted: #6e788e;
+      --accent: #9d8cff; --accent-soft: #1d1a2e; --ok: #5fd0a0; --warn: #f0b269; --bad: #ff8a7a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px;
+    display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 820px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  input[type=text], select {
+    padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--border);
+    background: var(--panel); color: var(--text); font-size: 14px; font-family: var(--mono);
+  }
+  input[type=text] { flex: 1; min-width: 200px; }
+  select { min-width: 110px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; margin-top: 14px; }
+  .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8px; }
+  .common { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 640px){ .common { grid-template-columns: repeat(2, 1fr); } }
+  .stat { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; }
+  .stat .k { font-size: 12px; color: var(--muted); }
+  .stat .v { font-size: 15px; font-weight: 700; font-family: var(--mono); word-break: break-all; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; }
+  td.num { font-family: var(--mono); }
+  td.base { color: var(--accent); font-weight: 700; width: 40px; }
+  .bits { font-family: var(--mono); font-size: 13px; word-break: break-all; }
+  .byte { display: inline-block; background: var(--accent-soft); border-radius: 6px; padding: 2px 6px; margin: 3px 3px 0 0; }
+  .err { color: var(--bad); font-size: 13px; margin-top: 8px; }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+  code { background: var(--accent-soft); padding: 1px 5px; border-radius: 5px; font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔢 radix · 进制 / 数位转换</h1>
+  <p class="sub">在 2–36 进制间精确互转（BigInt，大数不丢精度），并显示二进制 / 字节视图。<strong>纯前端运行，零依赖。</strong></p>
+
+  <div class="row">
+    <input id="value" type="text" value="255" placeholder="输入数值…" />
+    <select id="fromBase"></select>
+    <span style="color:var(--muted)">→</span>
+    <select id="toBase"></select>
+  </div>
+  <div class="err" id="err"></div>
+
+  <div class="card">
+    <p class="label">常用进制</p>
+    <div class="common">
+      <div class="stat"><div class="k">二进制 (2)</div><div class="v" id="bin">—</div></div>
+      <div class="stat"><div class="k">八进制 (8)</div><div class="v" id="oct">—</div></div>
+      <div class="stat"><div class="k">十进制 (10)</div><div class="v" id="dec">—</div></div>
+      <div class="stat"><div class="k">十六进制 (16)</div><div class="v" id="hexv">—</div></div>
+    </div>
+    <div class="stat" style="margin-top:10px"><div class="k" id="conv-label">转换结果</div><div class="v" id="conv">—</div></div>
+  </div>
+
+  <div class="card">
+    <p class="label">全部进制 2–36</p>
+    <table id="all"><tbody></tbody></table>
+  </div>
+
+  <div class="card">
+    <p class="label">位 / 字节视图</p>
+    <div class="bits" id="bits"></div>
+    <div id="bytes" style="margin-top:6px"></div>
+  </div>
+
+  <p class="foot">BigInt 精确计算，2–36 进制 · 零依赖</p>
+</div>
+
+<script>
+// --- inlined core (mirrors src/core/radix.js) so this page runs over file:// ---
+const MAX_BASE = 36;
+const DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
+function alphabetFor(base){ if(base<2||base>MAX_BASE) return null; return DIGITS.slice(0,base); }
+function isValidInput(str, base){
+  if(base<2||base>MAX_BASE) return false;
+  const s=String(str==null?"":str).trim().toLowerCase();
+  if(!s) return false;
+  const body = s.startsWith("-")?s.slice(1):s;
+  if(!body) return false;
+  const alpha=alphabetFor(base);
+  for(const ch of body){ if(alpha.indexOf(ch)===-1) return false; }
+  return true;
+}
+function toDecimal(str, fromBase){
+  const s=String(str==null?"":str).trim().toLowerCase();
+  if(!isValidInput(s,fromBase)) throw new Error("invalid input");
+  const neg=s.startsWith("-"); const body=neg?s.slice(1):s;
+  let acc=0n;
+  for(const ch of body){ acc=acc*BigInt(fromBase)+BigInt(DIGITS.indexOf(ch)); }
+  return neg?-acc:acc;
+}
+function fromDecimal(value, toBase){
+  if(toBase<2||toBase>MAX_BASE) throw new Error("invalid base");
+  let n = typeof value==="bigint"?value:BigInt(value);
+  const neg=n<0n; n=neg?-n:n;
+  if(n===0n) return "0";
+  let out="";
+  while(n>0n){ out=DIGITS[Number(n%BigInt(toBase))]+out; n=n/BigInt(toBase); }
+  return neg?("-"+out):out;
+}
+function commonConversions(str, fromBase){
+  const d=toDecimal(str,fromBase);
+  return { binary:fromDecimal(d,2), octal:fromDecimal(d,8), decimal:d.toString(), hex:fromDecimal(d,16) };
+}
+function bitView(str, fromBase){
+  const d=toDecimal(str,fromBase); const mag=d<0n?-d:d;
+  const binary = mag===0n?"0":fromDecimal(mag,2);
+  const bits=binary.length, byteLength=Math.ceil(bits/8);
+  const padded=binary.padStart(byteLength*8,"0");
+  const bytes=[]; for(let i=0;i<padded.length;i+=8) bytes.push(padded.slice(i,i+8));
+  return { binary, bits, byteLength, bytes };
+}
+
+const $=(id)=>document.getElementById(id);
+const fb=$('fromBase'), tb=$('toBase');
+for(let b=2;b<=MAX_BASE;b++){
+  fb.add(new Option(b+" 进制", b));
+  tb.add(new Option(b+" 进制", b));
+}
+fb.value=10; tb.value=16;
+
+function render(){
+  const v=$('value').value.trim();
+  const fbv=parseInt(fb.value,10), tbv=parseInt(tb.value,10);
+  $('err').textContent = isValidInput(v, fbv) ? "" : ("非法输入：请确认只包含 " + fbv + " 进制下的合法字符");
+  if(!isValidInput(v, fbv)){
+    ['bin','oct','dec','hexv','conv','bits'].forEach(id=>$(id).textContent='—');
+    $('bytes').innerHTML=''; $('all').querySelector('tbody').innerHTML='';
+    $('conv-label').textContent='转换结果';
+    return;
+  }
+  const c=commonConversions(v, fbv);
+  $('bin').textContent=c.binary; $('oct').textContent=c.octal;
+  $('dec').textContent=c.decimal; $('hexv').textContent=c.hex;
+  const conv=fromDecimal(toDecimal(v,fbv), tbv);
+  $('conv-label').textContent='→ '+tbv+' 进制';
+  $('conv').textContent=conv;
+
+  // all bases 2..36
+  const tbody=$('all').querySelector('tbody'); tbody.innerHTML='';
+  for(let b=2;b<=MAX_BASE;b++){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="base">${b}</td><td class="num">${fromDecimal(toDecimal(v,fbv),b)}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  const bv=bitView(v, fbv);
+  $('bits').textContent=`${bv.binary}  （${bv.bits} 位 · ${bv.byteLength} 字节）`;
+  $('bytes').innerHTML = bv.bytes.map(x=>`<span class="byte">${x}</span>`).join('');
+}
+['value','fromBase','toBase'].forEach(id=>$(id).addEventListener('input',render));
+render();
+</script>
+</body>
+</html>

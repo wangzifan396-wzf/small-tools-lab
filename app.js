@@ -353,6 +353,30 @@ const TOOLS = [
     docs: "projects/ctxcalc/README.md",
     featured: false,
   },
+  {
+    id: "jwtpeek",
+    name: "JwtPeek",
+    category: "browser",
+    label: "JWT 解码",
+    description:
+      "Zero-dependency JWT decoder: decode the header and payload of a token, surface expiry / issued / not-before timing, and show a clear verdict — in the browser, no build step. Decode only, no signature verification.",
+    tech: "Browser · JWT",
+    live: "projects/jwtpeek/",
+    docs: "projects/jwtpeek/README.md",
+    featured: false,
+  },
+  {
+    id: "radix",
+    name: "Radix",
+    category: "browser",
+    label: "进制 / 数位转换",
+    description:
+      "Zero-dependency number base converter: convert across bases 2–36 with BigInt-exact math and inspect binary / octal / decimal / hex plus a bit & byte view — in the browser, no build step.",
+    tech: "Browser · BigInt",
+    live: "projects/radix/",
+    docs: "projects/radix/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {

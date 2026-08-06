@@ -1,0 +1,18 @@
+{
+  "name": "jwtpeek",
+  "version": "1.0.0",
+  "description": "Zero-dependency JWT decoder. Decode the header and payload of a JSON Web Token, surface expiry/issued/not-before timing, and show a human verdict — all locally, no signature verification, no dependencies.",
+  "type": "module",
+  "bin": {
+    "jwtpeek": "bin/jwtpeek.js"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "start": "node playground/serve.js"
+  },
+  "keywords": ["jwt", "token", "decode", "auth", "jose", "cli"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
