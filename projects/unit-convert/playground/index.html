@@ -11,12 +11,14 @@
   .wrap { max-width:680px; margin:40px auto; padding:0 18px; }
   h1 { font-size:22px; margin:0 0 4px; }
   .sub { color:var(--muted); margin:0 0 22px; }
-  .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
-  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:14px; }
+  .field { flex:1 1 180px; min-width:0; }
   label { font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
-  input, select { font:15px/1.4 system-ui; padding:9px 11px; border:1px solid var(--border); border-radius:9px; background:#fff; color:var(--text); }
-  input[type=number] { width:160px; }
-  select { min-width:120px; }
+  input, select { width:100%; font:15px/1.4 system-ui; padding:9px 11px; border:1px solid var(--border); border-radius:6px; background:#fff; color:var(--text); }
+  .unit-row { display:grid; grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr); gap:10px; align-items:end; }
+  .icon-button { width:40px; height:40px; padding:0; border:1px solid var(--border); border-radius:6px; background:#fff; color:var(--accent); font-size:22px; line-height:1; cursor:pointer; }
+  .icon-button:hover, .icon-button:focus-visible { border-color:var(--accent); background:#f0f7f4; }
   .result { margin-top:8px; font-size:20px; font-weight:600; color:var(--accent); min-height:28px; word-break:break-word; }
   .hint { color:var(--muted); font-size:12.5px; margin-top:10px; }
   code { background:#eef1f4; padding:1px 6px; border-radius:5px; font-size:12.5px; }
@@ -28,14 +30,15 @@
   <p class="sub">零依赖 · 长度 / 质量 / 温度 / 速度 / 数据 / 时间 / 面积 / 体积 / 能量 / 压强</p>
   <div class="card">
     <div class="row">
-      <div><label>数值</label><input id="value" type="number" value="100" /></div>
-      <div><label>类别</label><select id="category"></select></div>
+      <div class="field"><label for="value">数值</label><input id="value" type="number" inputmode="decimal" step="any" value="100" /></div>
+      <div class="field"><label for="category">类别</label><select id="category"></select></div>
     </div>
-    <div class="row">
-      <div><label>从</label><select id="from"></select></div>
-      <div><label>到</label><select id="to"></select></div>
+    <div class="unit-row">
+      <div class="field"><label for="from">从</label><select id="from"></select></div>
+      <button id="swap" class="icon-button" type="button" title="交换单位" aria-label="交换源单位和目标单位">⇄</button>
+      <div class="field"><label for="to">到</label><select id="to"></select></div>
     </div>
-    <div class="result" id="result">—</div>
+    <div class="result" id="result" aria-live="polite">—</div>
     <p class="hint">数据单位区分二进制 <code>KiB/MiB/GiB</code>（1024）与十进制 <code>KB/MB/GB</code>（1000）。温度走 C/F/K 偏移换算。</p>
   </div>
 </div>
@@ -44,7 +47,7 @@
   import { listCategories, unitsInCategory, convert, formatNumber } from '../src/index.js';
 
   const $ = (id) => document.getElementById(id);
-  const catSel = $('category'), fromSel = $('from'), toSel = $('to'), valEl = $('value'), resEl = $('result');
+  const catSel = $('category'), fromSel = $('from'), toSel = $('to'), valEl = $('value'), resEl = $('result'), swap = $('swap');
 
   for (const c of listCategories()) {
     const o = document.createElement('option'); o.value = c; o.textContent = c; catSel.appendChild(o);
@@ -70,6 +73,12 @@
 
   catSel.addEventListener('change', () => { fillUnits(); update(); });
   [fromSel, toSel, valEl].forEach((el) => el.addEventListener('input', update));
+  swap.addEventListener('click', () => {
+    const from = fromSel.value;
+    fromSel.value = toSel.value;
+    toSel.value = from;
+    update();
+  });
   fillUnits(); update();
 </script>
 </body>

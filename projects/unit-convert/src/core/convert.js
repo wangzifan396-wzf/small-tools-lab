@@ -83,8 +83,9 @@ export function categoryOf(unit) {
 }
 
 export function findUnit(unit) {
-  const cat = categoryOf(unit);
-  return cat ? { category: cat, symbol: unit } : null;
+  const symbol = String(unit || '').trim();
+  const cat = categoryOf(symbol);
+  return cat ? { category: cat, symbol } : null;
 }
 
 function toKelvin(value, from) {

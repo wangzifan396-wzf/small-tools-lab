@@ -291,6 +291,7 @@ const TOOLS = [
     description:
       "Convert across length, mass, temperature, speed, data (decimal + binary), time, area, volume, energy, pressure — for the CLI and the browser.",
     tech: "Node.js CLI · ESM",
+    live: "projects/unit-convert/playground/",
     docs: "projects/unit-convert/README.md",
     featured: false,
   },

@@ -12,6 +12,7 @@ node bin/unit-convert.js 0 C F            # 32 F
 node bin/unit-convert.js 1 MB MiB        # 0.953674316 MiB（十进制 vs 二进制）
 node bin/unit-convert.js --list           # 列出所有类别与单位
 node bin/unit-convert.js --cat length     # 列出某类别的单位
+node bin/unit-convert.js --help
 ```
 
 数据单位区分二进制 `KiB`/`MiB`/`GiB`/`TiB`（1024 进制）与十进制
@@ -30,7 +31,8 @@ convertWithUnit(0, 'C', 'F').formatted;   // "32 F"
 
 ## 浏览器
 
-打开 `playground/index.html`（或 `start` 启动本地服务），即可用两个下拉框实时换算。
+运行 `npm start`，再打开 <http://localhost:4173/>，即可用两个下拉框实时换算。
+托管版本可以从 [Small Tools Lab 目录](https://wangzifan396-wzf.github.io/small-tools-lab/) 打开。
 
 ## 测试
 

@@ -4,8 +4,18 @@ import {
   CATEGORIES, listCategories, unitsInCategory, categoryOf, convert, formatNumber
 } from './core/convert.js';
 
+const VERSION = '1.0.0';
+const USAGE = '用法: unit-convert <数值> <源单位> <目标单位>\n示例: unit-convert 100 km mi\n      unit-convert --list       列出所有类别与单位\n      unit-convert --cat length 列出某类别的单位';
+
 export function run(argv) {
   const args = argv.slice();
+
+  if (args.includes('--help') || args.includes('-h')) {
+    return { code: 0, out: USAGE };
+  }
+  if (args.includes('--version') || args.includes('-v')) {
+    return { code: 0, out: VERSION };
+  }
 
   const listIdx = args.indexOf('--list');
   const catIdx = args.indexOf('--cat');
@@ -27,11 +37,8 @@ export function run(argv) {
   }
 
   // Expect: <value> <from> <to>
-  if (args.length < 3) {
-    return {
-      code: 1,
-      out: '用法: unit-convert <数值> <源单位> <目标单位>\n示例: unit-convert 100 km mi\n      unit-convert --list       列出所有类别与单位\n      unit-convert --cat length 列出某类别的单位'
-    };
+  if (args.length !== 3) {
+    return { code: 2, out: USAGE };
   }
 
   const [valueStr, from, to] = args;

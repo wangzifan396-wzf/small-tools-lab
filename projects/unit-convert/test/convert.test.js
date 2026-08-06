@@ -39,6 +39,7 @@ describe('convert core', () => {
     assert.equal(categoryOf('km'), 'length');
     assert.equal(categoryOf('nope'), null);
     assert.deepEqual(findUnit('lb'), { category: 'mass', symbol: 'lb' });
+    assert.deepEqual(findUnit('  km  '), { category: 'length', symbol: 'km' });
   });
   test('listCategories / unitsInCategory', () => {
     assert.ok(listCategories().includes('temperature'));
@@ -52,6 +53,9 @@ describe('convert core', () => {
     const r = convertWithUnit(100, 'km', 'mi');
     assert.equal(r.unit, 'mi');
     assert.ok(r.formatted.startsWith(formatNumber(r.value)));
+  });
+  test('rejects non-finite numeric input', () => {
+    assert.throws(() => convert('not-a-number', 'm', 'km'), /数值无效/);
   });
 });
 
@@ -73,14 +77,23 @@ describe('cli run', () => {
     assert.equal(r.code, 0);
     assert.ok(r.out.includes('km'));
   });
-  test('missing args prints usage (exit 1)', () => {
+  test('missing args prints usage (exit 2)', () => {
     const r = run(['100', 'km']);
-    assert.equal(r.code, 1);
+    assert.equal(r.code, 2);
     assert.ok(r.out.includes('用法'));
   });
   test('unknown unit prints hint (exit 1)', () => {
     const r = run(['1', 'furlong', 'm']);
     assert.equal(r.code, 1);
     assert.ok(r.out.includes('长度') || r.out.includes('length'));
+  });
+  test('--help and --version use successful exit codes', () => {
+    assert.deepEqual(run(['--version']), { code: 0, out: '1.0.0' });
+    const help = run(['--help']);
+    assert.equal(help.code, 0);
+    assert.ok(help.out.includes('unit-convert'));
+  });
+  test('extra positional arguments are usage errors', () => {
+    assert.equal(run(['1', 'm', 'km', 'extra']).code, 2);
   });
 });

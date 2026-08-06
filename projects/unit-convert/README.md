@@ -13,6 +13,7 @@ node bin/unit-convert.js 0 C F            # 32 F
 node bin/unit-convert.js 1 MB MiB        # 0.953674316 MiB  (decimal vs binary)
 node bin/unit-convert.js --list           # every category and its units
 node bin/unit-convert.js --cat length     # units in one category
+node bin/unit-convert.js --help
 ```
 
 Binary data units (`KiB`/`MiB`/`GiB`/`TiB`) use powers of 1024; decimal
@@ -33,8 +34,9 @@ through a base unit, so adding a new unit is a one-line factor.
 
 ## Browser
 
-Open `playground/index.html` (or `start` to serve it) for a live converter with
-two dropdowns and an instant result.
+Run `npm start`, then open <http://localhost:4173/> for a live converter with
+two dropdowns and an instant result. The hosted version is available from the
+[Small Tools Lab catalog](https://wangzifan396-wzf.github.io/small-tools-lab/).
 
 ## Test
 
