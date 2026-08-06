@@ -1,0 +1,18 @@
+{
+  "name": "cron-describe",
+  "version": "1.0.0",
+  "description": "Zero-dependency cron expression parser + humanizer: turn `分 时 日 月 周` into plain Chinese and list the next run times.",
+  "type": "module",
+  "bin": {
+    "cron-describe": "bin/cron-describe.js"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "start": "node playground/serve.js"
+  },
+  "keywords": ["cron", "schedule", "parser", "cli", "timer"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

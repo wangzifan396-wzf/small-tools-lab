@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>cron-describe · cron 表达式解读</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --border: #e7e4dd; --border-strong: #d8d4ca;
+    --text: #22211e; --text-2: #56534c; --muted: #8b877e;
+    --accent: #bf5b38; --accent-soft: #f8ece7; --ok: #3d8f61;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --border: #232b3a; --border-strong: #34415a;
+      --text: #e9edf5; --text-2: #aab3c6; --muted: #6e788e;
+      --accent: #ff7a59; --accent-soft: #2a1d18; --ok: #5fd0a0;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px;
+    display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 680px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  input[type=text] {
+    flex: 1; min-width: 200px; padding: 11px 13px; border-radius: var(--r);
+    border: 1px solid var(--border); background: var(--panel); color: var(--text);
+    font-family: var(--mono); font-size: 15px;
+  }
+  input[type=number] { width: 84px; padding: 11px 13px; border-radius: var(--r); border: 1px solid var(--border); background: var(--panel); color: var(--text); }
+  button {
+    padding: 11px 18px; border-radius: var(--r); border: 1px solid transparent;
+    background: var(--accent); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  button:hover { filter: brightness(1.05); }
+  .examples { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 18px; }
+  .chip { font-size: 12.5px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--panel); color: var(--text-2); cursor: pointer; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 18px; margin-top: 6px; }
+  .desc { font-size: 16px; font-weight: 600; }
+  .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 16px 0 6px; }
+  ol { margin: 0; padding-left: 20px; }
+  li { font-family: var(--mono); font-size: 13.5px; padding: 2px 0; }
+  .err { color: #c0392b; }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+  code { background: var(--accent-soft); padding: 1px 5px; border-radius: 5px; font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🕑 cron 表达式解读</h1>
+  <p class="sub">把 <code>分 时 日 月 周</code> 变成人话，并算出接下来几次的执行时间。</p>
+  <div class="row">
+    <input id="expr" type="text" value="0 0 * * 1" placeholder="例如 0 0 * * 1" spellcheck="false" />
+    <input id="count" type="number" min="1" max="20" value="5" />
+    <button id="go">解读</button>
+  </div>
+  <div class="examples" id="examples"></div>
+  <div id="out"></div>
+  <p class="foot">零依赖 · 纯前端运行 · 数据不出本机</p>
+</div>
+<script>
+const MONTHS = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+const DOWS = {sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6};
+const DOW_ZH = ['日','一','二','三','四','五','六'];
+const MACROS = {'@yearly':'0 0 1 1 *','@annually':'0 0 1 1 *','@monthly':'0 0 1 * *','@weekly':'0 0 * * 0','@daily':'0 0 * * *','@midnight':'0 0 * * *','@hourly':'0 * * * *'};
+function resolveName(tok, map){ if(/^\d+$/.test(tok)) return parseInt(tok,10); const k=tok.toLowerCase(); if(map&&k in map) return map[k]; return null; }
+function parseField(spec,min,max,map){
+  const out=new Set();
+  for(const partRaw of spec.split(',')){
+    const part=partRaw.trim(); if(part==='') return null;
+    let step=1,range=part; const slash=part.indexOf('/');
+    if(slash!==-1){ const st=parseInt(part.slice(slash+1).trim(),10); if(!Number.isInteger(st)||st<=0) return null; range=part.slice(0,slash).trim()||'*'; }
+    let lo,hi;
+    if(range==='*'){lo=min;hi=max;}
+    else{ const dash=range.indexOf('-');
+      if(dash!==-1){lo=resolveName(range.slice(0,dash).trim(),map);hi=resolveName(range.slice(dash+1).trim(),map);}
+      else{const v=resolveName(range,map);lo=hi=v;}
+      if(lo==null||hi==null) return null; }
+    if(lo<min||hi>max||lo>hi) return null;
+    for(let x=lo;x<=hi;x+=step) out.add(x);
+  }
+  return out;
+}
+function parse(expr){
+  let e=String(expr==null?'':expr).trim().toLowerCase();
+  if(e==='') return {ok:false,error:'表达式为空'};
+  if(e in MACROS) e=MACROS[e];
+  const fields=e.split(/\s+/).filter(Boolean);
+  if(fields.length!==5&&fields.length!==6) return {ok:false,error:'应为 5 段或 6 段'};
+  let sec=null,minute,hour,dom,month,dow;
+  if(fields.length===6){ sec=parseField(fields[0],0,59,null); if(!sec) return {ok:false,error:'秒字段非法'}; [minute,hour,dom,month,dow]=fields.slice(1); }
+  else { [minute,hour,dom,month,dow]=fields; }
+  const fMinute=parseField(minute,0,59,null),fHour=parseField(hour,0,23,null),fDom=parseField(dom,1,31,null),fMonth=parseField(month,1,12,MONTHS),fDow=parseField(dow,0,7,DOWS);
+  if(!fMinute) return {ok:false,error:'分字段非法：'+minute};
+  if(!fHour) return {ok:false,error:'时字段非法：'+hour};
+  if(!fDom) return {ok:false,error:'日字段非法：'+dom};
+  if(!fMonth) return {ok:false,error:'月字段非法：'+month};
+  if(!fDow) return {ok:false,error:'周字段非法：'+dow};
+  return {ok:true,fields:{sec,minute:fMinute,hour:fHour,dom:fDom,month:fMonth,dow:fDow},hasSeconds:fields.length===6,stars:{minute:minute==='*',hour:hour==='*',dom:dom==='*',month:month==='*',dow:dow==='*'}};
+}
+function descField(set,min,max,j){ const a=[...set].sort((x,y)=>x-y); if(a.length===max-min+1) return null; return a.join(j); }
+function describe(p){
+  const f=p.fields,parts=[];
+  const months=descField(f.month,1,12,'、'); if(months) parts.push('每年 '+months+' 月');
+  const doms=descField(f.dom,1,31,'、'); if(doms) parts.push(doms+' 号');
+  const dows=descField(f.dow,0,7,'、');
+  if(dows){ const names=dows.split('、').map(n=>'周'+DOW_ZH[parseInt(n,10)%7]).join('、'); parts.push(names); }
+  if(!months&&!doms&&!dows) parts.push('每天');
+  const mins=descField(f.minute,0,59,'、'),hrs=descField(f.hour,0,23,'、');
+  let time;
+  if(!hrs&&!mins) time='每分钟';
+  else if(!hrs&&mins) time='每小时的第 '+mins+' 分';
+  else if(hrs&&!mins) time='每天 '+hrs+' 点整';
+  else time='每天 '+hrs+' 点 '+mins+' 分';
+  if(f.sec&&f.sec.size!==60) time+=' '+descField(f.sec,0,59,'、')+' 秒';
+  parts.push(time+' 执行');
+  let zh=parts.join('，')+'。';
+  if(!p.stars.dom&&!p.stars.dow) zh+='（日 与 周 同时限定为「或」关系）';
+  return zh;
+}
+function matches(date,f,stars){
+  if(f.sec&&!f.sec.has(date.getSeconds())) return false;
+  if(!f.minute.has(date.getMinutes())) return false;
+  if(!f.hour.has(date.getHours())) return false;
+  if(!f.month.has(date.getMonth()+1)) return false;
+  const dow=date.getDay(),dowOk=f.dow.has(dow)||(dow===0&&f.dow.has(7)),domOk=f.dom.has(date.getDate());
+  let dayOk; if(stars.dom&&stars.dow) dayOk=true; else if(stars.dom) dayOk=dowOk; else if(stars.dow) dayOk=domOk; else dayOk=domOk||dowOk;
+  return dayOk;
+}
+function nextRuns(expr,count,from){
+  const p=parse(expr); if(!p.ok) return {ok:false,error:p.error};
+  const start=new Date(from); start.setSeconds(0,0); start.setMinutes(start.getMinutes()+1);
+  const stepMs=p.hasSeconds?1000:60000, maxIter=p.hasSeconds?20000000:4000000;
+  const out=[]; let cur=new Date(start.getTime()),g=0;
+  while(out.length<count&&g<maxIter){ if(matches(cur,p.fields,p.stars)) out.push(new Date(cur.getTime())); cur=new Date(cur.getTime()+stepMs); g++; }
+  return {ok:true,runs:out};
+}
+function fmt(d){ const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+function render(){
+  const expr=document.getElementById('expr').value.trim();
+  const count=Math.max(1,Math.min(20,parseInt(document.getElementById('count').value,10)||5));
+  const out=document.getElementById('out');
+  const p=parse(expr);
+  if(!p.ok){ out.innerHTML='<div class="card err">解析失败：'+p.error+'</div>'; return; }
+  const nr=nextRuns(expr,count,Date.now());
+  let html='<div class="card"><div class="desc">'+describe(p)+'</div>';
+  html+='<div class="label">下次运行（最多 '+count+' 次）</div>';
+  if(nr.ok&&nr.runs.length){
+    html+='<ol>'+nr.runs.map(d=>'<li>'+fmt(d)+'</li>').join('')+'</ol>';
+  } else { html+='<div class="err">'+(nr.error||'未找到')+'</div>'; }
+  html+='</div>';
+  out.innerHTML=html;
+}
+const EX=['0 0 * * 1','0 0 1 * *','*/15 * * * *','0 9-17 * * 1-5','30 8 * * 1,3,5'];
+const exWrap=document.getElementById('examples');
+EX.forEach(e=>{ const c=document.createElement('span'); c.className='chip'; c.textContent=e; c.onclick=()=>{document.getElementById('expr').value=e;render();}; exWrap.appendChild(c); });
+document.getElementById('go').onclick=render;
+document.getElementById('expr').addEventListener('keydown',e=>{ if(e.key==='Enter') render(); });
+render();
+</script>
+</body>
+</html>

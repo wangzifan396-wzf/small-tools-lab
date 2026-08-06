@@ -329,6 +329,18 @@ const TOOLS = [
     docs: "projects/text-forge/README.md",
     featured: false,
   },
+  {
+    id: "cron-describe",
+    name: "Cron Describe",
+    category: "browser",
+    label: "Cron 解读",
+    description:
+      "Zero-dependency cron expression parser + humanizer: turn `分 时 日 月 周` into plain Chinese and list the next run times — in the browser, no build step.",
+    tech: "Browser · Cron",
+    live: "projects/cron-describe/",
+    docs: "projects/cron-describe/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {
