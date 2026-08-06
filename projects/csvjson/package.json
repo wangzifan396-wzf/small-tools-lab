@@ -1,0 +1,7 @@
+{
+  "name": "csvjson",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CSV 与 JSON 互转：逐字符解析、正确处理引号/逗号/换行，分隔符自动识别。",
+  "license": "MIT"
+}

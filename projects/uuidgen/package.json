@@ -1,0 +1,7 @@
+{
+  "name": "uuidgen",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RFC4122 v4 UUID 批量生成：密码学随机数优先，可切换连字符与大写。",
+  "license": "MIT"
+}

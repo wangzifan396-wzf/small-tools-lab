@@ -1,0 +1,7 @@
+{
+  "name": "wordcount",
+  "version": "1.0.0",
+  "private": true,
+  "description": "中英混排文本统计：字符、词、行、段落、句子与预计阅读时长。",
+  "license": "MIT"
+}

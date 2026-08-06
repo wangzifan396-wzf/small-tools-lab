@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Word Count · 文本统计</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --border: #e7e4dd; --text: #22211e; --text-2: #56534c;
+    --muted: #8b877e; --accent: #bf5b38; --accent-soft: #f8ece7;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --border: #232b3a; --text: #e9edf5; --text-2: #aab3c6;
+      --muted: #6e788e; --accent: #ff7a59; --accent-soft: #2a1d18;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px; display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 720px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 18px; margin-top: 12px; }
+  .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8px; }
+  textarea {
+    width: 100%; min-height: 180px; padding: 12px 13px; border-radius: var(--r);
+    border: 1px solid var(--border); background: var(--panel); color: var(--text);
+    font-family: var(--mono); font-size: 14px; line-height: 1.6; resize: vertical;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 12px; }
+  .stat { background: var(--accent-soft); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; }
+  .stat .n { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); }
+  .stat .t { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .ops { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  button {
+    padding: 9px 16px; border-radius: var(--r); border: 1px solid transparent;
+    background: var(--accent); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  button:hover { filter: brightness(1.05); }
+  button.ghost { background: var(--panel); color: var(--text-2); border: 1px solid var(--border); }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔢 Word Count · 文本统计</h1>
+  <p class="sub">实时统计字数、词数、行数、段落、中英混排与预计阅读时长。纯前端，数据不出本机。</p>
+
+  <div class="card">
+    <div class="label">输入文本</div>
+    <textarea id="txt" placeholder="在这里粘贴或输入文本…"></textarea>
+    <div class="ops">
+      <button id="clear" class="ghost">清空</button>
+      <button id="sample" class="ghost">示例</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">统计结果</div>
+    <div class="grid" id="stats"></div>
+  </div>
+
+  <p class="foot">零依赖 · 纯前端 · 数据不出本机</p>
+</div>
+<script>
+var CJK = /[一-鿿㐀-䶿豈-﫿]/g;
+function count(text) {
+  var chars = text.length;
+  var charsNoSpace = text.replace(/\s/g, "").length;
+  var latin = (text.match(/[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*/g) || []).length;
+  var cjk = (text.match(CJK) || []).length;
+  var lines = text === "" ? 0 : text.split(/\n/).length;
+  var trimmed = text.trim();
+  var paras = trimmed === "" ? 0 : (trimmed.match(/\n\s*\n/g) || []).length + 1;
+  var sentences = (text.match(/[。！？!?；;]+/g) || []).length;
+  // 阅读时长：中文按 ~300 字/分，英文按 ~200 词/分
+  var mins = cjk / 300 + latin / 200;
+  var readMin = Math.max(mins, 0);
+  var readStr = readMin < 1
+    ? Math.round(readMin * 60) + " 秒"
+    : (readMin < 60 ? readMin.toFixed(1) + " 分钟" : Math.floor(readMin / 60) + " 小时 " + Math.round(readMin % 60) + " 分");
+  return [
+    { t: "字符（含空格）", n: chars },
+    { t: "字符（去空格）", n: charsNoSpace },
+    { t: "中文汉字", n: cjk },
+    { t: "英文词", n: latin },
+    { t: "行数", n: lines },
+    { t: "段落", n: paras },
+    { t: "句子", n: sentences },
+    { t: "预计阅读", n: readStr, raw: true }
+  ];
+}
+function render() {
+  var text = document.getElementById("txt").value;
+  var box = document.getElementById("stats");
+  if (!text) { box.innerHTML = '<div class="stat"><div class="n">0</div><div class="t">等待输入…</div></div>'; return; }
+  box.innerHTML = count(text).map(function (s) {
+    return '<div class="stat"><div class="n">' + s.n + '</div><div class="t">' + s.t + "</div></div>";
+  }).join("");
+}
+document.getElementById("txt").addEventListener("input", render);
+document.getElementById("clear").onclick = function () { document.getElementById("txt").value = ""; render(); };
+document.getElementById("sample").onclick = function () {
+  document.getElementById("txt").value =
+    "Agenite 是一个运行在你自己电脑上的本地智能体。它能读写文件、执行命令、联网查资料，并把每一步都摊开给你看。\n\n" +
+    "The agent loops: think, call a tool, observe, repeat — until the task is done or you stop it.";
+  render();
+};
+render();
+</script>
+</body>
+</html>

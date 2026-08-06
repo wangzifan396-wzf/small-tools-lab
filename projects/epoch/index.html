@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Epoch · 时间戳转换</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --border: #e7e4dd; --text: #22211e; --text-2: #56534c;
+    --muted: #8b877e; --accent: #bf5b38; --accent-soft: #f8ece7;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --border: #232b3a; --text: #e9edf5; --text-2: #aab3c6;
+      --muted: #6e788e; --accent: #ff7a59; --accent-soft: #2a1d18;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px; display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 720px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 18px; margin-top: 12px; }
+  .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  input[type=text], input[type=number], select {
+    width: 100%; padding: 11px 13px; border-radius: var(--r); border: 1px solid var(--border);
+    background: var(--panel); color: var(--text); font-family: var(--mono); font-size: 15px;
+  }
+  select { width: auto; }
+  button {
+    padding: 11px 18px; border-radius: var(--r); border: 1px solid transparent;
+    background: var(--accent); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  button:hover { filter: brightness(1.05); }
+  button.ghost { background: var(--panel); color: var(--text-2); border: 1px solid var(--border); }
+  .mini { padding: 5px 10px; font-size: 12px; font-weight: 500; }
+  .ops { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .kv { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
+  .kv:last-child { border-bottom: none; }
+  .kv .k { color: var(--muted); flex: none; }
+  .kv .v { font-family: var(--mono); text-align: right; word-break: break-all; }
+  .now { font-family: var(--mono); font-size: 13px; color: var(--text-2); }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+  code { background: var(--accent-soft); padding: 1px 5px; border-radius: 5px; font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🕓 Epoch · 时间戳转换</h1>
+  <p class="sub">Unix 时间戳 ⇄ 日期：本地 / UTC / ISO 8601，自动识别「秒」或「毫秒」，并显示相对时长。</p>
+
+  <div class="card">
+    <div class="label">当前时间</div>
+    <div class="now" id="now">—</div>
+  </div>
+
+  <div class="card">
+    <div class="label">时间戳 → 日期</div>
+    <div class="row">
+      <input id="ts" type="text" placeholder="例如 1717000000 或 1717000000000" spellcheck="false" />
+      <select id="unit">
+        <option value="auto">自动</option>
+        <option value="s">秒</option>
+        <option value="ms">毫秒</option>
+      </select>
+    </div>
+    <div class="ops">
+      <button id="conv" class="ghost">转换</button>
+      <button id="now2ts" class="ghost mini">用当前时间</button>
+    </div>
+    <div id="tsOut" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card">
+    <div class="label">日期 → 时间戳</div>
+    <div class="row">
+      <input id="dt" type="text" placeholder="例如 2024-05-30 12:00:00" spellcheck="false" />
+    </div>
+    <div class="ops">
+      <button id="now2dt" class="ghost mini">用当前时间</button>
+    </div>
+    <div id="dtOut" style="margin-top:12px"></div>
+  </div>
+
+  <p class="foot">零依赖 · 纯前端 · 数据不出本机</p>
+</div>
+<script>
+function pad(n) { return String(n).padStart(2, "0"); }
+function fmtLocal(d) {
+  return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " " +
+    pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+}
+function fmtUTC(d) {
+  return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate()) + " " +
+    pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()) + ":" + pad(d.getUTCSeconds()) + " UTC";
+}
+function toISO(d) { return d.toISOString(); }
+function rel(ms) {
+  const s = Math.floor(Math.abs(ms) / 1000);
+  const sign = ms < 0 ? "前" : "后";
+  if (s < 60) return s + " 秒" + sign;
+  const m = Math.floor(s / 60); if (m < 60) return m + " 分钟" + sign;
+  const h = Math.floor(m / 60); if (h < 24) return h + " 小时" + sign;
+  const d = Math.floor(h / 24); if (d < 30) return d + " 天" + sign;
+  const mo = Math.floor(d / 30); if (mo < 12) return mo + " 个月" + sign;
+  return Math.floor(mo / 12) + " 年" + sign;
+}
+function unitOf(v, sel) {
+  if (sel !== "auto") return sel;
+  return String(v).replace(".", "").length >= 13 ? "ms" : "s";
+}
+function kv(k, v) {
+  return '<div class="kv"><span class="k">' + k + '</span><span class="v">' + v + "</span></div>";
+}
+function renderTS() {
+  const raw = document.getElementById("ts").value.trim();
+  const out = document.getElementById("tsOut");
+  if (!raw) { out.innerHTML = ""; return; }
+  const v = Number(raw);
+  if (!Number.isFinite(v)) {
+    out.innerHTML = kv("错误", "请输入数字时间戳");
+    return;
+  }
+  const u = unitOf(v, document.getElementById("unit").value);
+  const ms = u === "ms" ? v : v * 1000;
+  const d = new Date(ms);
+  if (isNaN(d.getTime())) {
+    out.innerHTML = kv("错误", "时间戳超出范围");
+    return;
+  }
+  out.innerHTML =
+    kv("本地时间", fmtLocal(d)) +
+    kv("UTC", fmtUTC(d)) +
+    kv("ISO 8601", toISO(d)) +
+    kv("识别单位", u === "ms" ? "毫秒" : "秒") +
+    kv("相对现在", rel(d.getTime() - Date.now()));
+}
+function parseDateTime(s) {
+  s = s.trim();
+  let iso = s;
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) iso = s.replace(" ", "T");
+  const d = new Date(iso);
+  if (!isNaN(d.getTime())) return d;
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})$/);
+  if (m) {
+    const d2 = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], 0);
+    if (!isNaN(d2.getTime())) return d2;
+  }
+  return null;
+}
+function renderDT() {
+  const raw = document.getElementById("dt").value.trim();
+  const out = document.getElementById("dtOut");
+  if (!raw) { out.innerHTML = ""; return; }
+  const d = parseDateTime(raw);
+  if (!d) {
+    out.innerHTML = kv("错误", "无法解析该日期（试试 2024-05-30 12:00:00）");
+    return;
+  }
+  const ms = d.getTime();
+  out.innerHTML =
+    kv("秒 (s)", String(Math.floor(ms / 1000))) +
+    kv("毫秒 (ms)", String(ms)) +
+    kv("本地时间", fmtLocal(d)) +
+    kv("UTC", fmtUTC(d)) +
+    kv("ISO 8601", toISO(d));
+}
+function tick() {
+  const d = new Date();
+  document.getElementById("now").textContent =
+    fmtLocal(d) + "  ·  " + Math.floor(d.getTime() / 1000) + " s  ·  " + d.getTime() + " ms";
+}
+document.getElementById("conv").onclick = renderTS;
+document.getElementById("ts").addEventListener("input", renderTS);
+document.getElementById("unit").addEventListener("change", renderTS);
+document.getElementById("dt").addEventListener("input", renderDT);
+document.getElementById("now2ts").onclick = function () {
+  document.getElementById("ts").value = String(Date.now());
+  renderTS();
+};
+document.getElementById("now2dt").onclick = function () {
+  document.getElementById("dt").value = fmtLocal(new Date());
+  renderDT();
+};
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "epoch",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Unix 时间戳与日期互转：本地 / UTC / ISO 8601，自动识别秒或毫秒，显示相对时长。",
+  "license": "MIT"
+}

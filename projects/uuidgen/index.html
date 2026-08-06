@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UUID Gen · 唯一标识生成</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --border: #e7e4dd; --text: #22211e; --text-2: #56534c;
+    --muted: #8b877e; --accent: #bf5b38; --accent-soft: #f8ece7; --ok: #3d8f61;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --border: #232b3a; --text: #e9edf5; --text-2: #aab3c6;
+      --muted: #6e788e; --accent: #ff7a59; --accent-soft: #2a1d18; --ok: #5fd0a0;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px; display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 720px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 18px; margin-top: 12px; }
+  .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  textarea {
+    width: 100%; min-height: 160px; padding: 12px 13px; border-radius: var(--r);
+    border: 1px solid var(--border); background: var(--panel); color: var(--text);
+    font-family: var(--mono); font-size: 14px; line-height: 1.7; resize: vertical;
+  }
+  input[type=number], select {
+    padding: 9px 12px; border-radius: var(--r); border: 1px solid var(--border);
+    background: var(--panel); color: var(--text); font-size: 13px;
+  }
+  label.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); cursor: pointer; }
+  button {
+    padding: 9px 16px; border-radius: var(--r); border: 1px solid transparent;
+    background: var(--accent); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  button:hover { filter: brightness(1.05); }
+  button.ghost { background: var(--panel); color: var(--text-2); border: 1px solid var(--border); }
+  .ops { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+  #msg { margin-top: 10px; font-size: 13px; }
+  #msg.ok { color: var(--ok); }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🆔 UUID Gen · 唯一标识生成</h1>
+  <p class="sub">批量生成 RFC4122 v4 UUID。优先使用浏览器密码学随机数，不可用时回退。纯前端，数据不出本机。</p>
+
+  <div class="card">
+    <div class="row">
+      <label class="chk">数量
+        <input id="count" type="number" min="1" max="200" value="4" />
+      </label>
+      <label class="chk"><input type="checkbox" id="dashes" checked /> 含连字符</label>
+      <label class="chk"><input type="checkbox" id="upper" /> 大写</label>
+    </div>
+    <div class="ops">
+      <button id="gen">生成</button>
+      <button id="copy" class="ghost">复制</button>
+    </div>
+    <div id="msg"></div>
+  </div>
+
+  <div class="card">
+    <div class="label">结果</div>
+    <textarea id="out" spellcheck="false" readonly placeholder="生成结果将显示在这里…"></textarea>
+  </div>
+
+  <p class="foot">零依赖 · 纯前端 · 数据不出本机</p>
+</div>
+<script>
+function hex16() {
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    var b = new Uint8Array(16);
+    crypto.getRandomValues(b);
+    b[6] = (b[6] & 0x0f) | 0x40;
+    b[8] = (b[8] & 0x3f) | 0x80;
+    var s = "";
+    for (var i = 0; i < 16; i++) s += ("0" + b[i].toString(16)).slice(-2);
+    return s;
+  }
+  // Last-resort fallback (not cryptographically strong): Math.random.
+  var t = "";
+  for (var k = 0; k < 32; k++) t += Math.floor(Math.random() * 16).toString(16);
+  return t.slice(0, 12) + "4" + t.slice(13, 16) + "8" + t.slice(17, 32);
+}
+function uuidv4() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    try { return crypto.randomUUID(); } catch (e) { /* fall through */ }
+  }
+  var h = hex16();
+  return (h.slice(0, 8) + "-" + h.slice(8, 12) + "-" + h.slice(12, 16) + "-" + h.slice(16, 20) + "-" + h.slice(20, 32));
+}
+function run() {
+  var msg = document.getElementById("msg");
+  var out = document.getElementById("out");
+  msg.className = ""; msg.textContent = "";
+  var n = parseInt(document.getElementById("count").value, 10);
+  if (!Number.isFinite(n) || n < 1) n = 1;
+  if (n > 200) n = 200;
+  var dashes = document.getElementById("dashes").checked;
+  var upper = document.getElementById("upper").checked;
+  var arr = [];
+  for (var i = 0; i < n; i++) {
+    var u = uuidv4();
+    if (!dashes) u = u.replace(/-/g, "");
+    if (upper) u = u.toUpperCase();
+    arr.push(u);
+  }
+  out.value = arr.join("\n");
+  msg.className = "ok"; msg.textContent = "已生成 " + n + " 个 UUID";
+}
+function copy() {
+  var v = document.getElementById("out").value;
+  if (!v) return;
+  navigator.clipboard.writeText(v).then(function () {
+    var m = document.getElementById("msg"); m.className = "ok"; m.textContent = "已复制";
+  }).catch(function () { alert(v); });
+}
+document.getElementById("gen").onclick = run;
+document.getElementById("copy").onclick = copy;
+run();
+</script>
+</body>
+</html>

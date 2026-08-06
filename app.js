@@ -379,6 +379,54 @@ const TOOLS = [
     docs: "projects/radix/README.md",
     featured: false,
   },
+  {
+    id: "epoch",
+    name: "Epoch",
+    category: "browser",
+    label: "时间戳转换",
+    description:
+      "Zero-dependency Unix timestamp ⇄ date converter: local / UTC / ISO 8601, auto-detect seconds vs milliseconds, and show relative duration — in the browser, no build step.",
+    tech: "Browser · Date",
+    live: "projects/epoch/",
+    docs: "projects/epoch/README.md",
+    featured: false,
+  },
+  {
+    id: "wordcount",
+    name: "Word Count",
+    category: "browser",
+    label: "文本统计",
+    description:
+      "Zero-dependency text statistics for mixed CJK + Latin text: characters, words, lines, paragraphs, sentences, and an estimated reading time — in the browser, no build step.",
+    tech: "Browser · Unicode",
+    live: "projects/wordcount/",
+    docs: "projects/wordcount/README.md",
+    featured: false,
+  },
+  {
+    id: "csvjson",
+    name: "CSV ⇄ JSON",
+    category: "browser",
+    label: "表格转换",
+    description:
+      "Zero-dependency CSV ⇄ JSON converter with a correct quoted-field parser (commas / newlines / quotes), auto-detected delimiters, and RFC4180 escaping — in the browser, no build step.",
+    tech: "Browser · Parser",
+    live: "projects/csvjson/",
+    docs: "projects/csvjson/README.md",
+    featured: false,
+  },
+  {
+    id: "uuidgen",
+    name: "UUID Gen",
+    category: "browser",
+    label: "唯一标识生成",
+    description:
+      "Zero-dependency RFC4122 v4 UUID generator: batch up to 200, toggle dashes and uppercase, crypto-random when available — in the browser, no build step.",
+    tech: "Browser · Crypto",
+    live: "projects/uuidgen/",
+    docs: "projects/uuidgen/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {
