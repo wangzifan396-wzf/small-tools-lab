@@ -21,7 +21,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test",
     "demo": "node bin/quanty.js bytes 1536 && node bin/quanty.js compact 1500000 --style zh && node bin/quanty.js ordinal 22 --lang zh",
     "playground": "node playground/serve.js"
   },

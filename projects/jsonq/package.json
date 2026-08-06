@@ -21,7 +21,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test",
     "demo": "node bin/jsonq.js get '{\"a\":{\"b\":[10,20]}}' a.b.0 && node bin/jsonq.js filter '[{\"n\":3},{\"n\":1}]' n gt 2",
     "playground": "node playground/serve.js"
   },

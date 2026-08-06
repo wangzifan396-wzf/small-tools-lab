@@ -28,8 +28,8 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
-    "test:watch": "node --test --watch \"test/*.test.js\"",
+    "test": "node --test",
+    "test:watch": "node --test --watch",
     "demo": "node bin/cronly.js next \"0 9 * * 1-5\" --count 5",
     "playground": "node playground/serve.js"
   },

@@ -4,7 +4,7 @@
   "description": "Local-first hand-drawn whiteboard. Infinite canvas, zero dependencies, works offline — data never leaves your device.",
   "type": "module",
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test",
     "serve": "node serve.js",
     "build": "node build.js",
     "demo": "node serve.js"

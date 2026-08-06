@@ -4,7 +4,7 @@
   "description": "Local-first Markdown notes & knowledge base. Zero dependencies, works offline, data stays on your device.",
   "type": "module",
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test",
     "serve": "node serve.js",
     "build": "node build.js",
     "demo": "node serve.js"

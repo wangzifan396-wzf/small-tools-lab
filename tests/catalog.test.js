@@ -34,3 +34,19 @@ test("search and category filtering are deterministic", () => {
 test("cards expose commands as links without inline handlers", () => {
   const html = toolCard(TOOLS[0]); assert.match(html, /Open tool/); assert.match(html, /href=/); assert.doesNotMatch(html, /onclick=/);
 });
+
+test("project test scripts avoid shell-dependent quoted globs", () => {
+  const projectsRoot = path.join(root, "projects");
+  for (const entry of fs.readdirSync(projectsRoot, { withFileTypes: true })) {
+    const packagePath = path.join(projectsRoot, entry.name, "package.json");
+    if (!entry.isDirectory() || !fs.existsSync(packagePath)) continue;
+    const scripts = JSON.parse(fs.readFileSync(packagePath, "utf8")).scripts || {};
+    for (const [name, script] of Object.entries(scripts)) {
+      assert.doesNotMatch(
+        script,
+        /node\s+--test(?:\s+--watch)?\s+["'][^"']*[*?][^"']*["']/,
+        `${entry.name} ${name} uses a quoted test glob that is not portable across shells`,
+      );
+    }
+  }
+});

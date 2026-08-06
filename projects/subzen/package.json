@@ -28,8 +28,8 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
-    "test:watch": "node --test --watch \"test/*.test.js\"",
+    "test": "node --test",
+    "test:watch": "node --test --watch",
     "lint:self": "node bin/subzen.js lint examples/messy.zh.srt || true",
     "demo": "node bin/subzen.js stats examples/messy.zh.srt",
     "playground": "node playground/serve.js"
