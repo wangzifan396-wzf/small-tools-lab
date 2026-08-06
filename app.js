@@ -327,6 +327,7 @@ const TOOLS = [
     description:
       "Zero-dependency text toolkit: slugify, case conversion, Unicode normalization, diacritic removal, full/half-width conversion, and whitespace cleaning — for the CLI and the browser.",
     tech: "Node.js CLI · Unicode",
+    live: "projects/text-forge/",
     docs: "projects/text-forge/README.md",
     featured: false,
   },

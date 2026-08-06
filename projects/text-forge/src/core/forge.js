@@ -14,13 +14,15 @@ function splitWords(s) {
 
 export function slugify(input, opts = {}) {
   const { lower = true, sep = '-' } = opts;
+  if (typeof sep !== 'string' || sep.length === 0) throw new Error('sep 必须是非空字符串');
+  const escapedSep = sep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   let s = String(input == null ? '' : input);
   s = s.normalize('NFKC');
   if (lower) s = s.toLowerCase();
   // keep ASCII alphanumerics + CJK; replace everything else with the separator
-  s = s.replace(new RegExp(`[^a-z0-9${CJK}]`, 'gi'), sep);
-  s = s.replace(new RegExp(sep + '+', 'g'), sep);
-  s = s.replace(new RegExp(`^${sep}+|${sep}+$`, 'g'), '');
+  s = s.replace(new RegExp(`[^a-z0-9${CJK}]`, 'gi'), () => sep);
+  s = s.replace(new RegExp(`(?:${escapedSep})+`, 'g'), () => sep);
+  s = s.replace(new RegExp(`^(?:${escapedSep})+|(?:${escapedSep})+$`, 'g'), '');
   return s;
 }
 

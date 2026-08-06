@@ -1,143 +1,81 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Regex Visualizer · 正则可视化</title>
-<style>
-  :root { --bg:#f7f8fa; --card:#fff; --border:#e3e6eb; --text:#1f2430; --muted:#6b7280; --accent:#24735c; }
-  * { box-sizing: border-box; }
-  body { margin:0; font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
-  .wrap { max-width:760px; margin:40px auto; padding:0 18px; }
-  h1 { font-size:22px; margin:0 0 4px; }
-  .sub { color:var(--muted); margin:0 0 22px; }
-  .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.04); margin-bottom:16px; }
-  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
-  label { font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
-  input { font:15px/1.4 system-ui; padding:9px 11px; border:1px solid var(--border); border-radius:9px; background:#fff; color:var(--text); width:100%; }
-  input.flags { width:120px; }
-  .result { margin-top:8px; font-size:15px; color:var(--text); white-space:pre-wrap; word-break:break-word; }
-  .explain { list-style:none; padding:0; margin:0; }
-  .explain li { padding:6px 0; border-bottom:1px dashed var(--border); display:flex; gap:10px; }
-  .explain .raw { font-family:ui-monospace,Menlo,Consolas,monospace; background:#eef1f4; padding:1px 7px; border-radius:6px; color:var(--accent); white-space:nowrap; }
-  .explain .kind { font-size:11px; color:#fff; background:var(--muted); border-radius:5px; padding:1px 6px; align-self:center; }
-  .hint { color:var(--muted); font-size:12.5px; margin-top:10px; }
-  code { background:#eef1f4; padding:1px 6px; border-radius:5px; font-size:12.5px; }
-  mark { background:#ffe39a; padding:0 2px; border-radius:3px; }
-  .count { font-weight:600; color:var(--accent); }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Regex Visualizer · 正则可视化</title>
+  <style>
+    :root { --bg:#f4f6f7; --surface:#fff; --border:#d8dee2; --text:#17201d; --muted:#60706a; --accent:#176b52; --amber:#fff0bd; --danger:#b42318; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { width:min(940px,calc(100% - 36px)); margin:36px auto; }
+    h1 { margin:0; font-size:24px; }
+    .sub { margin:4px 0 22px; color:var(--muted); }
+    .tool { padding:20px; border:1px solid var(--border); border-radius:8px; background:var(--surface); box-shadow:0 1px 3px rgb(0 0 0 / 5%); }
+    .pattern-row { display:grid; grid-template-columns:minmax(0,1fr) 130px; gap:12px; }
+    label { display:block; margin-bottom:5px; color:var(--muted); font-size:12px; }
+    input,textarea { width:100%; border:1px solid var(--border); border-radius:6px; background:#fff; color:var(--text); font:15px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace; }
+    input { height:40px; padding:0 10px; }
+    textarea { min-height:120px; margin-bottom:14px; padding:10px; resize:vertical; }
+    .error { min-height:22px; color:var(--danger); }
+    .summary { display:flex; align-items:baseline; gap:8px; margin:12px 0; }
+    .summary strong { color:var(--accent); font-size:24px; }
+    .results { display:grid; grid-template-columns:1fr 1fr; gap:22px; border-top:1px solid var(--border); padding-top:18px; }
+    .results h2 { margin:0 0 10px; font-size:15px; }
+    .tokens { max-height:320px; margin:0; padding:0; overflow:auto; list-style:none; }
+    .tokens li { display:grid; grid-template-columns:auto auto 1fr; gap:8px; align-items:start; padding:7px 0; border-bottom:1px solid #edf0f1; }
+    .raw { padding:1px 6px; border-radius:4px; background:#edf3f0; color:var(--accent); font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+    .kind { padding:2px 5px; border-radius:4px; background:#687872; color:#fff; font-size:10px; text-transform:uppercase; }
+    .highlight { min-height:96px; padding:12px; border:1px solid var(--border); border-radius:6px; background:#fff; white-space:pre-wrap; overflow-wrap:anywhere; }
+    mark { border-radius:3px; background:var(--amber); padding:1px 2px; }
+    .privacy { margin:14px 0 0; color:var(--muted); font-size:12px; }
+    @media (max-width:680px) { .wrap { margin:24px auto; } .pattern-row,.results { grid-template-columns:1fr; } .tokens { max-height:240px; } }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Regex Visualizer · 正则可视化</h1>
-  <p class="sub">零依赖 · 正则解析说明 + 实时匹配高亮</p>
-
-  <div class="card">
-    <div class="row">
-      <div style="flex:1"><label>正则 pattern</label><input id="pattern" value="\b(\w+)@(\w+)\.\w+\b" /></div>
-      <div><label>flags</label><input id="flags" class="flags" value="g" /></div>
-    </div>
-    <div class="row">
-      <div style="flex:1"><label>测试文本</label><input id="text" value="联系 alice@example.com 或 bob@test.org 试试" /></div>
-    </div>
-    <div class="result" id="explainBox"></div>
-  </div>
-
-  <div class="card">
-    <div class="result"><span class="count" id="count">0</span> 处匹配</div>
-    <div class="result" id="highlightBox"></div>
-    <p class="hint">说明：<code>g</code> 标志决定是否全局匹配；高亮文本已做 HTML 转义，注入安全。</p>
-  </div>
-</div>
-
-<script>
-// ---- inlined core (mirror of src/core/regex.js; works over file://) ----
-const ESCAPE_MEANINGS = {
-  d:'任意数字 [0-9]', D:'任意非数字 [^0-9]', w:'任意单词字符 [A-Za-z0-9_]', W:'任意非单词字符',
-  s:'任意空白字符', S:'任意非空白字符', b:'单词边界（anchor）', B:'非单词边界（anchor）',
-  n:'换行符 \\\\n', r:'回车符 \\\\r', t:'制表符 \\\\t', f:'换页符 \\\\f', v:'垂直制表符 \\\\v', '0':'NUL 字符'
-};
-function explain(pattern, flags='') {
-  try { new RegExp(pattern, flags); } catch (e) { return { error: e.message }; }
-  const tokens=[]; const n=pattern.length; let i=0;
-  while (i<n) {
-    const c=pattern[i];
-    if (c==='\\\\') {
-      const next=pattern[i+1];
-      if (next===undefined){ tokens.push({raw:'\\\\',kind:'literal',meaning:'反斜杠（末尾）'}); i++; continue; }
-      if (next>='1'&&next<='9'){ tokens.push({raw:pattern.slice(i,i+2),kind:'backreference',meaning:'反向引用第 '+next+' 个捕获组'}); i+=2; continue; }
-      if (next==='k'&&pattern[i+2]==='<'){ const end=pattern.indexOf('>',i+3); if(end!==-1){ const name=pattern.slice(i+3,end); tokens.push({raw:pattern.slice(i,end+1),kind:'backreference',meaning:'命名反向引用 <'+name+'>'}); i=end+1; continue; } }
-      const meaning=ESCAPE_MEANINGS[next]||((next>='0'&&next<='9')?'八进制/控制转义 \\\\'+next:'字面量字符 "'+next+'"（转义后）');
-      const kind=(next==='b'||next==='B')?'anchor':'escape';
-      tokens.push({raw:'\\\\'+next,kind,meaning}); i+=2; continue;
+  <main class="wrap">
+    <h1>Regex Visualizer · 正则可视化</h1>
+    <p class="sub">逐项解释表达式，并在测试文本中高亮匹配</p>
+    <section class="tool" aria-label="正则表达式分析器">
+      <div class="pattern-row">
+        <div><label for="pattern">Pattern</label><input id="pattern" value="\b(\w+)@(\w+)\.\w+\b" maxlength="500" spellcheck="false" /></div>
+        <div><label for="flags">Flags</label><input id="flags" value="g" maxlength="8" spellcheck="false" /></div>
+      </div>
+      <label for="sample">测试文本</label>
+      <textarea id="sample" maxlength="20000" spellcheck="false">联系 alice@example.com 或 bob@test.org 试试</textarea>
+      <div id="error" class="error" role="alert"></div>
+      <div class="summary"><strong id="count">0</strong><span>处匹配</span></div>
+      <div class="results">
+        <section><h2>表达式说明</h2><ol id="tokens" class="tokens"></ol></section>
+        <section><h2>匹配预览</h2><div id="highlight" class="highlight"></div></section>
+      </div>
+      <p class="privacy">内容只在当前标签页处理。请勿对不可信表达式运行超长文本。</p>
+    </section>
+  </main>
+  <script type="module">
+    import { explain, findMatches, highlight } from './src/index.js';
+    const $ = (id) => document.getElementById(id);
+    let timer;
+    function render() {
+      const pattern = $('pattern').value, flags = $('flags').value, sample = $('sample').value;
+      const explanation = explain(pattern, flags);
+      const matches = findMatches(sample, pattern, flags);
+      const error = explanation.error || matches.error || '';
+      $('error').textContent = error;
+      $('count').textContent = error ? '0' : String(matches.matches.length) + (matches.capped ? '+' : '');
+      $('tokens').replaceChildren();
+      if (!error) for (const token of explanation.tokens) {
+        const item = document.createElement('li');
+        const raw = document.createElement('span'); raw.className = 'raw'; raw.textContent = token.raw;
+        const kind = document.createElement('span'); kind.className = 'kind'; kind.textContent = token.kind;
+        const meaning = document.createElement('span'); meaning.textContent = token.meaning;
+        item.append(raw, kind, meaning); $('tokens').append(item);
+      }
+      $('highlight').innerHTML = error ? '' : (highlight(sample, pattern, flags) || '<span>无匹配</span>');
     }
-    if (c==='^'){ tokens.push({raw:'^',kind:'anchor',meaning:'字符串/行开头（锚点）'}); i++; continue; }
-    if (c==='$'){ tokens.push({raw:'$',kind:'anchor',meaning:'字符串/行结尾（锚点）'}); i++; continue; }
-    if (c==='.'){ tokens.push({raw:'.',kind:'wildcard',meaning:'除换行外任意单个字符'}); i++; continue; }
-    if (c==='|'){ tokens.push({raw:'|',kind:'alternation',meaning:'或：匹配左侧或右侧分支'}); i++; continue; }
-    if (c==='(') {
-      if (pattern.startsWith('(?:',i)){ tokens.push({raw:'(?:',kind:'group',meaning:'非捕获组（不记录匹配内容）'}); i+=3; continue; }
-      if (pattern.startsWith('(?<',i)){ const end=pattern.indexOf('>',i+3); if(end!==-1){ const inner=pattern.slice(i+3,end); if(inner==='='){tokens.push({raw:pattern.slice(i,end+1),kind:'group',meaning:'肯定向后查找（lookbehind）'});i=end+1;continue;} if(inner==='!'){tokens.push({raw:pattern.slice(i,end+1),kind:'group',meaning:'否定向后查找'});i=end+1;continue;} tokens.push({raw:pattern.slice(i,end+1),kind:'group',meaning:'命名捕获组 «'+inner+'»'}); i=end+1; continue; } }
-      if (pattern.startsWith('(?=',i)){ tokens.push({raw:'(?=',kind:'group',meaning:'肯定向前查找（lookahead）'}); i+=3; continue; }
-      if (pattern.startsWith('(?!',i)){ tokens.push({raw:'(?!',kind:'group',meaning:'否定向前查找'}); i+=3; continue; }
-      tokens.push({raw:'(',kind:'group',meaning:'捕获组（记录匹配内容）'}); i++; continue;
-    }
-    if (c===')'){ tokens.push({raw:')',kind:'group',meaning:'组结束'}); i++; continue; }
-    if (c==='[') {
-      let j=i+1, neg=false; if(pattern[j]==='^'){neg=true;j++;} let content='';
-      while(j<n){ if(pattern[j]==='\\\\'){content+=pattern.slice(j,j+2);j+=2;continue;} if(pattern[j]===']')break; content+=pattern[j]; j++; }
-      const raw=pattern.slice(i,j+1);
-      const meaning=(neg?'否定字符集合：匹配不在集合中的':'字符集合：匹配集合内的')+'一个字符'+(content?('（'+content+'）'):'');
-      tokens.push({raw,kind:'class',meaning}); i=j+1; continue;
-    }
-    if (c==='*'||c==='+'||c==='?') {
-      let raw=c, meaning=c==='*'?'量词：0 次或多次':c==='+'?'量词：1 次或多次':'量词：0 次或 1 次（可选）';
-      if (pattern[i+1]==='?'){ raw+='?'; meaning+='（懒惰/非贪婪）'; i+=2; } else i++;
-      tokens.push({raw,kind:'quantifier',meaning}); continue;
-    }
-    if (c==='{') {
-      const end=pattern.indexOf('}',i);
-      if(end!==-1){ const inner=pattern.slice(i+1,end); if(/^\\d+(,\\d*)?$/.test(inner)){ const parts=inner.split(','); let meaning='量词：'; if(parts.length===1)meaning+='恰好 '+parts[0]+' 次'; else if(parts[1]==='')meaning+='至少 '+parts[0]+' 次'; else meaning+=parts[0]+'–'+parts[1]+' 次'; let raw=pattern.slice(i,end+1); if(pattern[end+1]==='?'){raw+='?';meaning+='（懒惰/非贪婪）';i=end+2;}else i=end+1; tokens.push({raw,kind:'quantifier',meaning}); continue; } }
-      tokens.push({raw:'{',kind:'literal',meaning:'字面量字符 "{"'}); i++; continue;
-    }
-    tokens.push({raw:c,kind:'literal',meaning:'字面量字符 "'+c+'"'}); i++;
-  }
-  return { tokens };
-}
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
-function buildGlobal(pattern,flags){ try{ const f=flags.includes('g')?flags:flags+'g'; return new RegExp(pattern,f); }catch{ return null; } }
-function findMatches(text,pattern,flags=''){
-  const re=buildGlobal(pattern,flags); if(!re){ try{new RegExp(pattern,flags);}catch(e){return{error:e.message,matches:[],namedGroups:[],capped:false};} return{error:'invalid',matches:[],namedGroups:[],capped:false}; }
-  const matches=[],namedGroups=[]; const CAP=1000; let m;
-  while((m=re.exec(text))!==null){ if(m[0].length===0){re.lastIndex++;continue;} matches.push({index:m.index,end:m.index+m[0].length,value:m[0],groups:m.slice(1)}); if(namedGroups.length===0&&m.groups)namedGroups.push(...Object.keys(m.groups)); if(matches.length>=CAP)return{matches,namedGroups,capped:true}; }
-  return {matches,namedGroups,capped:false};
-}
-function highlight(text,pattern,flags=''){
-  const re=buildGlobal(pattern,flags); if(!re)return escapeHtml(String(text));
-  let out='',last=0,m,guard=0;
-  while((m=re.exec(text))!==null){ if(m[0].length===0){re.lastIndex++;continue;} if(m.index>last)out+=escapeHtml(text.slice(last,m.index)); out+='<mark>'+escapeHtml(m[0])+'</mark>'; last=m.index+m[0].length; if(++guard>1000)break; }
-  out+=escapeHtml(text.slice(last)); return out;
-}
-
-// ---- UI wiring ----
-const $ = (id) => document.getElementById(id);
-function update(){
-  const pattern=$('pattern').value, flags=$('flags').value, text=$('text').value;
-  // explanation
-  const ex=explain(pattern,flags);
-  const box=$('explainBox');
-  if(ex.error){ box.innerHTML='<span style="color:#b00">正则解析错误: '+escapeHtml(ex.error)+'</span>'; }
-  else {
-    box.innerHTML='<ol class="explain">'+ex.tokens.map(t=>`<li><span class="raw">${escapeHtml(t.raw)}</span><span class="kind">${t.kind}</span><span>${escapeHtml(t.meaning)}</span></li>`).join('')+'</ol>';
-  }
-  // matches + highlight
-  const r=findMatches(text,pattern,flags);
-  if(r.error){ $('count').textContent='0'; $('highlightBox').innerHTML='<span style="color:#b00">'+escapeHtml(r.error)+'</span>'; return; }
-  $('count').textContent=String(r.matches.length)+(r.capped?'+':'');
-  $('highlightBox').innerHTML=highlight(text,pattern,flags)||'<span style="color:#6b7280">（无匹配）</span>';
-}
-['pattern','flags','text'].forEach(id=>$(id).addEventListener('input',update));
-update();
-</script>
+    function schedule() { clearTimeout(timer); timer = setTimeout(render, 120); }
+    ['pattern','flags','sample'].forEach((id) => $(id).addEventListener('input', schedule));
+    render();
+  </script>
 </body>
 </html>

@@ -25,6 +25,12 @@ describe('explain', () => {
     // 'a' is a literal; '+?' is the lazy quantifier token
     assert.ok(r.tokens.some((t) => t.raw === '+?' && t.kind === 'quantifier'));
   });
+  test('distinguishes lookbehind from named groups', () => {
+    const positive = explain('(?<=USD)\\d+');
+    const negative = explain('(?<!\\d)cat');
+    assert.ok(positive.tokens.some((t) => t.raw === '(?<=' && t.meaning.includes('lookbehind')));
+    assert.ok(negative.tokens.some((t) => t.raw === '(?<!' && t.meaning.includes('lookbehind')));
+  });
   test('returns error for invalid regex', () => {
     const r = explain('(');
     assert.ok(r.error);
@@ -96,14 +102,18 @@ describe('cli run', () => {
     assert.ok(r.out.includes('匹配数: 2'));
     assert.ok(r.out.includes('<mark>'));
   });
-  test('missing args prints usage (exit 1)', () => {
+  test('missing args prints usage (exit 2)', () => {
     const r = run([]);
-    assert.equal(r.code, 1);
+    assert.equal(r.code, 2);
     assert.ok(r.out.includes('用法'));
   });
   test('invalid pattern explains error (exit 1)', () => {
     const r = run(['--explain', '(']);
     assert.equal(r.code, 1);
     assert.ok(r.out.includes('正则解析错误'));
+  });
+  test('--help and --version use successful exit codes', () => {
+    assert.equal(run(['--help']).code, 0);
+    assert.deepEqual(run(['--version']), { code: 0, out: '1.0.0' });
   });
 });

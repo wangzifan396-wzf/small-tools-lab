@@ -28,15 +28,15 @@ highlight('a<b>c', 'b');               // 'a<mark>b</mark>c' (HTML-escaped)
 ```
 
 Handles anchors `^ $ \b \B`, character classes `[...]`, groups `( ) (?: )
-(?<name>) (?> )` lookarounds, quantifiers `* + ? {n,m}` with lazy variants,
+(?<name>)` and lookarounds, quantifiers `* + ? {n,m}` with lazy variants,
 alternation `|`, escapes `\d \w \s \n \t`, and backreferences. Bad patterns
 return `{ error }` instead of throwing.
 
 ## Browser
 
-Open `playground/index.html` directly (works over `file://`) or run `start` to
-serve it locally. Live-updating explanation list, highlighted output, and match
-count.
+Run `npm start`, then open <http://localhost:4173/>. The hosted version is
+available from the [Small Tools Lab catalog](https://wangzifan396-wzf.github.io/small-tools-lab/).
+The browser keeps the pattern and sample text in memory only.
 
 ## Test
 

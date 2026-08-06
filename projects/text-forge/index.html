@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Text Forge · 文本转换</title>
+  <style>
+    :root { --bg:#f4f6f7; --surface:#fff; --border:#d8dee2; --text:#17201d; --muted:#60706a; --accent:#176b52; --accent-soft:#e9f5f0; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { width:min(920px,calc(100% - 36px)); margin:36px auto; }
+    h1 { margin:0; font-size:24px; }
+    .sub { margin:4px 0 22px; color:var(--muted); }
+    .tool { padding:20px; border:1px solid var(--border); border-radius:8px; background:var(--surface); box-shadow:0 1px 3px rgb(0 0 0 / 5%); }
+    .toolbar { display:grid; grid-template-columns:minmax(220px,1fr) auto auto; gap:10px; align-items:end; margin-bottom:16px; }
+    label { display:block; margin-bottom:5px; color:var(--muted); font-size:12px; }
+    select,textarea,button { font:inherit; }
+    select,textarea { width:100%; border:1px solid var(--border); border-radius:6px; background:#fff; color:var(--text); }
+    select { height:40px; padding:0 10px; }
+    textarea { min-height:180px; padding:12px; resize:vertical; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+    button { min-height:40px; padding:0 14px; border:1px solid var(--border); border-radius:6px; background:#fff; color:var(--text); cursor:pointer; }
+    button.primary { border-color:var(--accent); background:var(--accent); color:#fff; }
+    button:hover,button:focus-visible { border-color:var(--accent); }
+    .panes { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .status { min-height:22px; margin-top:10px; color:var(--accent); font-size:13px; }
+    .privacy { margin:14px 0 0; color:var(--muted); font-size:12px; }
+    @media (max-width:680px) { .wrap { margin:24px auto; } .toolbar { grid-template-columns:1fr 1fr; } .toolbar .mode { grid-column:1 / -1; } .panes { grid-template-columns:1fr; } textarea { min-height:150px; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Text Forge · 文本转换</h1>
+    <p class="sub">大小写、Slug、Unicode、全半角和空白清理</p>
+    <section class="tool" aria-label="文本转换器">
+      <div class="toolbar">
+        <div class="mode">
+          <label for="mode">转换模式</label>
+          <select id="mode">
+            <optgroup label="命名与大小写">
+              <option value="slugify">Slug</option><option value="case:camel">camelCase</option>
+              <option value="case:pascal">PascalCase</option><option value="case:snake">snake_case</option>
+              <option value="case:kebab">kebab-case</option><option value="case:constant">CONSTANT_CASE</option>
+              <option value="case:title">Title Case</option><option value="case:sentence">Sentence case</option>
+              <option value="case:lower">lowercase</option><option value="case:upper">UPPERCASE</option>
+            </optgroup>
+            <optgroup label="Unicode 与排版">
+              <option value="unicode:NFC">Unicode NFC</option><option value="unicode:NFD">Unicode NFD</option>
+              <option value="unicode:NFKC">Unicode NFKC</option><option value="unicode:NFKD">Unicode NFKD</option>
+              <option value="nodiacritics">移除变音符号</option><option value="width:full">转全角</option>
+              <option value="width:half">转半角</option><option value="clean">清理空白</option>
+            </optgroup>
+          </select>
+        </div>
+        <button id="clear" type="button">清空</button>
+        <button id="copy" class="primary" type="button">复制结果</button>
+      </div>
+      <div class="panes">
+        <div><label for="input">输入</label><textarea id="input" spellcheck="false">Hello 世界 World!</textarea></div>
+        <div><label for="output">结果</label><textarea id="output" readonly aria-live="polite"></textarea></div>
+      </div>
+      <div id="status" class="status" role="status"></div>
+      <p class="privacy">所有转换均在当前浏览器标签页内完成，不上传或保存文本。</p>
+    </section>
+  </main>
+  <script type="module">
+    import { slugify, toCase, normalizeUnicode, removeDiacritics, width, cleanWhitespace } from './src/index.js';
+    const $ = (id) => document.getElementById(id);
+    const input = $('input'), output = $('output'), mode = $('mode'), status = $('status');
+    function transform(value, selected) {
+      if (selected === 'slugify') return slugify(value);
+      if (selected === 'clean') return cleanWhitespace(value);
+      if (selected === 'nodiacritics') return removeDiacritics(value);
+      if (selected.startsWith('case:')) return toCase(value, selected.slice(5));
+      if (selected.startsWith('unicode:')) return normalizeUnicode(value, selected.slice(8));
+      if (selected.startsWith('width:')) return width(value, selected.slice(6));
+      return value;
+    }
+    function update() {
+      try { output.value = transform(input.value, mode.value); status.textContent = ''; }
+      catch (error) { output.value = ''; status.textContent = error.message; }
+    }
+    input.addEventListener('input', update);
+    mode.addEventListener('change', update);
+    $('clear').addEventListener('click', () => { input.value = ''; update(); input.focus(); });
+    $('copy').addEventListener('click', async () => {
+      await navigator.clipboard.writeText(output.value);
+      status.textContent = '已复制';
+    });
+    update();
+  </script>
+</body>
+</html>

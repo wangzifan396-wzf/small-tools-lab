@@ -18,6 +18,12 @@ node bin/text-forge.js clean "  a   b  "
 
 直接运行 `node bin/text-forge.js` 可列出全部 mode。
 
+多行或包含 shell 特殊字符的文本可以通过 stdin 传入：
+
+```bash
+printf '%s' "Hello 世界" | node bin/text-forge.js slugify
+```
+
 ## 作为库
 
 ```js
@@ -28,6 +34,11 @@ toCase('helloWorld', 'snake');                      // 'hello_world'
 removeDiacritics('café');                           // 'cafe'
 toFullWidth('A 1');                                 // 'Ａ　１'
 ```
+
+## 浏览器
+
+运行 `npm start` 后打开 <http://localhost:4173/>，也可以从
+[Small Tools Lab 目录](https://wangzifan396-wzf.github.io/small-tools-lab/) 打开浏览器版。
 
 ## 测试
 

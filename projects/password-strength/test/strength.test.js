@@ -15,6 +15,8 @@ describe('analyze', () => {
   test('common password flagged', () => {
     const r = analyze('password');
     assert.equal(r.flags.hasCommonPattern, true);
+    assert.equal(r.score, 0);
+    assert.equal(r.crackEstimate, '~instant');
   });
 
   test('reversed common password flagged', () => {
@@ -73,9 +75,13 @@ describe('cli run', () => {
     assert.ok(r.out.includes('熵'));
     assert.ok(r.out.includes('建议'));
   });
-  test('missing args prints usage (exit 1)', () => {
+  test('missing args prints usage (exit 2)', () => {
     const r = run([]);
-    assert.equal(r.code, 1);
+    assert.equal(r.code, 2);
     assert.ok(r.out.includes('用法'));
+  });
+  test('--help and --version use successful exit codes', () => {
+    assert.equal(run(['--help']).code, 0);
+    assert.deepEqual(run(['--version']), { code: 0, out: '1.0.0' });
   });
 });

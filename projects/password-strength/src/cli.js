@@ -11,10 +11,13 @@ const USAGE = [
 ].join('\n');
 
 const SCORE_LABEL = ['非常弱', '弱', '中等', '强', '非常强'];
+const VERSION = '1.0.0';
 
 export function run(argv) {
+  if (argv.includes('--help') || argv.includes('-h')) return { code: 0, out: USAGE };
+  if (argv.includes('--version') || argv.includes('-v')) return { code: 0, out: VERSION };
   if (argv.length < 1) {
-    return { code: 1, out: USAGE };
+    return { code: 2, out: USAGE };
   }
   const [pw] = argv;
   const r = analyze(pw);

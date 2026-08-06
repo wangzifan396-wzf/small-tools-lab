@@ -31,8 +31,9 @@ highlight('a<b>c', 'b');               // 'a<mark>b</mark>c'（已转义 HTML）
 
 ## 浏览器
 
-直接打开 `playground/index.html`（可在 `file://` 下运行），或 `start` 启动本地服务。
-实时更新的说明列表、高亮输出与匹配计数。
+运行 `npm start`，再打开 <http://localhost:4173/>。托管版本可以从
+[Small Tools Lab 目录](https://wangzifan396-wzf.github.io/small-tools-lab/) 打开。
+表达式和测试文本只保留在当前标签页内存中。
 
 ## 测试
 

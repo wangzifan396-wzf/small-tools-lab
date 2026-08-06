@@ -75,7 +75,13 @@ export function analyze(password = '') {
   else if (entropyBits < 128) score = 3;
   else score = 4;
 
-  const crackEstimate = estimateCrack(entropyBits);
+  if (hasCommonPattern) score = 0;
+  else {
+    if (tooShort) score = Math.min(score, 1);
+    if (hasSequential || hasRepeats || allSameClass) score = Math.min(score, 2);
+  }
+
+  const crackEstimate = hasCommonPattern ? '~instant' : estimateCrack(entropyBits);
 
   const suggestions = [];
   if (length === 0) suggestions.push('请输入密码');

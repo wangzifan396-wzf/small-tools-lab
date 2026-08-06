@@ -19,6 +19,12 @@ node bin/text-forge.js clean "  a   b  "
 
 Run `node bin/text-forge.js` with no args to list every mode.
 
+For multiline or shell-sensitive text, pass it through stdin:
+
+```bash
+printf '%s' "Hello 世界" | node bin/text-forge.js slugify
+```
+
 ## Library
 
 ```js
@@ -29,6 +35,11 @@ toCase('helloWorld', 'snake');                      // 'hello_world'
 removeDiacritics('café');                           // 'cafe'
 toFullWidth('A 1');                                 // 'Ａ　１'
 ```
+
+## Browser
+
+Run `npm start`, then open <http://localhost:4173/>. The hosted version is
+available from the [Small Tools Lab catalog](https://wangzifan396-wzf.github.io/small-tools-lab/).
 
 ## Test
 

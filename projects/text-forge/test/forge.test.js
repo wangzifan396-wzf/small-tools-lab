@@ -18,6 +18,9 @@ describe('slugify', () => {
   });
   test('custom separator', () => {
     assert.equal(slugify('Hello World', { sep: '_' }), 'hello_world');
+    assert.equal(slugify('Hello World', { sep: '.' }), 'hello.world');
+    assert.equal(slugify('Hello World', { sep: '[' }), 'hello[world');
+    assert.throws(() => slugify('Hello World', { sep: '' }), /非空字符串/);
   });
   test('respects lower:false', () => {
     assert.equal(slugify('Hello World', { lower: false }), 'Hello-World');
@@ -108,6 +111,7 @@ describe('cli run', () => {
     const r = run(['slugify', 'Hello 世界 World!']);
     assert.equal(r.code, 0);
     assert.equal(r.out, 'hello-世界-world');
+    assert.equal(run(['slugify', 'Hello', 'World']).out, 'hello-world');
   });
   test('case:kebab via cli', () => {
     const r = run(['case:kebab', 'HelloWorld Test']);
@@ -129,14 +133,18 @@ describe('cli run', () => {
     const r = run(['clean', '  a   b  ']);
     assert.equal(r.out, 'a b');
   });
-  test('missing args prints usage (exit 1)', () => {
+  test('missing args prints usage (exit 2)', () => {
     const r = run([]);
-    assert.equal(r.code, 1);
+    assert.equal(r.code, 2);
     assert.ok(r.out.includes('用法'));
   });
-  test('unknown mode prints usage (exit 1)', () => {
+  test('unknown mode prints usage (exit 2)', () => {
     const r = run(['bogus', 'x']);
-    assert.equal(r.code, 1);
+    assert.equal(r.code, 2);
     assert.ok(r.out.includes('可用 mode'));
+  });
+  test('--help and --version use successful exit codes', () => {
+    assert.equal(run(['--help']).code, 0);
+    assert.deepEqual(run(['--version']), { code: 0, out: '1.0.0' });
   });
 });

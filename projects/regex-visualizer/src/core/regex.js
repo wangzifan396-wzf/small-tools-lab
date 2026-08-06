@@ -84,12 +84,18 @@ export function explain(pattern, flags = '') {
         tokens.push({ raw: '(?:', kind: 'group', meaning: '非捕获组（不记录匹配内容）' });
         i += 3; continue;
       }
+      if (pattern.startsWith('(?<=', i)) {
+        tokens.push({ raw: '(?<=', kind: 'group', meaning: '肯定向后查找（lookbehind）' });
+        i += 4; continue;
+      }
+      if (pattern.startsWith('(?<!', i)) {
+        tokens.push({ raw: '(?<!', kind: 'group', meaning: '否定向后查找（negative lookbehind）' });
+        i += 4; continue;
+      }
       if (pattern.startsWith('(?<', i)) {
         const end = pattern.indexOf('>', i + 3);
         if (end !== -1) {
           const inner = pattern.slice(i + 3, end);
-          if (inner === '=') { tokens.push({ raw: pattern.slice(i, end + 1), kind: 'group', meaning: '肯定向后查找（lookbehind）' }); i = end + 1; continue; }
-          if (inner === '!') { tokens.push({ raw: pattern.slice(i, end + 1), kind: 'group', meaning: '否定向后查找（negative lookbehind）' }); i = end + 1; continue; }
           tokens.push({ raw: pattern.slice(i, end + 1), kind: 'group', meaning: `命名捕获组 «${inner}»` }); i = end + 1; continue;
         }
       }

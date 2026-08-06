@@ -1,14 +1,17 @@
 {
-  "name": "password-strength",
+  "name": "password-strength-local",
   "version": "1.0.0",
   "description": "Zero-dependency password strength analyzer: entropy-based scoring, offline crack-time estimate, and a checklist of weaknesses — for the CLI and the browser.",
   "type": "module",
+  "types": "types/index.d.ts",
+  "exports": { ".": { "types": "./types/index.d.ts", "import": "./src/index.js" } },
+  "files": ["bin", "src", "types", "index.html", "playground", "README.md", "README.zh-CN.md", "LICENSE", "SECURITY.md"],
   "bin": {
     "password-strength": "bin/password-strength.js"
   },
   "main": "src/index.js",
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test",
     "start": "node playground/serve.js"
   },
   "keywords": ["password", "strength", "entropy", "security", "cli"],

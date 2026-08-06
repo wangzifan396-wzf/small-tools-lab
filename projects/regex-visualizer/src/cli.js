@@ -11,15 +11,19 @@ const USAGE = [
   '  regex-visualizer --explain "\\\\d{3}-\\\\d{4}"',
   '  regex-visualizer "\\\\b\\\\w+\\\\b" "hello world 123" g',
 ].join('\n');
+const VERSION = '1.0.0';
 
 export function run(argv) {
   const args = argv.slice();
+
+  if (args.includes('--help') || args.includes('-h')) return { code: 0, out: USAGE };
+  if (args.includes('--version') || args.includes('-v')) return { code: 0, out: VERSION };
 
   const explainIdx = args.indexOf('--explain');
   if (explainIdx !== -1) {
     const pattern = args[explainIdx + 1];
     if (pattern === undefined) {
-      return { code: 1, out: '用法: regex-visualizer --explain "<pattern>" [flags]' };
+      return { code: 2, out: '用法: regex-visualizer --explain "<pattern>" [flags]' };
     }
     const flags = args[explainIdx + 2] || '';
     const r = explain(pattern, flags);
@@ -29,7 +33,7 @@ export function run(argv) {
   }
 
   if (args.length < 2) {
-    return { code: 1, out: USAGE };
+    return { code: 2, out: USAGE };
   }
 
   const [pattern, text, flags] = args;
