@@ -463,6 +463,28 @@ const TOOLS = [
     docs: "projects/colorconv/README.md",
     featured: false,
   },
+  {
+    id: "agent-trace",
+    name: "Agent Trace",
+    category: "cli",
+    label: "本地 Agent 会话分析",
+    description:
+      "Analyze Codex, Claude Code, and generic JSONL traces for tokens, tool latency, repeated reads, and failure loops without exposing prompt bodies.",
+    tech: "Node.js · JSONL · Local-first",
+    docs: "projects/agent-trace/README.md",
+    featured: true,
+  },
+  {
+    id: "skill-sentry",
+    name: "Skill Sentry",
+    category: "cli",
+    label: "Agent Skill 安全扫描",
+    description:
+      "Scan SKILL.md packages for prompt injection, exfiltration, hidden Unicode, destructive commands, unsafe references, and supply-chain risk.",
+    tech: "Node.js · Security · SARIF",
+    docs: "projects/skill-sentry/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {

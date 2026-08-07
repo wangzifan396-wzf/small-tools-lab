@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 37 focused tools across three categories (17 browser, 18 CLI, 2 local-AI)
-- 35 Node.js projects and 2 Python local-AI experiments with 588 focused project-level tests
+- 42 focused tools across three categories (20 browser, 20 CLI, 2 local-AI)
+- 40 Node.js projects and 2 Python local-AI experiments with 612 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (17)
+### Browser tools (20)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -44,8 +44,11 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [Word Count](projects/wordcount/README.md) | Count Unicode characters, mixed CJK / Latin text, structure, and reading time | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/wordcount/) |
 | [CSV ⇄ JSON](projects/csvjson/README.md) | Strict quoted-field CSV parser and loss-aware JSON converter | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/csvjson/) |
 | [UUID Gen](projects/uuidgen/README.md) | Generate RFC 4122 v4 identifiers using cryptographically secure randomness | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/uuidgen/) |
+| [Base64](projects/base64/README.md) | Encode and decode UTF-8 text safely, including CJK and emoji | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base64/) |
+| [JSON Format](projects/jsonfmt/README.md) | Format, minify, and validate JSON with clear local errors | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/jsonfmt/) |
+| [Color Convert](projects/colorconv/README.md) | Convert HEX, RGB, and HSL colors with a live preview | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/colorconv/) |
 
-### Developer CLIs (18)
+### Developer CLIs (20)
 
 | Project | Purpose |
 | --- | --- |
@@ -67,6 +70,8 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [Ignore Doctor](projects/ignore-doctor/README.md) | Audit ignore boundaries for leaks, dangerous negations, duplicate rules, and Docker context bloat |
 | [Port Matrix](projects/port-matrix/README.md) | Map port contracts across source, environment files, containers, orchestration, and docs |
 | [Text Forge](projects/text-forge/README.md) | Zero-dependency text toolkit: slugify, case conversion, Unicode normalization, diacritic removal, full/half-width conversion, and whitespace cleaning |
+| [Agent Trace](projects/agent-trace/README.md) | Analyze local coding-agent JSONL for token use, tool latency, repeated reads, and failure loops without prompt bodies |
+| [Skill Sentry](projects/skill-sentry/README.md) | Statically scan AI agent skills for injection, exfiltration, destructive behavior, unsafe references, and supply-chain risk |
 
 ### Local AI
 

@@ -1,0 +1,3 @@
+{"type":"user","timestamp":"2026-01-01T00:00:00.000Z","role":"user"}
+{"type":"tool_call","timestamp":"2026-01-01T00:00:01.000Z","name":"read_file","id":"call-1","input":{"path":"src/app.js"}}
+{"type":"tool_result","timestamp":"2026-01-01T00:00:01.250Z","tool_use_id":"call-1","content":"ok"}

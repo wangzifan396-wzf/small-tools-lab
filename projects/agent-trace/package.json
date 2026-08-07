@@ -1,0 +1,17 @@
+{
+  "name": "agent-trace-local",
+  "version": "0.1.0",
+  "description": "Local-first JSONL analyzer for coding-agent tokens, tool latency, repeated reads, and failure loops.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "types": "types/index.d.ts",
+  "exports": { ".": { "types": "./types/index.d.ts", "import": "./src/index.js" } },
+  "main": "src/index.js",
+  "bin": { "agent-trace": "bin/agent-trace.js" },
+  "files": ["bin", "src", "types", "README.md", "README.zh-CN.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md"],
+  "scripts": { "test": "node --test" },
+  "keywords": ["coding-agent", "jsonl", "tokens", "observability", "codex", "claude-code"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
