@@ -440,6 +440,42 @@ const TOOLS = [
     featured: false,
   },
   {
+    id: "mime",
+    name: "MIME 类型查询",
+    category: "browser",
+    label: "类型查询",
+    description:
+      "扩展名与 MIME 类型双向查询，提示文本类类型的 charset，内建约 120 条常用映射，纯浏览器零依赖。",
+    tech: "Browser · Web",
+    live: "projects/mime/",
+    docs: "projects/mime/README.md",
+    featured: false,
+  },
+  {
+    id: "cidr",
+    name: "CIDR 子网计算",
+    category: "browser",
+    label: "网络计算",
+    description:
+      "IPv4 子网计算器：网络/广播地址、掩码、可用主机范围与数量，正确处理 /31、/32 边界，纯浏览器零依赖。",
+    tech: "Browser · Network",
+    live: "projects/cidr/",
+    docs: "projects/cidr/README.md",
+    featured: false,
+  },
+  {
+    id: "ulid",
+    name: "ULID 生成 / 解析",
+    category: "browser",
+    label: "ID 生成",
+    description:
+      "生成按时间排序的 26 字符 ULID（Crockford Base32），可解析时间戳与随机熵，纯浏览器零依赖。",
+    tech: "Browser · ID",
+    live: "projects/ulid/",
+    docs: "projects/ulid/README.md",
+    featured: false,
+  },
+  {
     id: "base58",
     name: "Base58 编解码",
     category: "browser",

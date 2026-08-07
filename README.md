@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (61)
+### Browser tools (64)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -45,6 +45,9 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [CSV ⇄ JSON](projects/csvjson/README.md) | Strict quoted-field CSV parser and loss-aware JSON converter | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/csvjson/) |
 | [UUID Gen](projects/uuidgen/README.md) | Generate RFC 4122 v4 identifiers using cryptographically secure randomness | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/uuidgen/) |
 | [Base64](projects/base64/README.md) | Encode and decode UTF-8 text safely, including CJK and emoji | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base64/) |
+| [MIME 类型查询](projects/mime/README.md) | Look up MIME type by extension (or the reverse), with charset hints | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/mime/) |
+| [CIDR 子网计算](projects/cidr/README.md) | IPv4 subnet calculator: network/broadcast, mask, host range & count | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cidr/) |
+| [ULID 生成 / 解析](projects/ulid/README.md) | Generate / decode sortable 26-char ULIDs (Crockford Base32) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/ulid/) |
 | [Base58](projects/base58/README.md) | Bitcoin-style Base58 codec (no 0/O/I/l), handy for wallet addresses and short IDs | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base58/) |
 | [Base32](projects/base32/README.md) | RFC 4648 and Crockford Base32 codec, 5-bit grouping with case tolerance | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base32/) |
 | [Base85](projects/base85/README.md) | Ascii85 and Z85 Base85 codec, packing 4 bytes into 5 characters | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base85/) |
