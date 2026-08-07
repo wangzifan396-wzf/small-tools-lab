@@ -3,5 +3,36 @@
   "version": "1.0.0",
   "private": true,
   "description": "Unix 时间戳与日期互转：本地 / UTC / ISO 8601，自动识别秒或毫秒，显示相对时长。",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "main": "src/index.js",
+  "files": [
+    "src",
+    "types",
+    "index.html",
+    "playground",
+    "README.md",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "start": "node playground/serve.js"
+  },
+  "keywords": [
+    "epoch",
+    "timestamp",
+    "unix-time",
+    "date",
+    "converter"
+  ],
   "license": "MIT"
 }

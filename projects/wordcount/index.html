@@ -66,41 +66,35 @@
 
   <p class="foot">零依赖 · 纯前端 · 数据不出本机</p>
 </div>
-<script>
-var CJK = /[一-鿿㐀-䶿豈-﫿]/g;
-function count(text) {
-  var chars = text.length;
-  var charsNoSpace = text.replace(/\s/g, "").length;
-  var latin = (text.match(/[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*/g) || []).length;
-  var cjk = (text.match(CJK) || []).length;
-  var lines = text === "" ? 0 : text.split(/\n/).length;
-  var trimmed = text.trim();
-  var paras = trimmed === "" ? 0 : (trimmed.match(/\n\s*\n/g) || []).length + 1;
-  var sentences = (text.match(/[。！？!?；;]+/g) || []).length;
-  // 阅读时长：中文按 ~300 字/分，英文按 ~200 词/分
-  var mins = cjk / 300 + latin / 200;
-  var readMin = Math.max(mins, 0);
-  var readStr = readMin < 1
-    ? Math.round(readMin * 60) + " 秒"
-    : (readMin < 60 ? readMin.toFixed(1) + " 分钟" : Math.floor(readMin / 60) + " 小时 " + Math.round(readMin % 60) + " 分");
-  return [
-    { t: "字符（含空格）", n: chars },
-    { t: "字符（去空格）", n: charsNoSpace },
-    { t: "中文汉字", n: cjk },
-    { t: "英文词", n: latin },
-    { t: "行数", n: lines },
-    { t: "段落", n: paras },
-    { t: "句子", n: sentences },
-    { t: "预计阅读", n: readStr, raw: true }
-  ];
-}
+<script type="module">
+import { countText } from './src/index.js';
+
 function render() {
-  var text = document.getElementById("txt").value;
-  var box = document.getElementById("stats");
-  if (!text) { box.innerHTML = '<div class="stat"><div class="n">0</div><div class="t">等待输入…</div></div>'; return; }
-  box.innerHTML = count(text).map(function (s) {
-    return '<div class="stat"><div class="n">' + s.n + '</div><div class="t">' + s.t + "</div></div>";
-  }).join("");
+  const text = document.getElementById('txt').value;
+  const box = document.getElementById('stats');
+  const counts = countText(text);
+  const stats = text ? [
+    ['字符（含空格）', counts.characters],
+    ['字符（去空格）', counts.charactersNoWhitespace],
+    ['中文汉字', counts.hanCharacters],
+    ['英文词', counts.latinWords],
+    ['行数', counts.lines],
+    ['段落', counts.paragraphs],
+    ['句子', counts.sentences],
+    ['预计阅读', counts.readingLabel],
+  ] : [['等待输入…', 0]];
+  box.replaceChildren(...stats.map(([label, value]) => {
+    const stat = document.createElement('div');
+    stat.className = 'stat';
+    const number = document.createElement('div');
+    number.className = 'n';
+    number.textContent = value;
+    const title = document.createElement('div');
+    title.className = 't';
+    title.textContent = label;
+    stat.append(number, title);
+    return stat;
+  }));
 }
 document.getElementById("txt").addEventListener("input", render);
 document.getElementById("clear").onclick = function () { document.getElementById("txt").value = ""; render(); };

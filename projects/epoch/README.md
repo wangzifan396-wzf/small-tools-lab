@@ -11,10 +11,25 @@
 
 ## 用法
 
-直接用浏览器打开 `index.html` 即可（也可通过 small-tools-lab 门户进入）。
-无需任何后端或网络请求。
+通过 [Small Tools Lab 在线页面](https://wangzifan396-wzf.github.io/small-tools-lab/projects/epoch/) 直接使用，或在本地启动：
+
+```sh
+npm start
+```
+
+然后打开终端显示的本地地址。页面使用原生 ES 模块，因此不建议通过 `file://` 直接打开。
+
+作为模块使用：
+
+```js
+import { epochToDate, formatUtc } from './src/index.js';
+
+const { date } = epochToDate('1717000000');
+console.log(formatUtc(date));
+```
 
 ## 技术
 
 - 纯 `Date` API，无第三方依赖。
 - 适配浅色 / 深色系统主题。
+- Node.js 20+ 可运行 `npm test` 验证核心逻辑。

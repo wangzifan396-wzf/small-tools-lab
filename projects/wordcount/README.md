@@ -12,9 +12,23 @@
 
 ## 用法
 
-用浏览器打开 `index.html`，粘贴文本即可。无需后端或网络。
+通过 [Small Tools Lab 在线页面](https://wangzifan396-wzf.github.io/small-tools-lab/projects/wordcount/) 使用，或在本地运行：
+
+```sh
+npm start
+```
+
+核心统计也可以作为 ES 模块导入：
+
+```js
+import { countText } from './src/index.js';
+
+console.log(countText('你好, open source.'));
+```
 
 ## 技术
 
 - 纯正则 + `String` API，无第三方依赖。
 - 适配浅色 / 深色系统主题。
+- 按 Unicode 码点统计字符，避免把 emoji 算成两个字符。
+- Node.js 20+ 可运行 `npm test`。

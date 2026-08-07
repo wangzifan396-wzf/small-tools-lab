@@ -52,7 +52,7 @@
 <body>
 <div class="wrap">
   <h1>🆔 UUID Gen · 唯一标识生成</h1>
-  <p class="sub">批量生成 RFC4122 v4 UUID。优先使用浏览器密码学随机数，不可用时回退。纯前端，数据不出本机。</p>
+  <p class="sub">批量生成 RFC4122 v4 UUID。仅使用浏览器密码学安全随机数，不可用时明确报错。纯前端，数据不出本机。</p>
 
   <div class="card">
     <div class="row">
@@ -76,54 +76,43 @@
 
   <p class="foot">零依赖 · 纯前端 · 数据不出本机</p>
 </div>
-<script>
-function hex16() {
-  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-    var b = new Uint8Array(16);
-    crypto.getRandomValues(b);
-    b[6] = (b[6] & 0x0f) | 0x40;
-    b[8] = (b[8] & 0x3f) | 0x80;
-    var s = "";
-    for (var i = 0; i < 16; i++) s += ("0" + b[i].toString(16)).slice(-2);
-    return s;
-  }
-  // Last-resort fallback (not cryptographically strong): Math.random.
-  var t = "";
-  for (var k = 0; k < 32; k++) t += Math.floor(Math.random() * 16).toString(16);
-  return t.slice(0, 12) + "4" + t.slice(13, 16) + "8" + t.slice(17, 32);
-}
-function uuidv4() {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    try { return crypto.randomUUID(); } catch (e) { /* fall through */ }
-  }
-  var h = hex16();
-  return (h.slice(0, 8) + "-" + h.slice(8, 12) + "-" + h.slice(12, 16) + "-" + h.slice(16, 20) + "-" + h.slice(20, 32));
-}
+<script type="module">
+import { generateUuids } from './src/index.js';
+
 function run() {
-  var msg = document.getElementById("msg");
-  var out = document.getElementById("out");
-  msg.className = ""; msg.textContent = "";
-  var n = parseInt(document.getElementById("count").value, 10);
-  if (!Number.isFinite(n) || n < 1) n = 1;
-  if (n > 200) n = 200;
-  var dashes = document.getElementById("dashes").checked;
-  var upper = document.getElementById("upper").checked;
-  var arr = [];
-  for (var i = 0; i < n; i++) {
-    var u = uuidv4();
-    if (!dashes) u = u.replace(/-/g, "");
-    if (upper) u = u.toUpperCase();
-    arr.push(u);
+  const msg = document.getElementById('msg');
+  const out = document.getElementById('out');
+  const countInput = document.getElementById('count');
+  const count = Math.min(200, Math.max(1, Number.parseInt(countInput.value, 10) || 1));
+  countInput.value = count;
+  msg.className = '';
+  msg.textContent = '';
+  try {
+    const values = generateUuids(count, {
+      dashes: document.getElementById('dashes').checked,
+      uppercase: document.getElementById('upper').checked,
+    });
+    out.value = values.join('\n');
+    msg.className = 'ok';
+    msg.textContent = `已生成 ${count} 个 UUID`;
+  } catch (error) {
+    out.value = '';
+    msg.textContent = `生成失败：${error.message}`;
   }
-  out.value = arr.join("\n");
-  msg.className = "ok"; msg.textContent = "已生成 " + n + " 个 UUID";
 }
-function copy() {
-  var v = document.getElementById("out").value;
-  if (!v) return;
-  navigator.clipboard.writeText(v).then(function () {
-    var m = document.getElementById("msg"); m.className = "ok"; m.textContent = "已复制";
-  }).catch(function () { alert(v); });
+
+async function copy() {
+  const value = document.getElementById('out').value;
+  if (!value) return;
+  const message = document.getElementById('msg');
+  try {
+    await navigator.clipboard.writeText(value);
+    message.className = 'ok';
+    message.textContent = '已复制';
+  } catch {
+    message.className = '';
+    message.textContent = '浏览器拒绝了剪贴板权限，请手动复制';
+  }
 }
 document.getElementById("gen").onclick = run;
 document.getElementById("copy").onclick = copy;

@@ -11,9 +11,24 @@
 
 ## 用法
 
-用浏览器打开 `index.html`，选择方向与分隔符，粘贴内容后点「转换」。结果可一键复制。
+通过 [Small Tools Lab 在线页面](https://wangzifan396-wzf.github.io/small-tools-lab/projects/csvjson/) 使用，或在本地运行：
+
+```sh
+npm start
+```
+
+核心解析器可以作为 ES 模块导入：
+
+```js
+import { csvToJson, jsonToCsv } from './src/index.js';
+
+console.log(csvToJson('name,age\nAlice,30'));
+console.log(jsonToCsv([{ name: 'Alice', age: 30 }]));
+```
 
 ## 技术
 
 - 自写的 CSV 解析器（逐字符扫描，正确处理引号包裹与转义）。
 - 无第三方依赖；适配浅色 / 深色系统主题。
+- 对重复 / 空表头、列数不一致、未闭合引号返回明确错误，避免静默丢数据。
+- Node.js 20+ 可运行 `npm test`。

@@ -421,7 +421,7 @@ const TOOLS = [
     category: "browser",
     label: "唯一标识生成",
     description:
-      "Zero-dependency RFC4122 v4 UUID generator: batch up to 200, toggle dashes and uppercase, crypto-random when available — in the browser, no build step.",
+      "Zero-dependency RFC4122 v4 UUID generator: batch up to 200, toggle dashes and uppercase, and require cryptographically secure randomness — in the browser, no build step.",
     tech: "Browser · Crypto",
     live: "projects/uuidgen/",
     docs: "projects/uuidgen/README.md",

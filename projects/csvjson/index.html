@@ -95,111 +95,49 @@
 
   <p class="foot">零依赖 · 纯前端 · 数据不出本机</p>
 </div>
-<script>
-function detectDelim(text) {
-  var firstLine = (text.split(/\r?\n/)[0] || "");
-  var cands = [",", ";", "\t", "|"];
-  var best = ",", bestCount = -1;
-  for (var i = 0; i < cands.length; i++) {
-    var d = cands[i];
-    var count = firstLine.split(d).length - 1;
-    if (count > bestCount) { bestCount = count; best = d; }
-  }
-  return best;
-}
-// RFC4180-ish parser: handles quoted fields, embedded commas/newlines/quotes.
-function parseCSV(text, delim) {
-  var rows = [], row = [], field = "", i = 0;
-  var n = text.length;
-  while (i < n) {
-    var c = text[i];
-    if (c === '"') {
-      if (i + 1 < n && text[i + 1] === '"') { field += '"'; i += 2; continue; }
-      var j = i + 1, buf = "";
-      while (j < n) {
-        if (text[j] === '"') {
-          if (j + 1 < n && text[j + 1] === '"') { buf += '"'; j += 2; continue; }
-          break;
-        }
-        buf += text[j]; j++;
-      }
-      field += buf; i = j + 1; continue;
-    }
-    if (c === delim) { row.push(field); field = ""; i++; continue; }
-    if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; i++; continue; }
-    if (c === "\r") { i++; continue; }
-    field += c; i++;
-  }
-  if (field !== "" || row.length) { row.push(field); rows.push(row); }
-  return rows;
-}
-function csvEscape(val, delim) {
-  var s = val == null ? "" : String(val);
-  if (/["\n\r]/.test(s) || s.indexOf(delim) !== -1) return '"' + s.replace(/"/g, '""') + '"';
-  return s;
-}
-function isBlank(row) { return row.every(function (c) { return (c || "").trim() === ""; }); }
+<script type="module">
+import { csvToJson, jsonToCsv } from './src/index.js';
 
-function csvToJson(text, delim, useHeader) {
-  var rows = parseCSV(text, delim).filter(function (r) { return !isBlank(r); });
-  if (!rows.length) return "[]";
-  if (!useHeader) return JSON.stringify(rows, null, 2);
-  var head = rows[0];
-  var out = [];
-  for (var k = 1; k < rows.length; k++) {
-    var obj = {};
-    for (var h = 0; h < head.length; h++) obj[head[h]] = rows[k][h] !== undefined ? rows[k][h] : "";
-    out.push(obj);
-  }
-  return JSON.stringify(out, null, 2);
-}
-function jsonToCsv(text, delim) {
-  var data = JSON.parse(text);
-  if (!Array.isArray(data)) data = [data];
-  if (!data.length) return "";
-  // array of arrays → direct
-  if (Array.isArray(data[0])) {
-    return data.map(function (r) { return r.map(function (c) { return csvEscape(c, delim); }).join(delim); }).join("\n");
-  }
-  // array of objects → union keys in first-seen order
-  var keys = [];
-  data.forEach(function (o) {
-    if (o && typeof o === "object") Object.keys(o).forEach(function (k) { if (keys.indexOf(k) === -1) keys.push(k); });
-  });
-  var lines = [keys.map(function (k) { return csvEscape(k, delim); }).join(delim)];
-  data.forEach(function (o) {
-    lines.push(keys.map(function (k) { return csvEscape(o ? o[k] : "", delim); }).join(delim));
-  });
-  return lines.join("\n");
-}
 function run() {
-  var msg = document.getElementById("msg");
-  var out = document.getElementById("out");
-  msg.className = ""; msg.textContent = "";
-  var text = document.getElementById("in").value;
+  const msg = document.getElementById('msg');
+  const out = document.getElementById('out');
+  msg.className = '';
+  msg.textContent = '';
+  const text = document.getElementById('in').value;
   if (!text.trim()) { out.value = ""; msg.className = "err"; msg.textContent = "请输入内容"; return; }
-  var dir = document.getElementById("dir").value;
-  var delim = document.getElementById("delim").value;
-  if (delim === "auto") delim = detectDelim(text);
-  else if (delim === "tab") delim = "\t";
+  const direction = document.getElementById('dir').value;
+  let delimiter = document.getElementById('delim').value;
+  if (delimiter === 'tab') delimiter = '\t';
   try {
-    if (dir === "csv2json") {
-      out.value = csvToJson(text, delim, document.getElementById("header").checked);
+    if (direction === 'csv2json') {
+      out.value = csvToJson(text, {
+        delimiter,
+        header: document.getElementById('header').checked,
+      });
     } else {
-      out.value = jsonToCsv(text, delim);
+      out.value = jsonToCsv(text, delimiter === 'auto' ? ',' : delimiter);
     }
-    msg.className = "ok"; msg.textContent = "转换成功";
-  } catch (e) {
-    out.value = "";
-    msg.className = "err"; msg.textContent = "转换失败：" + e.message;
+    msg.className = 'ok';
+    msg.textContent = '转换成功';
+  } catch (error) {
+    out.value = '';
+    msg.className = 'err';
+    msg.textContent = `转换失败：${error.message}`;
   }
 }
-function copy() {
-  var v = document.getElementById("out").value;
-  if (!v) return;
-  navigator.clipboard.writeText(v).then(function () {
-    var m = document.getElementById("msg"); m.className = "ok"; m.textContent = "已复制结果";
-  }).catch(function () { alert(v); });
+
+async function copy() {
+  const value = document.getElementById('out').value;
+  if (!value) return;
+  const message = document.getElementById('msg');
+  try {
+    await navigator.clipboard.writeText(value);
+    message.className = 'ok';
+    message.textContent = '已复制结果';
+  } catch {
+    message.className = 'err';
+    message.textContent = '浏览器拒绝了剪贴板权限，请手动复制';
+  }
 }
 document.getElementById("go").onclick = run;
 document.getElementById("copy").onclick = copy;
@@ -208,7 +146,7 @@ document.getElementById("sample").onclick = function () {
   document.getElementById("delim").value = "auto";
   document.getElementById("header").checked = true;
   document.getElementById("in").value =
-    'name,age,city,note\nAlice,30,"New York","likes \"code\", coffee"\nBob,25,Beijing,中文备注\nCharles,41,"San Francisco",multi\nline text';
+    'name,age,city,note\nAlice,30,"New York","likes ""code"", coffee"\nBob,25,Beijing,中文备注\nCharles,41,"San Francisco","multi\nline text"';
   run();
 };
 // Hide the header checkbox in JSON→CSV mode where it doesn't apply.

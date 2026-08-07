@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 33 focused tools across three categories (13 browser, 18 CLI, 2 local-AI)
-- 31 Node.js projects and 2 Python local-AI experiments with 549 focused project-level tests
+- 37 focused tools across three categories (17 browser, 18 CLI, 2 local-AI)
+- 35 Node.js projects and 2 Python local-AI experiments with 588 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (13)
+### Browser tools (17)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -40,6 +40,10 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [CtxCalc](projects/ctxcalc/README.md) | Estimate prompt tokens and check fit against a model context window | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/ctxcalc/) |
 | [JwtPeek](projects/jwtpeek/README.md) | Decode a JWT and surface expiry / issued / not-before timing | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/jwtpeek/) |
 | [Radix](projects/radix/README.md) | Convert between bases 2–36 with BigInt-exact math and a bit & byte view | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/radix/) |
+| [Epoch](projects/epoch/README.md) | Convert Unix seconds or milliseconds to local, UTC, ISO, and relative time | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/epoch/) |
+| [Word Count](projects/wordcount/README.md) | Count Unicode characters, mixed CJK / Latin text, structure, and reading time | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/wordcount/) |
+| [CSV ⇄ JSON](projects/csvjson/README.md) | Strict quoted-field CSV parser and loss-aware JSON converter | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/csvjson/) |
+| [UUID Gen](projects/uuidgen/README.md) | Generate RFC 4122 v4 identifiers using cryptographically secure randomness | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/uuidgen/) |
 
 ### Developer CLIs (18)
 

@@ -89,91 +89,71 @@
 
   <p class="foot">零依赖 · 纯前端 · 数据不出本机</p>
 </div>
-<script>
-function pad(n) { return String(n).padStart(2, "0"); }
-function fmtLocal(d) {
-  return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " " +
-    pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+<script type="module">
+import {
+  epochToDate,
+  parseDateTime,
+  formatLocal,
+  formatUtc,
+  formatRelative,
+} from './src/index.js';
+
+function renderRows(container, rows) {
+  container.replaceChildren(...rows.map(([key, value]) => {
+    const row = document.createElement('div');
+    row.className = 'kv';
+    const keyNode = document.createElement('span');
+    keyNode.className = 'k';
+    keyNode.textContent = key;
+    const valueNode = document.createElement('span');
+    valueNode.className = 'v';
+    valueNode.textContent = value;
+    row.append(keyNode, valueNode);
+    return row;
+  }));
 }
-function fmtUTC(d) {
-  return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate()) + " " +
-    pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()) + ":" + pad(d.getUTCSeconds()) + " UTC";
-}
-function toISO(d) { return d.toISOString(); }
-function rel(ms) {
-  const s = Math.floor(Math.abs(ms) / 1000);
-  const sign = ms < 0 ? "前" : "后";
-  if (s < 60) return s + " 秒" + sign;
-  const m = Math.floor(s / 60); if (m < 60) return m + " 分钟" + sign;
-  const h = Math.floor(m / 60); if (h < 24) return h + " 小时" + sign;
-  const d = Math.floor(h / 24); if (d < 30) return d + " 天" + sign;
-  const mo = Math.floor(d / 30); if (mo < 12) return mo + " 个月" + sign;
-  return Math.floor(mo / 12) + " 年" + sign;
-}
-function unitOf(v, sel) {
-  if (sel !== "auto") return sel;
-  return String(v).replace(".", "").length >= 13 ? "ms" : "s";
-}
-function kv(k, v) {
-  return '<div class="kv"><span class="k">' + k + '</span><span class="v">' + v + "</span></div>";
-}
+
 function renderTS() {
-  const raw = document.getElementById("ts").value.trim();
-  const out = document.getElementById("tsOut");
-  if (!raw) { out.innerHTML = ""; return; }
-  const v = Number(raw);
-  if (!Number.isFinite(v)) {
-    out.innerHTML = kv("错误", "请输入数字时间戳");
-    return;
+  const raw = document.getElementById('ts').value.trim();
+  const out = document.getElementById('tsOut');
+  if (!raw) { out.replaceChildren(); return; }
+  try {
+    const result = epochToDate(raw, document.getElementById('unit').value);
+    renderRows(out, [
+      ['本地时间', formatLocal(result.date)],
+      ['UTC', formatUtc(result.date)],
+      ['ISO 8601', result.date.toISOString()],
+      ['识别单位', result.unit === 'ms' ? '毫秒' : '秒'],
+      ['相对现在', formatRelative(result.date)],
+    ]);
+  } catch (error) {
+    renderRows(out, [['错误', error.message]]);
   }
-  const u = unitOf(v, document.getElementById("unit").value);
-  const ms = u === "ms" ? v : v * 1000;
-  const d = new Date(ms);
-  if (isNaN(d.getTime())) {
-    out.innerHTML = kv("错误", "时间戳超出范围");
-    return;
-  }
-  out.innerHTML =
-    kv("本地时间", fmtLocal(d)) +
-    kv("UTC", fmtUTC(d)) +
-    kv("ISO 8601", toISO(d)) +
-    kv("识别单位", u === "ms" ? "毫秒" : "秒") +
-    kv("相对现在", rel(d.getTime() - Date.now()));
 }
-function parseDateTime(s) {
-  s = s.trim();
-  let iso = s;
-  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) iso = s.replace(" ", "T");
-  const d = new Date(iso);
-  if (!isNaN(d.getTime())) return d;
-  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})$/);
-  if (m) {
-    const d2 = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], 0);
-    if (!isNaN(d2.getTime())) return d2;
-  }
-  return null;
-}
+
 function renderDT() {
-  const raw = document.getElementById("dt").value.trim();
-  const out = document.getElementById("dtOut");
-  if (!raw) { out.innerHTML = ""; return; }
-  const d = parseDateTime(raw);
-  if (!d) {
-    out.innerHTML = kv("错误", "无法解析该日期（试试 2024-05-30 12:00:00）");
-    return;
+  const raw = document.getElementById('dt').value.trim();
+  const out = document.getElementById('dtOut');
+  if (!raw) { out.replaceChildren(); return; }
+  try {
+    const date = parseDateTime(raw);
+    const milliseconds = date.getTime();
+    renderRows(out, [
+      ['秒 (s)', String(Math.floor(milliseconds / 1000))],
+      ['毫秒 (ms)', String(milliseconds)],
+      ['本地时间', formatLocal(date)],
+      ['UTC', formatUtc(date)],
+      ['ISO 8601', date.toISOString()],
+    ]);
+  } catch {
+    renderRows(out, [['错误', '无法解析该日期（试试 2024-05-30 12:00:00）']]);
   }
-  const ms = d.getTime();
-  out.innerHTML =
-    kv("秒 (s)", String(Math.floor(ms / 1000))) +
-    kv("毫秒 (ms)", String(ms)) +
-    kv("本地时间", fmtLocal(d)) +
-    kv("UTC", fmtUTC(d)) +
-    kv("ISO 8601", toISO(d));
 }
+
 function tick() {
-  const d = new Date();
-  document.getElementById("now").textContent =
-    fmtLocal(d) + "  ·  " + Math.floor(d.getTime() / 1000) + " s  ·  " + d.getTime() + " ms";
+  const date = new Date();
+  document.getElementById('now').textContent =
+    `${formatLocal(date)}  ·  ${Math.floor(date.getTime() / 1000)} s  ·  ${date.getTime()} ms`;
 }
 document.getElementById("conv").onclick = renderTS;
 document.getElementById("ts").addEventListener("input", renderTS);
@@ -184,7 +164,7 @@ document.getElementById("now2ts").onclick = function () {
   renderTS();
 };
 document.getElementById("now2dt").onclick = function () {
-  document.getElementById("dt").value = fmtLocal(new Date());
+  document.getElementById("dt").value = formatLocal(new Date());
   renderDT();
 };
 tick();

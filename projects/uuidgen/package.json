@@ -2,6 +2,14 @@
   "name": "uuidgen",
   "version": "1.0.0",
   "private": true,
-  "description": "RFC4122 v4 UUID 批量生成：密码学随机数优先，可切换连字符与大写。",
+  "description": "RFC4122 v4 UUID 批量生成：仅使用密码学安全随机数，可切换连字符与大写。",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "types": "types/index.d.ts",
+  "exports": { ".": { "types": "./types/index.d.ts", "import": "./src/index.js" } },
+  "main": "src/index.js",
+  "files": ["src", "types", "index.html", "playground", "README.md", "SECURITY.md"],
+  "scripts": { "test": "node --test", "start": "node playground/serve.js" },
+  "keywords": ["uuid", "uuid-v4", "rfc4122", "random", "generator"],
   "license": "MIT"
 }
