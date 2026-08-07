@@ -440,6 +440,42 @@ const TOOLS = [
     featured: false,
   },
   {
+    id: "sqlfmt",
+    name: "SQL 格式化 / 压缩",
+    category: "browser",
+    label: "代码格式化",
+    description:
+      "零依赖 SQL 排版：关键字大写、子句分行、AND/OR 缩进，支持美化与压缩，字符串与注释原样保留。",
+    tech: "Browser · SQL",
+    live: "projects/sqlfmt/",
+    docs: "projects/sqlfmt/README.md",
+    featured: false,
+  },
+  {
+    id: "curlcon",
+    name: "curl 转代码",
+    category: "browser",
+    label: "代码转换",
+    description:
+      "把 curl 命令一键转成 JavaScript fetch 与 Python requests，解析 -X/-H/-d/-u/-b/-k 等参数，纯浏览器零依赖。",
+    tech: "Browser · Converter",
+    live: "projects/curlcon/",
+    docs: "projects/curlcon/README.md",
+    featured: false,
+  },
+  {
+    id: "cssfmt",
+    name: "CSS 美化 / 压缩",
+    category: "browser",
+    label: "代码格式化",
+    description:
+      "零依赖 CSS 排版：按花括号层级缩进美化，或去除注释与空白压缩成单行，字符串与注释内容原样保留。",
+    tech: "Browser · CSS",
+    live: "projects/cssfmt/",
+    docs: "projects/cssfmt/README.md",
+    featured: false,
+  },
+  {
     id: "mime",
     name: "MIME 类型查询",
     category: "browser",

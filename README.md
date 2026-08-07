@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (64)
+### Browser tools (67)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -45,6 +45,9 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [CSV ⇄ JSON](projects/csvjson/README.md) | Strict quoted-field CSV parser and loss-aware JSON converter | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/csvjson/) |
 | [UUID Gen](projects/uuidgen/README.md) | Generate RFC 4122 v4 identifiers using cryptographically secure randomness | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/uuidgen/) |
 | [Base64](projects/base64/README.md) | Encode and decode UTF-8 text safely, including CJK and emoji | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base64/) |
+| [SQL 格式化 / 压缩](projects/sqlfmt/README.md) | Keyword-upper, clause-line-break, AND/OR indent; string & comment safe | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/sqlfmt/) |
+| [curl 转代码](projects/curlcon/README.md) | Convert a curl command to JS fetch and Python requests | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/curlcon/) |
+| [CSS 美化 / 压缩](projects/cssfmt/README.md) | Brace-aware CSS beautify and minify, strings/comments preserved | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cssfmt/) |
 | [MIME 类型查询](projects/mime/README.md) | Look up MIME type by extension (or the reverse), with charset hints | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/mime/) |
 | [CIDR 子网计算](projects/cidr/README.md) | IPv4 subnet calculator: network/broadcast, mask, host range & count | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cidr/) |
 | [ULID 生成 / 解析](projects/ulid/README.md) | Generate / decode sortable 26-char ULIDs (Crockford Base32) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/ulid/) |
