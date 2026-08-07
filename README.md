@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (30)
+### Browser tools (36)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -51,6 +51,12 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [RomanNum](projects/roman/README.md) | Convert Arabic and Roman numerals (1–3999) both ways | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/roman/) |
 | [DiceBox](projects/dice/README.md) | Cryptographically secure dice, random integers, and no-repeat draws | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/dice/) |
 | [DateDiff](projects/datediff/README.md) | Compute the year/month/day gap between two dates and age | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/datediff/) |
+| [RegexTester](projects/regex/README.md) | Live regex matching with capture-group highlighting | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/regex/) |
+| [NumBase](projects/num-base/README.md) | Convert numbers between bases 2–36 (binary/octal/decimal/hex) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/num-base/) |
+| [PassGen](projects/password-generator/README.md) | Cryptographically secure password generator with entropy estimate | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/password-generator/) |
+| [Timer](projects/timer/README.md) | Countdown and stopwatch with lap timing | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/timer/) |
+| [TextDiff](projects/text-diff/README.md) | Line-by-line text diff (LCS) highlighting additions/deletions | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/text-diff/) |
+| [BMI](projects/bmi/README.md) | BMI calculator with China/WHO standards and healthy-weight range | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/bmi/) |
 | [URLEncode](projects/url-encode/README.md) | Percent-encode / decode text, with form-style space-to-plus | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/url-encode/) |
 | [HTMLEntity](projects/html-entity/README.md) | Encode / decode HTML entities (named, decimal, hex) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/html-entity/) |
 | [LoremGen](projects/lorem/README.md) | Generate Lorem Ipsum by paragraph / sentence / word | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/lorem/) |

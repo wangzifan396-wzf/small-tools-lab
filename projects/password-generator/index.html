@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>密码生成器 · small-tools-lab</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --panel2:#1f232c; --border:#2a2f3a; --text:#e6e9ef; --muted:#9aa3b2; --accent:#6ea8fe; --ok:#4ade80; --bad:#f87171; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); padding:22px; }
+  h1 { font-size:18px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 18px; font-size:13px; }
+  label { display:block; font-size:12px; color:var(--muted); margin:14px 0 6px; }
+  input[type=number], input[type=text] { width:100%; background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:9px 11px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; }
+  input:focus { outline:none; border-color:var(--accent); }
+  .row { display:flex; gap:10px; align-items:center; }
+  .row > div { flex:1; }
+  .checks { display:flex; flex-wrap:wrap; gap:14px; margin-top:8px; }
+  .checks label { display:flex; align-items:center; gap:6px; color:var(--text); font-size:13px; margin:0; cursor:pointer; }
+  .checks input { width:auto; }
+  button { background:var(--accent); color:#0b1020; border:0; border-radius:8px; padding:9px 16px; font-weight:600; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--text); border:1px solid var(--border); font-weight:500; }
+  .acts { margin-top:16px; display:flex; gap:8px; }
+  .out { margin-top:16px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; }
+  .out h3 { margin:0 0 10px; font-size:13px; color:var(--muted); font-weight:600; }
+  .pw { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--border); font-family:ui-monospace,monospace; font-size:13.5px; }
+  .pw:first-of-type { border-top:0; }
+  .pw .v { word-break:break-all; }
+  .pw .strength { font-size:11px; color:var(--muted); }
+  .tip { color:var(--muted); font-size:12px; margin-top:14px; }
+</style>
+</head>
+<body>
+  <h1>密码生成器</h1>
+  <p class="sub">密码学安全随机（Web Crypto），可配置字符集与批量生成。</p>
+
+  <div class="row">
+    <div>
+      <label>长度</label>
+      <input id="len" type="number" value="16" min="4" max="128" />
+    </div>
+    <div>
+      <label>生成数量</label>
+      <input id="count" type="number" value="5" min="1" max="50" />
+    </div>
+  </div>
+
+  <label>字符集</label>
+  <div class="checks">
+    <label><input type="checkbox" id="c-low" checked /> 小写 a-z</label>
+    <label><input type="checkbox" id="c-up" checked /> 大写 A-Z</label>
+    <label><input type="checkbox" id="c-dig" checked /> 数字 0-9</label>
+    <label><input type="checkbox" id="c-sym" checked /> 符号 !@#$%^&*</label>
+    <label><input type="checkbox" id="c-amb" /> 排除易混字符 (0O1lI)</label>
+  </div>
+
+  <div class="acts">
+    <button id="gen">生成</button>
+    <button class="ghost" id="copyall">复制全部</button>
+  </div>
+
+  <div class="out">
+    <h3>结果</h3>
+    <div id="list"></div>
+  </div>
+
+  <p class="tip">使用 <code>crypto.getRandomValues</code> + 拒绝采样，保证每个字符均匀分布且无偏。短密码即使随机也不安全，建议 ≥ 12 位并包含多种字符。</p>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  const SETS = {
+    low: 'abcdefghijklmnopqrstuvwxyz',
+    up: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    dig: '0123456789',
+    sym: '!@#$%^&*()-_=+[]{};:,.<>?'
+  };
+  const AMBIG = new Set('0O1lI|`\'"'.split(''));
+
+  function buildPool() {
+    let pool = '';
+    if ($('c-low').checked) pool += SETS.low;
+    if ($('c-up').checked) pool += SETS.up;
+    if ($('c-dig').checked) pool += SETS.dig;
+    if ($('c-sym').checked) pool += SETS.sym;
+    if ($('c-amb').checked) pool = pool.split('').filter((c) => !AMBIG.has(c)).join('');
+    return pool;
+  }
+
+  // uniform random in [0, n) via rejection sampling
+  function randBelow(n) {
+    const max = Math.floor(0x100000000 / n) * n;
+    let x;
+    do { x = crypto.getRandomValues(new Uint32Array(1))[0]; } while (x >= max);
+    return x % n;
+  }
+
+  function strength(p) {
+    let bits = 0;
+    const poolSize = ($('c-low').checked?26:0) + ($('c-up').checked?26:0) + ($('c-dig').checked?10:0) + ($('c-sym').checked?SETS.sym.length:0);
+    if (poolSize > 1) bits = Math.round(p.length * Math.log2(poolSize));
+    if (bits < 40) return '弱';
+    if (bits < 64) return '中';
+    if (bits < 100) return '强';
+    return '极强';
+  }
+
+  function generate() {
+    const pool = buildPool();
+    const list = $('list');
+    if (!pool) { list.innerHTML = '<div class="pw"><span class="v" style="color:var(--bad)">请至少选择一种字符集。</span></div>'; return; }
+    const len = Math.max(4, Math.min(128, parseInt($('len').value, 10) || 16));
+    const n = Math.max(1, Math.min(50, parseInt($('count').value, 10) || 1));
+    let html = '';
+    for (let i = 0; i < n; i++) {
+      let s = '';
+      for (let j = 0; j < len; j++) s += pool[randBelow(pool.length)];
+      html += `<div class="pw"><span class="v">${s}</span><span class="strength">熵≈${strength(s)}</span></div>`;
+    }
+    list.innerHTML = html;
+  }
+
+  $('gen').onclick = generate;
+  $('copyall').onclick = () => {
+    const items = [...document.querySelectorAll('#list .pw .v')].map((e) => e.textContent);
+    if (!items.length) return;
+    navigator.clipboard?.writeText(items.join('\n'));
+    $('copyall').textContent = '已复制';
+    setTimeout(() => ($('copyall').textContent = '复制全部'), 1200);
+  };
+  generate();
+})();
+</script>
+</body>
+</html>

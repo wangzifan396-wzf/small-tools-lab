@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BMI 计算 · small-tools-lab</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --panel2:#1f232c; --border:#2a2f3a; --text:#e6e9ef; --muted:#9aa3b2; --accent:#6ea8fe; --ok:#4ade80; --bad:#f87171; --warn:#fbbf24; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); padding:22px; }
+  h1 { font-size:18px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 18px; font-size:13px; }
+  label { display:block; font-size:12px; color:var(--muted); margin:14px 0 6px; }
+  input[type=number], select { width:100%; background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:9px 11px; font-size:14px; }
+  input:focus, select:focus { outline:none; border-color:var(--accent); }
+  .row { display:flex; gap:12px; }
+  .row > div { flex:1; }
+  button { background:var(--accent); color:#0b1020; border:0; border-radius:8px; padding:9px 16px; font-weight:600; cursor:pointer; margin-top:16px; }
+  .out { margin-top:18px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px; }
+  .bmi-val { font-size:40px; font-weight:700; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:13px; font-weight:600; margin-left:8px; }
+  .b-under { background:var(--warn); color:#1a1a1a; }
+  .b-normal { background:var(--ok); color:#0a1a0f; }
+  .b-over { background:var(--warn); color:#1a1a1a; }
+  .b-obese { background:var(--bad); color:#1a0a0a; }
+  .res { display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid var(--border); }
+  .res:first-of-type { border-top:0; }
+  .res .k { color:var(--muted); }
+  .scale { margin-top:14px; }
+  .bar { height:10px; border-radius:6px; background:linear-gradient(90deg,var(--warn) 0 18%,var(--ok) 18% 24%,var(--warn) 24% 28%,var(--bad) 28% 100%); position:relative; }
+  .marker { position:absolute; top:-4px; width:3px; height:18px; background:var(--text); border-radius:2px; transform:translateX(-50%); }
+  .tip { color:var(--muted); font-size:12px; margin-top:14px; }
+</style>
+</head>
+<body>
+  <h1>BMI 计算</h1>
+  <p class="sub">输入身高体重，得出 BMI、健康分级与建议体重区间（同时给出 WHO 与中国标准）。</p>
+
+  <div class="row">
+    <div>
+      <label>身高 (cm)</label>
+      <input id="h" type="number" value="170" min="50" max="250" />
+    </div>
+    <div>
+      <label>体重 (kg)</label>
+      <input id="w" type="number" value="65" min="20" max="300" />
+    </div>
+  </div>
+  <div>
+    <label>标准</label>
+    <select id="std">
+      <option value="cn">中国标准 (24 / 28)</option>
+      <option value="who">WHO 标准 (25 / 30)</option>
+    </select>
+  </div>
+  <button id="calc">计算</button>
+
+  <div class="out">
+    <div class="bmi-val" id="bmi">—</div>
+    <span class="badge" id="badge"></span>
+    <div class="res"><span class="k">分级说明</span><span id="desc"></span></div>
+    <div class="res"><span class="k">健康体重区间</span><span id="range"></span></div>
+    <div class="res"><span class="k">距健康区间</span><span id="delta"></span></div>
+    <div class="scale">
+      <div class="bar"><div class="marker" id="marker" style="left:50%"></div></div>
+    </div>
+  </div>
+
+  <p class="tip">BMI = 体重(kg) / 身高(m)²。BMI 仅作粗略参考，肌肉量高者可能偏高；更准确需结合体脂率等指标。</p>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  function category(bmi, std) {
+    const overCut = std === 'cn' ? 24 : 25;
+    const obeseCut = std === 'cn' ? 28 : 30;
+    if (bmi < 18.5) return { key:'under', label:'偏瘦', cls:'b-under', desc:'低于健康体重，建议适当增加营养与锻炼。' };
+    if (bmi < overCut) return { key:'normal', label:'正常', cls:'b-normal', desc:'体重在健康范围内，保持即可。' };
+    if (bmi < obeseCut) return { key:'over', label:'超重', cls:'b-over', desc:'略高于健康范围，建议控制饮食、增加运动。' };
+    return { key:'obese', label:'肥胖', cls:'b-obese', desc:'明显高于健康范围，建议咨询专业人士制定计划。' };
+  }
+
+  function calc() {
+    const h = parseFloat($('h').value), w = parseFloat($('w').value);
+    const std = $('std').value;
+    if (!(h > 0) || !(w > 0)) { $('bmi').textContent = '—'; $('badge').textContent = ''; $('desc').textContent = '请输入有效数值。'; return; }
+    const m = h / 100;
+    const bmi = w / (m * m);
+    const cat = category(bmi, std);
+    $('bmi').textContent = bmi.toFixed(1);
+    const badge = $('badge');
+    badge.textContent = cat.label; badge.className = 'badge ' + cat.cls;
+    $('desc').textContent = cat.desc;
+
+    const overCut = std === 'cn' ? 24 : 25;
+    const healthyMin = (18.5 * m * m);
+    const healthyMax = (overCut * m * m);
+    $('range').textContent = `${healthyMin.toFixed(1)} – ${healthyMax.toFixed(1)} kg`;
+
+    let d = '';
+    if (w < healthyMin) d = `还差 ${(healthyMin - w).toFixed(1)} kg 到健康下限`;
+    else if (w > healthyMax) d = `超出健康上限 ${(w - healthyMax).toFixed(1)} kg`;
+    else d = '已在健康区间内 ✓';
+    $('delta').textContent = d;
+
+    // marker position: map bmi 15..40 -> 0..100%
+    const pos = Math.max(0, Math.min(100, ((bmi - 15) / (40 - 15)) * 100));
+    $('marker').style.left = pos + '%';
+  }
+
+  $('calc').onclick = calc;
+  ['h','w','std'].forEach((id) => $(id).addEventListener('input', calc));
+  $('std').addEventListener('change', calc);
+  calc();
+})();
+</script>
+</body>
+</html>

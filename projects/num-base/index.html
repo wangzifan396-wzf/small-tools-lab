@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>进制转换器 · small-tools-lab</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --panel2:#1f232c; --border:#2a2f3a; --text:#e6e9ef; --muted:#9aa3b2; --accent:#6ea8fe; --ok:#4ade80; --bad:#f87171; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); padding:22px; }
+  h1 { font-size:18px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 18px; font-size:13px; }
+  label { display:block; font-size:12px; color:var(--muted); margin:14px 0 6px; }
+  input[type=number], input[type=text], select { width:100%; background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:9px 11px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; }
+  input:focus, select:focus { outline:none; border-color:var(--accent); }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .out { margin-top:16px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; }
+  .out h3 { margin:0 0 10px; font-size:13px; color:var(--muted); font-weight:600; }
+  .res { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid var(--border); }
+  .res:first-of-type { border-top:0; }
+  .res .k { color:var(--muted); }
+  .res .v { font-family:ui-monospace,monospace; color:var(--accent); word-break:break-all; }
+  .err { color:var(--bad); font-size:12.5px; min-height:18px; }
+  button { background:var(--accent); color:#0b1020; border:0; border-radius:8px; padding:8px 14px; font-weight:600; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--text); border:1px solid var(--border); font-weight:500; }
+  .acts { margin-top:14px; display:flex; gap:8px; }
+  .tip { color:var(--muted); font-size:12px; margin-top:14px; }
+</style>
+</head>
+<body>
+  <h1>进制转换器</h1>
+  <p class="sub">在 2~36 进制之间互转（支持字母 A–Z 表示 10–35）。</p>
+
+  <label>数值</label>
+  <input id="val" type="text" value="255" spellcheck="false" />
+
+  <div class="grid">
+    <div>
+      <label>当前进制 (2–36)</label>
+      <input id="from" type="number" value="10" min="2" max="36" />
+    </div>
+    <div>
+      <label>目标进制 (2–36)</label>
+      <input id="to" type="number" value="16" min="2" max="36" />
+    </div>
+  </div>
+  <div class="err" id="err"></div>
+
+  <div class="out">
+    <h3>转换结果</h3>
+    <div class="res"><span class="k">二进制 (2)</span><span class="v" id="r2"></span></div>
+    <div class="res"><span class="k">八进制 (8)</span><span class="v" id="r8"></span></div>
+    <div class="res"><span class="k">十进制 (10)</span><span class="v" id="r10"></span></div>
+    <div class="res"><span class="k">十六进制 (16)</span><span class="v" id="r16"></span></div>
+    <div class="res"><span class="k">目标 (<span id="toLbl">16</span>)</span><span class="v" id="rto"></span></div>
+  </div>
+
+  <div class="acts">
+    <button class="ghost" id="copy">复制目标值</button>
+    <button class="ghost" id="swap">交换进制</button>
+  </div>
+
+  <p class="tip">例如 255 的二进制是 <code>11111111</code>，十六进制是 <code>FF</code>。转换基于 JavaScript 的 <code>parseInt</code> / <code>toString(base)</code>。</p>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const val = $('val'), from = $('from'), to = $('to');
+  const err = $('err'), toLbl = $('toLbl');
+
+  function setText(id, s) { $(id).textContent = s; }
+
+  function render() {
+    const v = val.value.trim();
+    const f = parseInt(from.value, 10), t = parseInt(to.value, 10);
+    err.textContent = '';
+    if (!v) { ['r2','r8','r10','r16','rto'].forEach((id) => setText(id, '')); return; }
+    if (!(f >= 2 && f <= 36) || !(t >= 2 && t <= 36)) { err.textContent = '进制必须在 2–36 之间。'; return; }
+    const n = parseInt(v, f);
+    if (isNaN(n)) { err.textContent = `「${v}」不是合法的 ${f} 进制数。`; return; }
+    toLbl.textContent = t;
+    const fmt = (base) => {
+      const s = n.toString(base);
+      return base === 16 ? s.toUpperCase() : s.toUpperCase();
+    };
+    setText('r2', n.toString(2));
+    setText('r8', n.toString(8));
+    setText('r10', String(n));
+    setText('r16', n.toString(16).toUpperCase());
+    setText('rto', n.toString(t).toUpperCase());
+  }
+
+  ['input', 'change'].forEach((ev) => {
+    val.addEventListener(ev, render);
+    from.addEventListener(ev, render);
+    to.addEventListener(ev, render);
+  });
+
+  $('copy').onclick = () => {
+    const t = parseInt(to.value, 10);
+    const n = parseInt(val.value.trim(), parseInt(from.value, 10));
+    if (isNaN(n)) return;
+    navigator.clipboard?.writeText(n.toString(t).toUpperCase());
+    $('copy').textContent = '已复制';
+    setTimeout(() => ($('copy').textContent = '复制目标值'), 1200);
+  };
+  $('swap').onclick = () => {
+    const a = from.value; from.value = to.value; to.value = a; render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>

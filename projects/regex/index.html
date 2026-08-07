@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Regex 测试器 · small-tools-lab</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --panel2:#1f232c; --border:#2a2f3a; --text:#e6e9ef; --muted:#9aa3b2; --accent:#6ea8fe; --ok:#4ade80; --bad:#f87171; --mark:#fde68a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); padding:22px; }
+  h1 { font-size:18px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 18px; font-size:13px; }
+  label { display:block; font-size:12px; color:var(--muted); margin:14px 0 6px; }
+  .row { display:flex; gap:8px; align-items:center; }
+  input[type=text], textarea, select { width:100%; background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:9px 11px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; }
+  textarea { resize:vertical; min-height:120px; }
+  input:focus, textarea:focus { outline:none; border-color:var(--accent); }
+  .flags { max-width:120px; }
+  .err { color:var(--bad); font-size:12.5px; min-height:18px; margin-top:6px; }
+  .out { margin-top:16px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; }
+  .out h3 { margin:0 0 8px; font-size:13px; color:var(--muted); font-weight:600; }
+  .hl { white-space:pre-wrap; word-break:break-word; font-family:ui-monospace,monospace; font-size:13px; }
+  .hl mark { background:var(--mark); color:#1a1a1a; border-radius:3px; padding:0 2px; }
+  .match { font-size:12.5px; border-top:1px solid var(--border); padding:7px 0; }
+  .match:first-of-type { border-top:0; }
+  .match b { color:var(--accent); }
+  .g { color:var(--ok); }
+  .count { color:var(--muted); }
+  code.k { background:var(--panel2); padding:1px 5px; border-radius:4px; }
+  .tip { color:var(--muted); font-size:12px; margin-top:14px; }
+</style>
+</head>
+<body>
+  <h1>Regex 测试器</h1>
+  <p class="sub">实时匹配、捕获组高亮，纯前端零依赖。</p>
+
+  <label>正则（不含外层的 / /）</label>
+  <div class="row">
+    <input id="pat" type="text" value="(\w+)@(\w+)\.(\w+)" spellcheck="false" placeholder="例如 (\d{4})-(\d{2})-(\d{2})" />
+    <input id="flags" class="flags" type="text" value="g" spellcheck="false" title="flags: g i m s u y" />
+  </div>
+  <div class="err" id="err"></div>
+
+  <label>测试文本</label>
+  <textarea id="text" spellcheck="false">联系：alice@example.com, bob@test.org
+日期 2026-08-07 与 1994-03-15 都试试。</textarea>
+
+  <div class="out">
+    <h3>高亮结果</h3>
+    <div class="hl" id="hl"></div>
+  </div>
+
+  <div class="out">
+    <h3>匹配明细 <span class="count" id="count"></span></h3>
+    <div id="matches"></div>
+  </div>
+
+  <p class="tip">常用：<code class="k">\d</code> 数字 · <code class="k">\w</code> 词字符 · <code class="k">.</code> 任意 · <code class="k">+</code>/<code class="k">*</code>/<code class="k">?</code> 量词 · <code class="k">( )</code> 捕获组 · <code class="k">[ ]</code> 字符集 · <code class="k">|</code> 或。flags：<code class="k">g</code> 全局、<code class="k">i</code> 忽略大小写、<code class="k">m</code> 多行、<code class="k">s</code> 点匹配换行、<code class="k">u</code> Unicode。</p>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const pat = $('pat'), flags = $('flags'), text = $('text');
+  const err = $('err'), hl = $('hl'), matches = $('matches'), count = $('count');
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  function render() {
+    const p = pat.value, f = flags.value;
+    if (!p) { err.textContent = ''; hl.textContent = text.value; matches.innerHTML = ''; count.textContent = ''; return; }
+    let re;
+    try { re = new RegExp(p, f.includes('g') ? f : f + 'g'); }
+    catch (e) { err.textContent = '正则错误：' + e.message; hl.textContent = text.value; matches.innerHTML = ''; count.textContent = ''; return; }
+    err.textContent = '';
+
+    const src = text.value;
+    let out = '', last = 0, m, list = [];
+    const baseRe = new RegExp(p, f); // for single-shot group display
+    // collect matches with global
+    re.lastIndex = 0;
+    while ((m = re.exec(src)) !== null) {
+      list.push(m);
+      out += escapeHtml(src.slice(last, m.index));
+      out += '<mark>' + escapeHtml(m[0]) + '</mark>';
+      last = m.index + m[0].length;
+      if (m.index === re.lastIndex) re.lastIndex++; // avoid zero-width loop
+    }
+    out += escapeHtml(src.slice(last));
+    hl.innerHTML = out || escapeHtml(src);
+
+    count.textContent = list.length ? `(${list.length} 处)` : '(无匹配)';
+    matches.innerHTML = list.map((mm, i) => {
+      let groups = '';
+      for (let g = 1; g < mm.length; g++) {
+        groups += `<div class="g">组 ${g}: ${mm[g] === undefined ? '∅' : escapeHtml(mm[g])}</div>`;
+      }
+      return `<div class="match"><b>#${i + 1}</b> @${mm.index}: <code>${escapeHtml(mm[0])}</code>${groups}</div>`;
+    }).join('') || '<div class="match">没有匹配项。</div>';
+  }
+
+  ['input', 'change'].forEach((ev) => {
+    pat.addEventListener(ev, render);
+    flags.addEventListener(ev, render);
+    text.addEventListener(ev, render);
+  });
+  render();
+})();
+</script>
+</body>
+</html>

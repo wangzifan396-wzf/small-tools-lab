@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>文本差异 · small-tools-lab</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --panel2:#1f232c; --border:#2a2f3a; --text:#e6e9ef; --muted:#9aa3b2; --accent:#6ea8fe; --ok:#4ade80; --bad:#f87171; --add:#16341f; --del:#3a1d1d; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); padding:22px; }
+  h1 { font-size:18px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 18px; font-size:13px; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  label { display:block; font-size:12px; color:var(--muted); margin:0 0 6px; }
+  textarea { width:100%; min-height:180px; background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:10px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; resize:vertical; }
+  textarea:focus { outline:none; border-color:var(--accent); }
+  .ctrls { display:flex; gap:8px; margin:14px 0; align-items:center; }
+  button { background:var(--accent); color:#0b1020; border:0; border-radius:8px; padding:9px 16px; font-weight:600; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--text); border:1px solid var(--border); font-weight:500; }
+  .out { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; }
+  .out h3 { margin:0 0 10px; font-size:13px; color:var(--muted); font-weight:600; }
+  .summary { font-size:12.5px; color:var(--muted); margin-bottom:10px; }
+  .summary .a { color:var(--ok); } .summary .d { color:var(--bad); }
+  .diff { font-family:ui-monospace,monospace; font-size:12.5px; white-space:pre-wrap; word-break:break-word; max-height:420px; overflow:auto; }
+  .diff .line { padding:1px 6px; border-radius:3px; }
+  .diff .add { background:var(--add); color:#b6f3c8; }
+  .diff .del { background:var(--del); color:#f7b6b6; }
+  .diff .ctx { color:var(--muted); }
+  .tip { color:var(--muted); font-size:12px; margin-top:14px; }
+</style>
+</head>
+<body>
+  <h1>文本差异</h1>
+  <p class="sub">逐行对比两段文本，基于 LCS 算法标出新增 / 删除 / 未变更。</p>
+
+  <div class="cols">
+    <div><label>原文本 (A)</label><textarea id="a" spellcheck="false">function add(a,b){
+  return a+b
+}
+const x = add(1,2)</textarea></div>
+    <div><label>新文本 (B)</label><textarea id="b" spellcheck="false">function add(a, b) {
+  // 求和
+  return a + b;
+}
+const result = add(1, 2);</textarea></div>
+  </div>
+
+  <div class="ctrls">
+    <button id="diff">对比</button>
+    <button class="ghost" id="copy">复制差异</button>
+    <label style="margin:0 0 0 8px;display:flex;align-items:center;gap:6px;color:var(--text);font-size:13px;"><input type="checkbox" id="ctx" checked style="width:auto;" /> 显示未变更行</label>
+  </div>
+
+  <div class="out">
+    <h3>差异结果</h3>
+    <div class="summary" id="summary"></div>
+    <div class="diff" id="result"></div>
+  </div>
+
+  <p class="tip">算法：最长公共子序列（LCS）。适合代码、配置、文档的小到中等改动对比；超大文本可能较慢。</p>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  // LCS-based line diff -> sequence of {type:'ctx'|'add'|'del', text}
+  function diffLines(aLines, bLines) {
+    const n = aLines.length, m = bLines.length;
+    const dp = Array.from({ length: n + 1 }, () => new Int32Array(m + 1));
+    for (let i = n - 1; i >= 0; i--) {
+      for (let j = m - 1; j >= 0; j--) {
+        dp[i][j] = aLines[i] === bLines[j]
+          ? dp[i + 1][j + 1] + 1
+          : Math.max(dp[i + 1][j], dp[i][j + 1]);
+      }
+    }
+    const out = [];
+    let i = 0, j = 0;
+    while (i < n && j < m) {
+      if (aLines[i] === bLines[j]) { out.push({ type: 'ctx', text: aLines[i] }); i++; j++; }
+      else if (dp[i + 1][j] >= dp[i][j + 1]) { out.push({ type: 'del', text: aLines[i] }); i++; }
+      else { out.push({ type: 'add', text: bLines[j] }); j++; }
+    }
+    while (i < n) { out.push({ type: 'del', text: aLines[i] }); i++; }
+    while (j < m) { out.push({ type: 'add', text: bLines[j] }); j++; }
+    return out;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  function run() {
+    const aLines = $('a').value.split('\n');
+    const bLines = $('b').value.split('\n');
+    const showCtx = $('ctx').checked;
+    const res = diffLines(aLines, bLines);
+    let adds = 0, dels = 0;
+    let html = '';
+    for (const r of res) {
+      if (r.type === 'add') { adds++; html += `<div class="line add">+ ${escapeHtml(r.text)}</div>`; }
+      else if (r.type === 'del') { dels++; html += `<div class="line del">- ${escapeHtml(r.text)}</div>`; }
+      else if (showCtx) { html += `<div class="line ctx">  ${escapeHtml(r.text)}</div>`; }
+    }
+    $('result').innerHTML = html || '<div class="line ctx">（两段文本完全相同）</div>';
+    $('summary').innerHTML = `共 <span class="a">+${adds} 新增</span> / <span class="d">-${dels} 删除</span>，未变更 ${res.length - adds - dels} 行。`;
+  }
+
+  $('diff').onclick = run;
+  $('ctx').onchange = run;
+  $('copy').onclick = () => {
+    navigator.clipboard?.writeText($('result').innerText);
+    $('copy').textContent = '已复制';
+    setTimeout(() => ($('copy').textContent = '复制差异'), 1200);
+  };
+  run();
+})();
+</script>
+</body>
+</html>
