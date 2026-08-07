@@ -77,13 +77,8 @@
   <p class="foot">UTF-8 安全 · 零依赖 · 数据不出本机</p>
 </div>
 
-<script>
-"use strict";
-function utf8ToBytes(str){ return new TextEncoder().encode(str); }
-function bytesToBase64(bytes){ let bin=""; for(let i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]); return btoa(bin); }
-function base64ToBytes(b64){ const bin=atob(b64); const bytes=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i); return bytes; }
-function bytesToUtf8(bytes){ return new TextDecoder().decode(bytes); }
-
+<script type="module">
+import { decodeBase64, encodeBase64 } from './src/index.js';
 const $=(id)=>document.getElementById(id);
 function render(){
   const mode=$('mode').value;
@@ -92,28 +87,17 @@ function render(){
   err.textContent=""; err.className="err";
   if(!input){ $('output').value=""; return; }
   try{
-    let out;
-    if(mode==="encode"){ out=bytesToBase64(utf8ToBytes(input)); }
-    else {
-      const trimmed=input.trim().replace(/\s+/g,"");
-      out=bytesToUtf8(base64ToBytes(trimmed));
-    }
-    $('output').value=out;
+    $('output').value=mode==="encode" ? encodeBase64(input) : decodeBase64(input);
   }catch(e){
-    err.textContent="解码失败：不是合法的 Base64（" + (e && e.message ? e.message : e) + "）";
+    $('output').value="";
+    err.textContent="转换失败：" + (e && e.message ? e.message : e);
   }
 }
-function copy(){
+async function copy(){
   const v=$('output').value;
   if(!v){ return; }
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(v).then(()=>{ flash("已复制"); }, ()=>fallbackCopy(v));
-  } else fallbackCopy(v);
-}
-function fallbackCopy(v){
-  const t=$('output'); t.removeAttribute("readonly"); t.select();
-  try{ document.execCommand("copy"); flash("已复制"); }catch(e){ flash("复制失败，请手动选择"); }
-  t.setAttribute("readonly","");
+  try { await navigator.clipboard.writeText(v); flash("已复制"); }
+  catch { flash("浏览器拒绝了剪贴板权限，请手动复制"); }
 }
 function flash(msg){
   const err=$('err'); err.textContent=msg; err.className="err ok";

@@ -9,4 +9,20 @@
 - 一键复制、载入示例
 
 ## 用法
-直接双击 `index.html` 在浏览器打开即可（纯前端、零依赖、数据不出本机）。
+
+[在线使用](https://wangzifan396-wzf.github.io/small-tools-lab/projects/jsonfmt/)，或在本地运行：
+
+```sh
+npm start
+```
+
+核心模块支持自定义缩进、递归键排序、末尾换行和结构化校验结果：
+
+```js
+import { formatJson, validateJson } from './src/index.js';
+
+console.log(formatJson('{"z":1,"a":2}', { sortKeys: true }));
+console.log(validateJson('{broken}'));
+```
+
+Node.js 20+ 可运行 `npm test`。纯前端、零依赖、数据不出本机。

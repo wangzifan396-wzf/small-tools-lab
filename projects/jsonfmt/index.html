@@ -75,14 +75,9 @@
   <p class="foot">JSON.parse / stringify · 零依赖 · 数据不出本机</p>
 </div>
 
-<script>
-"use strict";
+<script type="module">
+import { formatJson, minifyJson, validateJson } from './src/index.js';
 const $=(id)=>document.getElementById(id);
-function parse(){
-  const raw=$('input').value;
-  if(!raw.trim()) throw new Error("输入为空");
-  return JSON.parse(raw);
-}
 function setErr(msg, kind){
   const e=$('err'); e.textContent=msg; e.className="err " + (kind||"");
 }
@@ -91,26 +86,21 @@ function flash(msg){
   setTimeout(()=>{ if($('err').textContent===msg) $('err').textContent=""; }, 1400);
 }
 function format(){
-  try{ const obj=parse(); $('output').value=JSON.stringify(obj, null, 2); setErr("✓ 合法 JSON，已美化", "ok"); }
+  try{ $('output').value=formatJson($('input').value); setErr("✓ 合法 JSON，已美化", "ok"); }
   catch(e){ $('output').value=""; setErr("✗ " + (e && e.message ? e.message : e), "bad"); }
 }
 function minify(){
-  try{ const obj=parse(); $('output').value=JSON.stringify(obj); setErr("✓ 合法 JSON，已压缩", "ok"); }
+  try{ $('output').value=minifyJson($('input').value); setErr("✓ 合法 JSON，已压缩", "ok"); }
   catch(e){ $('output').value=""; setErr("✗ " + (e && e.message ? e.message : e), "bad"); }
 }
 function validate(){
-  try{ parse(); setErr("✓ 合法的 JSON", "ok"); }
-  catch(e){ setErr("✗ " + (e && e.message ? e.message : e), "bad"); }
+  const result=validateJson($('input').value);
+  setErr(result.valid ? "✓ 合法的 JSON" : "✗ " + result.error, result.valid ? "ok" : "bad");
 }
-function copy(){
+async function copy(){
   const v=$('output').value; if(!v) return;
-  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(()=>flash("已复制"), ()=>fallback(v));
-  else fallback(v);
-}
-function fallback(v){
-  const t=$('output'); t.removeAttribute("readonly"); t.select();
-  try{ document.execCommand("copy"); flash("已复制"); }catch(e){ flash("复制失败，请手动选择"); }
-  t.setAttribute("readonly","");
+  try { await navigator.clipboard.writeText(v); flash("已复制"); }
+  catch { flash("浏览器拒绝了剪贴板权限，请手动复制"); }
 }
 function sample(){
   $('input').value='{"agent":"Agenite","localFirst":true,"tools":["write_file","run_command","web_fetch"],"mcp":{"count":12,"readonly":true}}';

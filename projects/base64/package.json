@@ -3,5 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "description": "Zero-dependency UTF-8-safe Base64 encoder/decoder that runs in the browser.",
-  "type": "module"
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "types": "types/index.d.ts",
+  "exports": { ".": { "types": "./types/index.d.ts", "import": "./src/index.js" } },
+  "main": "src/index.js",
+  "files": ["src", "types", "index.html", "playground", "README.md", "SECURITY.md"],
+  "scripts": { "test": "node --test", "start": "node playground/serve.js" },
+  "keywords": ["base64", "base64url", "utf8", "encoder", "decoder"],
+  "license": "MIT"
 }
