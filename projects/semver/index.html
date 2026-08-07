@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SemVer 检查 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  textarea, input[type=text] { width:100%; border:1px solid var(--bd); border-radius:8px; padding:9px 11px; font:14px ui-monospace,monospace; background:#fff; color:var(--ink); }
+  textarea { min-height:90px; resize:vertical; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  .badge { font-size:12px; padding:4px 10px; border-radius:999px; border:1px solid var(--bd); }
+  .badge.ok { background:#e7f5ec; color:#1d7a43; border-color:#bfe6cd; }
+  .badge.err { background:#fdeaea; color:#b3261e; border-color:#f4c9c6; }
+  .line { display:flex; gap:10px; align-items:center; border:1px solid var(--bd); border-radius:10px; padding:8px 12px; margin-bottom:6px; background:#fcfbf9; font:13px ui-monospace,monospace; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; white-space:pre-wrap; }
+  .ico { color:var(--ac2); }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">📦</span> SemVer 检查</h1>
+  <p class="sub">校验、比较、排序语义化版本号，并判断是否满足范围。纯浏览器零依赖。</p>
+
+  <div class="card">
+    <label>版本列表（每行一个，可带 v 前缀）</label>
+    <textarea id="list">v1.2.3
+2.0.0-beta.1
+1.10.0
+1.2.3-alpha
+0.9.0</textarea>
+    <div class="row">
+      <button class="pri" id="sort">排序（升序）</button>
+      <button id="validate">全部校验</button>
+    </div>
+    <div id="out" class="note"></div>
+  </div>
+
+  <div class="card">
+    <label>范围匹配（如 ^1.2.0、~1.2.3、&gt;=1.0.0 &lt;2.0.0、1.2.x）</label>
+    <div class="row">
+      <input type="text" id="range" value="^1.2.0" style="flex:1; min-width:200px;" />
+      <input type="text" id="cand" placeholder="待检验版本，如 1.5.0" style="flex:1; min-width:160px;" />
+      <button class="pri" id="check">是否满足</button>
+    </div>
+    <div class="note" id="rnote">支持 ^ 兼容、~ 近似、x 通配、与/或裸版本；比较按 major.minor.patch 及预发布。</div>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const RE = /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+([0-9A-Za-z.-]+))?$/;
+  function parse(v){
+    const m = v.trim().match(RE);
+    if(!m) return null;
+    return { major:+m[1], minor:+m[2], patch:+m[3], pre:m[4]?m[4].split("."):[], build:m[5]||"" };
+  }
+  function cmp(a,b){
+    for(const k of ["major","minor","patch"]){ if(a[k]!==b[k]) return a[k]-b[k]; }
+    if(!a.pre.length && !b.pre.length) return 0;
+    if(!a.pre.length) return 1; if(!b.pre.length) return -1;
+    for(let i=0;i<Math.max(a.pre.length,b.pre.length);i++){
+      if(a.pre[i]===undefined) return -1; if(b.pre[i]===undefined) return 1;
+      const an=+a.pre[i], bn=+b.pre[i];
+      if(!isNaN(an)&&!isNaN(bn)){ if(an!==bn) return an-bn; }
+      else if(a.pre[i]!==b.pre[i]) return a.pre[i]<b.pre[i]?-1:1;
+    }
+    return 0;
+  }
+  function satisfies(range, ver){
+    ver = parse(ver); if(!ver) return false;
+    range = range.trim();
+    // handle || as OR first
+    if(range.includes("||")) return range.split("||").some(r=>satisfies(r.trim(), verStr(ver)));
+    // handle space/comma as AND
+    const ands = range.split(/\s+|,/).filter(Boolean);
+    if(ands.length>1) return ands.every(r=>satisfies(r, verStr(ver)));
+    const m = range.match(/^([\^~]?)(>=|<=|>|<|=)?\s*v?(\d+|x)(?:\.(\d+|x)(?:\.(\d+|x)(?:-([0-9A-Za-z.-]+))?)?)?$/);
+    if(!m){ const p=parse(range); return p && cmp(p,ver)===0; }
+    const [, caret, op, ma, mi, pa, pre] = m;
+    const base = parse(range.replace(/[\\^~>=<]/g,"").replace(/x/g,"0").replace(/v/g,"")||"0.0.0");
+    if(op){ // comparator
+      const target = parse(range.replace(/[<>=]/g,"")); if(!target) return false;
+      const c = cmp(ver, target);
+      if(op===">=") return c>=0; if(op==="<=") return c<=0; if(op===">") return c>0; if(op==="<") return c<0; if(op==="=") return c===0;
+    }
+    if(caret==="^"){ if(ma==="x") return true; if(base.major>0) return ver.major===base.major && cmp(ver,base)>=0; if(base.minor>0) return ver.major===0&&ver.minor===base.minor&&cmp(ver,base)>=0; return ver.major===0&&ver.minor===0&&cmp(ver,base)>=0; }
+    if(caret==="~"){ if(ma==="x") return true; if(mi==="x") return ver.major===base.major && cmp(ver,base)>=0; return ver.major===base.major&&ver.minor===base.minor&&cmp(ver,base)>=0; }
+    // bare or x-wildcard
+    if(pa==="x"||pa===undefined){ if(mi==="x") return String(ver.major)===ma; if(pa==="x") return ver.major===base.major&&ver.minor===base.minor; return cmp(ver,base)===0; }
+    return cmp(ver,base)===0;
+  }
+  function verStr(v){ return v.pre.length?`${v.major}.${v.minor}.${v.patch}-${v.pre.join(".")}`:`${v.major}.${v.minor}.${v.patch}`; }
+  $("sort").onclick = () => {
+    const lines = $("list").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    const parsed = lines.map(l=>({raw:l,p:parse(l)}));
+    const bad = parsed.filter(x=>!x.p).map(x=>x.raw);
+    parsed.filter(x=>x.p).sort((a,b)=>cmp(a.p,b.p));
+    const ok = parsed.filter(x=>x.p).sort((a,b)=>cmp(a.p,b.p)).map(x=>x.raw);
+    $("list").value = ok.join("\n");
+    $("out").innerHTML = bad.length ? '<span style="color:#b3261e">⚠ 非法：'+bad.join(", ")+'</span>' : '<span style="color:#1d7a43">已按升序排序，全部合法。</span>';
+  };
+  $("validate").onclick = () => {
+    const lines = $("list").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    const bad = lines.filter(l=>!parse(l));
+    $("out").innerHTML = bad.length ? '<span style="color:#b3261e">⚠ 非法版本：'+bad.join(", ")+'</span>' : '<span style="color:#1d7a43">✓ 全部为合法 SemVer。</span>';
+  };
+  $("check").onclick = () => {
+    const r=$("range").value, c=$("cand").value.trim();
+    if(!c){ $("rnote").textContent="请输入待检验版本。"; return; }
+    const ok = satisfies(r, c);
+    $("rnote").innerHTML = '范围 <code>'+r+'</code> 对 <code>'+c+'</code>：<b style="color:'+(ok?"#1d7a43":"#b3261e")+'">'+(ok?"满足":"不满足")+'</b>';
+  };
+  $("validate").click();
+})();
+</script>
+</body>
+</html>

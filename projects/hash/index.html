@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hash 校验台 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:880px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  .field { display:flex; flex-direction:column; gap:6px; }
+  textarea { width:100%; min-height:120px; border:1px solid var(--bd); border-radius:10px; padding:10px 12px; font:13.5px ui-monospace,SFMono-Regular,Menlo,monospace; resize:vertical; background:#fff; color:var(--ink); }
+  select, input[type=text] { border:1px solid var(--bd); border-radius:8px; padding:8px 10px; font:14px inherit; background:#fff; color:var(--ink); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  button.ghost { color:var(--mut); }
+  .algo { display:flex; gap:8px; flex-wrap:wrap; }
+  .algo button { padding:7px 12px; }
+  .algo button.on { background:var(--ac2); color:#fff; border-color:var(--ac2); }
+  .out { display:flex; flex-direction:column; gap:10px; }
+  .oline { display:flex; align-items:baseline; gap:10px; border:1px solid var(--bd); border-radius:10px; padding:9px 12px; background:#fcfbf9; }
+  .oline .k { font-size:12px; color:var(--mut); min-width:74px; }
+  .oline .v { font:13px ui-monospace,monospace; word-break:break-all; flex:1; }
+  .oline .cp { font-size:12px; color:var(--ac2); cursor:pointer; border:none; background:none; padding:0; }
+  .drop { border:2px dashed var(--bd); border-radius:12px; padding:18px; text-align:center; color:var(--mut); cursor:pointer; transition:.15s; }
+  .drop.over { border-color:var(--ac); color:var(--ac); background:#fff8ec; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .ico { color:var(--ac2); }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">🔐</span> Hash 校验台</h1>
+  <p class="sub">计算文本的 MD5 / SHA 系列摘要与 HMAC，也支持拖入文件生成校验和。纯浏览器零依赖，数据不出本机。</p>
+
+  <div class="card">
+    <label>输入文本</label>
+    <textarea id="inp" placeholder="在此粘贴或输入需要哈希的内容…">Hello, Small Tools Lab</textarea>
+    <div class="row">
+      <div class="algo" id="algo">
+        <button data-a="MD5" class="on">MD5</button>
+        <button data-a="SHA-1">SHA-1</button>
+        <button data-a="SHA-256">SHA-256</button>
+        <button data-a="SHA-384">SHA-384</button>
+        <button data-a="SHA-512">SHA-512</button>
+      </div>
+    </div>
+    <div class="row">
+      <label style="margin:0;">HMAC 密钥（可选）</label>
+      <input type="text" id="hmacKey" placeholder="留空则仅计算摘要" style="flex:1; min-width:200px;" />
+      <button class="pri" id="run">计算</button>
+      <button class="ghost" id="clr">清空</button>
+    </div>
+    <div class="note" id="note">输入即实时哈希；切换算法或填写 HMAC 密钥也会实时更新。HMAC 仅对 SHA 系列生效。</div>
+  </div>
+
+  <div class="card">
+    <label>结果</label>
+    <div class="out" id="out"><div class="note">尚无结果。</div></div>
+  </div>
+
+  <div class="card">
+    <label>文件校验（拖入或选择文件）</label>
+    <div class="drop" id="drop">把文件拖到这里，或点击选择文件</div>
+    <input type="file" id="file" style="display:none;" />
+    <div class="out" id="fout" style="margin-top:12px;"></div>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  let algo = "MD5";
+
+  // ---- MD5 (RFC 1321), 32-bit safe ----
+  function md5(msg) {
+    function toBytes(str){ return new TextEncoder().encode(str); }
+    function rotl(x,n){ return (x<<n)|(x>>>(32-n)); }
+    function add(a,b){ const l=(a&0xffff)+(b&0xffff); const r=(a>>>16)+(b>>>16)+(l>>>16); return ((r&0xffff)<<16)|(l&0xffff); }
+    const s=[7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+    const K=new Array(64); for(let i=0;i<64;i++) K[i]=Math.floor(Math.abs(Math.sin(i+1))*4294967296)|0;
+    const inp=toBytes(msg); const len=inp.length;
+    const tail=len%64; const pad=tail<56?56-tail:120-tail;
+    const total=len+pad+8; const buf=new Uint8Array(total); buf.set(inp); buf[len]=0x80;
+    const dv=new DataView(buf.buffer); const bits=len*8;
+    dv.setUint32(total-8, bits>>>0, true); dv.setUint32(total-4, Math.floor(bits/0x100000000), true);
+    let a0=0x67452301,b0=0xefcdab89,c0=0x98badcfe,d0=0x10325476;
+    const M=new Int32Array(16);
+    for(let off=0;off<total;off+=64){
+      for(let i=0;i<16;i++) M[i]=dv.getInt32(off+i*4,true);
+      let A=a0,B=b0,C=c0,D=d0;
+      for(let i=0;i<64;i++){
+        let F,g;
+        if(i<16){ F=(B&C)|((~B)&D); g=i; }
+        else if(i<32){ F=(D&B)|((~D)&C); g=(5*i+1)%16; }
+        else if(i<48){ F=B^C^D; g=(3*i+5)%16; }
+        else { F=C^(B|(~D)); g=(7*i)%16; }
+        F=add(add(F,A),add(K[i],M[g]));
+        A=D; D=C; C=B; B=add(B,rotl(F,s[i]));
+      }
+      a0=add(a0,A); b0=add(b0,B); c0=add(c0,C); d0=add(d0,D);
+    }
+    function h(n){ let str=""; for(let i=0;i<4;i++) str+=("0"+((n>>>(i*8))&0xff).toString(16)).slice(-2); return str; }
+    return h(a0)+h(b0)+h(c0)+h(d0);
+  }
+
+  function toHex(buf){ return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join(""); }
+  function toB64(buf){ let s=""; const u=new Uint8Array(buf); for(let i=0;i<u.length;i++) s+=String.fromCharCode(u[i]); return btoa(s); }
+  function shaName(a){ return "SHA-" + a.split("-")[1]; }
+
+  async function sha(a, data){ return await crypto.subtle.digest(shaName(a), data); }
+  async function hmac(a, key, data){
+    const k=await crypto.subtle.importKey("raw", new TextEncoder().encode(key), { name:"HMAC", hash:shaName(a) }, false, ["sign"]);
+    return await crypto.subtle.sign("HMAC", k, data);
+  }
+
+  async function compute(){
+    const txt=$("inp").value; const enc=new TextEncoder().encode(txt); const outs=[];
+    try {
+      if(algo==="MD5"){ outs.push(["MD5", md5(txt), null]); }
+      else {
+        const hbuf=await sha(algo, enc); outs.push([algo, toHex(hbuf), toB64(hbuf)]);
+        const key=$("hmacKey").value;
+        if(key){ const mbuf=await hmac(algo, key, enc); outs.push([algo+" (HMAC)", toHex(mbuf), toB64(mbuf)]); }
+      }
+    } catch(e){ $("note").textContent="⚠ "+e.message; return; }
+    renderOut(outs);
+  }
+
+  function renderOut(outs){
+    $("out").innerHTML=outs.map(([k,v,b64]) =>
+      '<div class="oline"><span class="k">'+k+'</span><span class="v">'+v+'</span>' +
+      (b64?'<button class="cp" data-c="'+b64+'">B64</button>':'') +
+      '<button class="cp" data-c="'+v+'">复制</button></div>').join("");
+    $("out").querySelectorAll(".cp").forEach(b=>b.onclick=()=>{ navigator.clipboard.writeText(b.dataset.c); const t=b.textContent; b.textContent="已复制"; setTimeout(()=>b.textContent=t,900); });
+  }
+
+  $("algo").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    $("algo").querySelectorAll("button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); algo=b.dataset.a; compute();
+  });
+  $("run").onclick=compute; $("inp").oninput=compute; $("hmacKey").oninput=compute;
+  $("clr").onclick=()=>{ $("inp").value=""; $("out").innerHTML='<div class="note">已清空。</div>'; };
+
+  async function hashFile(file){
+    const data=await file.arrayBuffer(); const outs=[["文件", file.name+" ("+file.size+" B)", null]];
+    try {
+      if(algo==="MD5") outs.push(["MD5", md5(new TextDecoder().decode(data)), null]);
+      else { const h=await sha(algo,data); outs.push([algo, toHex(h), toB64(h)]); }
+    } catch(e){ $("note").textContent="⚠ "+e.message; return; }
+    $("fout").innerHTML=outs.map(([k,v])=>'<div class="oline"><span class="k">'+k+'</span><span class="v">'+String(v)+'</span>'+(v&&k!=="文件"?'<button class="cp" data-c="'+v+'">复制</button>':'')+'</div>').join("");
+    $("fout").querySelectorAll(".cp").forEach(b=>b.onclick=()=>navigator.clipboard.writeText(b.dataset.c));
+  }
+  const drop=$("drop");
+  drop.onclick=()=>$("file").click();
+  drop.ondragover=(e)=>{e.preventDefault();drop.classList.add("over");};
+  drop.ondragleave=()=>drop.classList.remove("over");
+  drop.ondrop=(e)=>{e.preventDefault();drop.classList.remove("over"); if(e.dataTransfer.files[0]) hashFile(e.dataTransfer.files[0]);};
+  $("file").onchange=()=>{ if($("file").files[0]) hashFile($("file").files[0]); };
+
+  compute();
+})();
+</script>
+</body>
+</html>

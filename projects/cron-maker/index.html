@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cron 构建器 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  input[type=text], select { border:1px solid var(--bd); border-radius:8px; padding:8px 10px; font:14px ui-monospace,monospace; background:#fff; color:var(--ink); }
+  .fields { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+  .fields .f label { text-align:center; }
+  .fields input { text-align:center; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  .expr { border:1px solid var(--bd); border-radius:10px; padding:12px; font:16px ui-monospace,monospace; background:#fcfbf9; text-align:center; letter-spacing:1px; }
+  .desc { font-size:14px; color:var(--ac2); margin-top:8px; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .ico { color:var(--ac2); }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+  @media (max-width:620px){ .fields { grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">⏰</span> Cron 构建器</h1>
+  <p class="sub">可视化构建 5 字段 Cron 表达式并生成中文描述。纯浏览器零依赖。</p>
+
+  <div class="card">
+    <div class="row">
+      <label style="margin:0;">常用模板</label>
+      <select id="preset">
+        <option value="* * * * *">每分钟</option>
+        <option value="0 * * * *">每小时整点</option>
+        <option value="0 9 * * *">每天 09:00</option>
+        <option value="0 9 * * 1-5">工作日 09:00</option>
+        <option value="0 0 * * 0">每周日 00:00</option>
+        <option value="0 0 1 * *">每月 1 日 00:00</option>
+        <option value="*/15 * * * *">每 15 分钟</option>
+        <option value="custom">自定义…</option>
+      </select>
+    </div>
+    <div class="fields" style="margin-top:14px;">
+      <div class="f"><label>分</label><input type="text" id="m" value="*" /></div>
+      <div class="f"><label>时</label><input type="text" id="h" value="*" /></div>
+      <div class="f"><label>日</label><input type="text" id="dom" value="*" /></div>
+      <div class="f"><label>月</label><input type="text" id="mon" value="*" /></div>
+      <div class="f"><label>周</label><input type="text" id="dow" value="*" /></div>
+    </div>
+    <div class="row"><button class="pri" id="build">生成</button></div>
+  </div>
+
+  <div class="card">
+    <label>表达式</label>
+    <div class="expr" id="expr">* * * * *</div>
+    <div class="desc" id="desc"></div>
+    <div class="row"><button id="copy">复制表达式</button></div>
+    <div class="note">标准 5 字段：分 时 日 月 周。仅生成表达式与通俗描述，不校验语法合法性（请用 Cron Describe 工具详查）。</div>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  function field(v, names){ if(v==="*") return "每"+names.unit; if(v.includes("/")){ const [,step]=v.split("/"); return "每"+step+names.unit; } if(v.includes("-")) return names.range.replace("{a}",v.split("-")[0]).replace("{b}",v.split("-")[1]); if(v.includes(",")) return v.split(",").map(x=>names.single.replace("{x}",x)).join("、"); return names.single.replace("{x}",v); }
+  const N = {
+    m:{unit:"分钟",range:"第{a}–{b}分钟",single:"第{x}分钟"},
+    h:{unit:"小时",range:"第{a}–{b}小时",single:"第{x}小时"},
+    dom:{unit:"天",range:"第{a}–{b}日",single:"第{x}日"},
+    mon:{unit:"月",range:"第{a}–{b}月",single:"第{x}月"},
+    dow:{unit:"天",range:"周{a}–周{b}",single:"周{x}"},
+  };
+  function describe(m,h,dom,mon,dow){
+    let s = "在" + field(mon,N.mon) + field(dom,N.dom);
+    const wd = field(dow,N.dow);
+    if(dow!=="*") s += "的"+wd;
+    s += "，" + field(h,N.h) + field(m,N.m) + "执行";
+    return s;
+  }
+  function build(){
+    const m=$("m").value.trim()||"*", h=$("h").value.trim()||"*", dom=$("dom").value.trim()||"*", mon=$("mon").value.trim()||"*", dow=$("dow").value.trim()||"*";
+    const expr = [m,h,dom,mon,dow].join(" ");
+    $("expr").textContent = expr;
+    $("desc").textContent = describe(m,h,dom,mon,dow);
+  }
+  $("preset").onchange = () => {
+    if($("preset").value==="custom") return;
+    const p=$("preset").value.split(" ");
+    ["m","h","dom","mon","dow"].forEach((id,i)=>$(""+id).value=p[i]);
+    build();
+  };
+  ["m","h","dom","mon","dow"].forEach(id=>$(id).oninput=()=>{ $("preset").value="custom"; build(); });
+  $("build").onclick = build;
+  $("copy").onclick = () => navigator.clipboard.writeText($("expr").textContent);
+  build();
+})();
+</script>
+</body>
+</html>

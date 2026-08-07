@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (36)
+### Browser tools (46)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -63,6 +63,16 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [Contrast](projects/contrast/README.md) | WCAG 2.1 contrast checker with AA / AAA badges | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/contrast/) |
 | [JSONDiff](projects/json-diff/README.md) | Structural diff of two JSON objects by path | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/json-diff/) |
 | [UnicodeView](projects/unicode/README.md) | Inspect per-character Unicode codepoints and UTF-8 / UTF-16 | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/unicode/) |
+| [HashLab](projects/hash/README.md) | MD5 / SHA digest and HMAC for text and files with Web Crypto | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/hash/) |
+| [Base64Image](projects/base64-image/README.md) | Convert images to and from Base64 Data URLs, with preview and download | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base64-image/) |
+| [GradientLab](projects/gradient/README.md) | Build linear / radial CSS gradients with editable color stops | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/gradient/) |
+| [SemverCheck](projects/semver/README.md) | Validate, sort, and range-match semantic versions | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/semver/) |
+| [CronMaker](projects/cron-maker/README.md) | Visually build 5-field cron expressions with a Chinese description | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cron-maker/) |
+| [PaletteLab](projects/color-palette/README.md) | Generate complementary / analogous / triadic palettes from a base color | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/color-palette/) |
+| [HTTPCodes](projects/http-codes/README.md) | Look up 1xx–5xx HTTP status codes with live search | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/http-codes/) |
+| [QueryParse](projects/query-parse/README.md) | Parse URL query strings into editable key/value pairs and rebuild | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/query-parse/) |
+| [NanoID](projects/nanoid/README.md) | Secure random ID / token generator with custom alphabet and bulk | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/nanoid/) |
+| [CipherLab](projects/cipher/README.md) | Caesar / ROT13 / Atbash / Vigenère / Base64 classical ciphers | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cipher/) |
 
 ### Developer CLIs (20)
 

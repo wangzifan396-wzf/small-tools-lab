@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>配色生成器 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  input[type=text] { border:1px solid var(--bd); border-radius:8px; padding:8px 10px; font:14px ui-monospace,monospace; background:#fff; color:var(--ink); }
+  input[type=color] { width:48px; height:38px; border:1px solid var(--bd); border-radius:8px; padding:2px; background:#fff; cursor:pointer; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  .group { margin-top:14px; }
+  .group h3 { font-size:14px; margin:0 0 8px; color:var(--mut); font-weight:600; }
+  .sw { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { width:84px; border:1px solid var(--bd); border-radius:10px; overflow:hidden; cursor:pointer; background:#fff; }
+  .chip .c { height:54px; }
+  .chip .x { font:11.5px ui-monospace,monospace; text-align:center; padding:5px 2px; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .ico { color:var(--ac2); }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">🎨</span> 配色生成器</h1>
+  <p class="sub">基于 HSL 从基准色生成互补 / 近似 / 三元 / 四角 / 单色阶调色板。纯浏览器零依赖。</p>
+
+  <div class="card">
+    <div class="row">
+      <label style="margin:0;">基准色</label>
+      <input type="color" id="base" value="#b8832f" />
+      <input type="text" id="baseHex" value="#B8832F" style="width:110px;" />
+    </div>
+    <div id="groups"></div>
+    <div class="note">点击任意色块复制其 HEX 值。</div>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  function hexToHsl(hex){
+    hex=hex.replace("#",""); if(hex.length===3) hex=hex.split("").map(c=>c+c).join("");
+    let r=parseInt(hex.slice(0,2),16)/255, g=parseInt(hex.slice(2,4),16)/255, b=parseInt(hex.slice(4,6),16)/255;
+    const max=Math.max(r,g,b),min=Math.min(r,g,b); let h,s,l=(max+min)/2;
+    if(max===min){ h=s=0; } else { const d=max-min; s=l>0.5?d/(2-max-min):d/(max+min);
+      if(max===r) h=(g-b)/d+(g<b?6:0); else if(max===g) h=(b-r)/d+2; else h=(r-g)/d+4; h/=6; }
+    return [Math.round(h*360), Math.round(s*100), Math.round(l*100)];
+  }
+  function hslToHex(h,s,l){
+    h=(h%360+360)%360; s/=100; l/=100;
+    const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2;
+    let r,g,b;
+    if(h<60){[r,g,b]=[c,x,0];} else if(h<120){[r,g,b]=[x,c,0];} else if(h<180){[r,g,b]=[0,c,x];}
+    else if(h<240){[r,g,b]=[0,x,c];} else if(h<300){[r,g,b]=[x,0,c];} else {[r,g,b]=[c,0,x];}
+    const to=(v)=>("0"+Math.round((v+m)*255).toString(16)).slice(-2);
+    return "#"+to(r)+to(g)+to(b);
+  }
+  function chip(hex){ return '<div class="chip" data-c="'+hex.toUpperCase()+'"><div class="c" style="background:'+hex+'"></div><div class="x">'+hex.toUpperCase()+'</div></div>'; }
+  function rot(h,d){ return (h+d)%360; }
+  function render(){
+    const [h,s,l]=hexToHsl($("baseHex").value);
+    const groups = {
+      "互补 Complementary": [chip(hslToHex(h,s,l)), chip(hslToHex(rot(h,180),s,l))],
+      "近似 Analogous": [-30,0,30].map(d=>chip(hslToHex(rot(h,d),s,l))).join(""),
+      "三元 Triadic": [0,120,240].map(d=>chip(hslToHex(rot(h,d),s,l))).join(""),
+      "四角 Tetradic": [0,90,180,270].map(d=>chip(hslToHex(rot(h,d),s,l))).join(""),
+      "单色阶 Monochrome": [0.25,0.45,0.65,0.85].map(v=>chip(hslToHex(h,s,Math.round(v*100)))).join(""),
+    };
+    let html="";
+    for(const [name, content] of Object.entries(groups)){
+      html += '<div class="group"><h3>'+name+'</h3><div class="sw">'+content+'</div></div>';
+    }
+    $("groups").innerHTML = html;
+    $("groups").querySelectorAll(".chip").forEach(c=>c.onclick=()=>navigator.clipboard.writeText(c.dataset.c));
+  }
+  function sync(hex){ $("baseHex").value = hex.toUpperCase(); render(); }
+  $("base").oninput = () => sync($("base").value);
+  $("baseHex").oninput = () => { if(/^#?[0-9a-fA-F]{6}$/.test($("baseHex").value)){ const v=$("baseHex").value.startsWith("#")?$("baseHex").value:"#"+$("baseHex").value; $("base").value=v; render(); } };
+  render();
+})();
+</script>
+</body>
+</html>

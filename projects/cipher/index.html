@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>古典密码 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:880px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  textarea { width:100%; min-height:110px; border:1px solid var(--bd); border-radius:10px; padding:10px 12px; font:13.5px ui-monospace,monospace; resize:vertical; background:#fff; color:var(--ink); }
+  select, input[type=text], input[type=number] { border:1px solid var(--bd); border-radius:8px; padding:8px 10px; font:14px inherit; background:#fff; color:var(--ink); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .ico { color:var(--ac2); }
+  .split { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:680px){ .split { grid-template-columns:1fr; } }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">🔏</span> 古典密码</h1>
+  <p class="sub">Caesar / ROT13 / Atbash / Vigenère / Base64 编解码。纯浏览器零依赖，仅供学习与演示。</p>
+
+  <div class="card">
+    <div class="row">
+      <label style="margin:0;">算法</label>
+      <select id="algo">
+        <option value="caesar">Caesar（凯撒移位）</option>
+        <option value="rot13">ROT13</option>
+        <option value="atbash">Atbash</option>
+        <option value="vigenere">Vigenère（维吉尼亚）</option>
+        <option value="base64">Base64</option>
+      </select>
+      <label style="margin:0;">模式</label>
+      <select id="mode">
+        <option value="enc">加密</option>
+        <option value="dec">解密</option>
+      </select>
+      <span id="keyWrap" style="display:none;"><label style="margin:0;">密钥 / 移位</label><input type="text" id="key" value="3" style="width:80px;" /></span>
+      <button class="pri" id="run">执行</button>
+    </div>
+    <div class="note" id="note">选择算法后，Vigenère / Caesar 需要密钥；ROT13 与 Atbash 对称，模式不影响结果。</div>
+  </div>
+
+  <div class="card">
+    <div class="split">
+      <div><label>输入</label><textarea id="inp" placeholder="输入明文或密文…">The quick brown fox jumps over the lazy dog 123</textarea></div>
+      <div><label>输出</label><textarea id="out" readonly placeholder="结果…"></textarea></div>
+    </div>
+    <div class="row"><button id="copy">复制结果</button><button id="swap">↔ 交换输入/输出</button></div>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  function caesar(s, k, dec){ const shift = dec ? (26 - (k % 26)) % 26 : k % 26; return s.replace(/[a-z]/gi, c => { const idx = A.indexOf(c.toUpperCase()); const nc = A[(idx + shift) % 26]; return c === c.toUpperCase() ? nc : nc.toLowerCase(); }); }
+  function atbash(s){ return s.replace(/[a-z]/gi, c => { const nc = A[25 - A.indexOf(c.toUpperCase())]; return c === c.toUpperCase() ? nc : nc.toLowerCase(); }); }
+  function vigenere(s, key, dec){
+    key = (key || "").toUpperCase().replace(/[^A-Z]/g, ""); if(!key) return s;
+    let ki = 0;
+    return s.replace(/[a-z]/gi, c => {
+      const k = A.indexOf(key[ki % key.length]); ki++;
+      const idx = A.indexOf(c.toUpperCase());
+      const nc = dec ? (idx - k + 26) % 26 : (idx + k) % 26;
+      const ch = A[nc]; return c === c.toUpperCase() ? ch : ch.toLowerCase();
+    });
+  }
+  function b64(s, dec){ try { return dec ? decodeURIComponent(escape(atob(s))) : btoa(unescape(encodeURIComponent(s))); } catch(e){ return "⚠ " + e.message; } }
+  function run(){
+    const algo = $("algo").value, dec = $("mode").value === "dec", s = $("inp").value;
+    let r;
+    if(algo === "caesar"){ const k = parseInt($("key").value, 10) || 0; r = caesar(s, k, dec); }
+    else if(algo === "rot13"){ r = caesar(s, 13, false); }
+    else if(algo === "atbash"){ r = atbash(s); }
+    else if(algo === "vigenere"){ r = vigenere(s, $("key").value, dec); }
+    else { r = b64(s, dec); }
+    $("out").value = r;
+  }
+  function syncKey(){ $("keyWrap").style.display = ($("algo").value === "caesar" || $("algo").value === "vigenere") ? "" : "none"; }
+  $("algo").onchange = () => { syncKey(); run(); };
+  $("mode").onchange = run;
+  $("run").onclick = run;
+  $("inp").oninput = run;
+  $("key").oninput = run;
+  $("copy").onclick = () => navigator.clipboard.writeText($("out").value);
+  $("swap").onclick = () => { const t = $("inp").value; $("inp").value = $("out").value; $("out").value = t; run(); };
+  syncKey(); run();
+})();
+</script>
+</body>
+</html>

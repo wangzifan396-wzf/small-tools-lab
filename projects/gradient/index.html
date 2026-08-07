@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>渐变生成器 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  input[type=text], input[type=number], select { border:1px solid var(--bd); border-radius:8px; padding:8px 10px; font:14px inherit; background:#fff; color:var(--ink); }
+  input[type=range] { width:100%; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  .preview { height:140px; border:1px solid var(--bd); border-radius:12px; margin-top:6px; }
+  .stop { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+  .stop input[type=color] { width:42px; height:34px; border:1px solid var(--bd); border-radius:8px; padding:2px; background:#fff; cursor:pointer; }
+  .stop input[type=text] { width:110px; }
+  .stop .pct { width:64px; }
+  .css { border:1px solid var(--bd); border-radius:10px; padding:10px 12px; font:13px ui-monospace,monospace; background:#fcfbf9; white-space:pre-wrap; word-break:break-all; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .ico { color:var(--ac2); }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">🌈</span> 渐变生成器</h1>
+  <p class="sub">生成线性 / 径向 CSS 渐变，实时预览并可复制 CSS。纯浏览器零依赖。</p>
+
+  <div class="card">
+    <div class="row">
+      <label style="margin:0;">类型</label>
+      <select id="type">
+        <option value="linear">线性 linear</option>
+        <option value="radial">径向 radial</option>
+      </select>
+      <label style="margin:0;" id="angleLbl">角度</label>
+      <input type="number" id="angle" value="90" style="width:80px;" />
+      <button id="addStop" class="ghost">+ 色标</button>
+    </div>
+    <div id="stops" style="margin-top:12px;"></div>
+    <div class="note">拖动色标可调整位置（0–100%）。至少两个色标。</div>
+  </div>
+
+  <div class="card">
+    <label>预览</label>
+    <div class="preview" id="preview"></div>
+    <label style="margin-top:12px;">CSS</label>
+    <div class="css" id="css"></div>
+    <div class="row"><button class="pri" id="copy">复制 CSS</button></div>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  let stops = [{ c:"#b8832f", p:0 }, { c:"#2f7d7b", p:100 }];
+  function renderStops(){
+    $("stops").innerHTML = stops.map((s,i)=>
+      '<div class="stop"><input type="color" data-i="'+i+'" value="'+s.c+'" /><input type="text" data-i="'+i+'" data-k="c" value="'+s.c+'" /><input type="number" class="pct" data-i="'+i+'" data-k="p" value="'+s.p+'" min="0" max="100" />%<button class="ghost" data-del="'+i+'">✕</button></div>'
+    ).join("");
+    $("stops").querySelectorAll('input[type=color]').forEach(el=>el.oninput=()=>{ stops[el.dataset.i].c=el.value; sync(); });
+    $("stops").querySelectorAll('input[type=text]').forEach(el=>el.oninput=()=>{ stops[el.dataset.i].c=el.value; sync(); });
+    $("stops").querySelectorAll('input.pct').forEach(el=>el.oninput=()=>{ stops[el.dataset.i].p=Math.max(0,Math.min(100,+el.value||0)); sync(); });
+    $("stops").querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(stops.length<=2) return; stops.splice(+b.dataset.del,1); renderStops(); sync(); });
+  }
+  function build(){
+    const sorted = [...stops].sort((a,b)=>a.p-b.p);
+    const list = sorted.map(s=>s.c+" "+s.p+"%").join(", ");
+    if($("type").value==="linear") return "linear-gradient("+$("angle").value+"deg, "+list+")";
+    return "radial-gradient(circle, "+list+")";
+  }
+  function sync(){
+    const css = build();
+    $("preview").style.background = css;
+    $("css").textContent = "background: " + css + ";";
+  }
+  $("type").onchange = () => { $("angleLbl").style.visibility = $("type").value==="linear" ? "visible":"hidden"; $("angle").style.visibility=$("type").value==="linear"?"visible":"hidden"; sync(); };
+  $("angle").oninput = sync;
+  $("addStop").onclick = () => { stops.push({ c:"#888888", p:50 }); renderStops(); sync(); };
+  $("copy").onclick = () => navigator.clipboard.writeText($("css").textContent);
+  renderStops(); sync();
+})();
+</script>
+</body>
+</html>

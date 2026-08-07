@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>图片 Base64 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:880px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  textarea { width:100%; min-height:120px; border:1px solid var(--bd); border-radius:10px; padding:10px 12px; font:12.5px ui-monospace,monospace; resize:vertical; background:#fff; color:var(--ink); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  .drop { border:2px dashed var(--bd); border-radius:12px; padding:18px; text-align:center; color:var(--mut); cursor:pointer; transition:.15s; }
+  .drop.over { border-color:var(--ac); color:var(--ac); background:#fff8ec; }
+  .preview { margin-top:12px; max-width:100%; border:1px solid var(--bd); border-radius:10px; padding:8px; background:#fff; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; white-space:pre-wrap; }
+  .ico { color:var(--ac2); }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">🖼️</span> 图片 Base64</h1>
+  <p class="sub">图片与 Base64 Data URL 互转，纯浏览器零依赖，数据不出本机。</p>
+
+  <div class="card">
+    <label>图片 → Base64</label>
+    <div class="drop" id="drop">把图片拖到这里，或点击选择文件</div>
+    <input type="file" id="file" accept="image/*" style="display:none;" />
+    <div id="imgPrev"></div>
+    <textarea id="enc" readonly placeholder="编码后的 Data URL 将显示在这里"></textarea>
+    <div class="row">
+      <button id="copyEnc">复制 Data URL</button>
+      <button id="dlImg" class="pri">下载图片</button>
+    </div>
+    <div class="note" id="note">支持 PNG / JPG / GIF / WebP 等；大图 Data URL 会很长，仅用于内联场景。</div>
+  </div>
+
+  <div class="card">
+    <label>Base64 → 图片（粘贴 Data URL 或纯 base64）</label>
+    <textarea id="dec" placeholder="data:image/png;base64,iVBORw0KGgo..."></textarea>
+    <div class="row"><button class="pri" id="showImg">解码预览</button></div>
+    <div id="decPrev"></div>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  let currentUrl = "";
+  function toB64(buf){ let s=""; const u=new Uint8Array(buf); for(let i=0;i<u.length;i++) s+=String.fromCharCode(u[i]); return btoa(s); }
+  function ext(mime){ return ({ "image/png":".png","image/jpeg":".jpg","image/gif":".gif","image/webp":".webp","image/svg+xml":".svg" }[mime] || ".bin"); }
+  async function encode(file){
+    const buf = await file.arrayBuffer();
+    currentUrl = "data:" + (file.type || "image/png") + ";base64," + toB64(buf);
+    $("enc").value = currentUrl;
+    $("imgPrev").innerHTML = '<img class="preview" src="'+currentUrl+'" alt="preview" style="max-height:220px;" />';
+    $("note").textContent = "已编码 " + file.name + "（" + file.size + " B）→ Data URL 长度 " + currentUrl.length + "。";
+  }
+  $("dlImg").onclick = () => { if(!currentUrl) return; const a=document.createElement("a"); a.href=currentUrl; a.download="image"+ext(currentUrl.split(";")[0].split(":")[1]); a.click(); };
+  $("copyEnc").onclick = () => navigator.clipboard.writeText($("enc").value);
+  const drop=$("drop");
+  drop.onclick=()=>$("file").click();
+  drop.ondragover=(e)=>{e.preventDefault();drop.classList.add("over");};
+  drop.ondragleave=()=>drop.classList.remove("over");
+  drop.ondrop=(e)=>{e.preventDefault();drop.classList.remove("over"); if(e.dataTransfer.files[0]) encode(e.dataTransfer.files[0]);};
+  $("file").onchange=()=>{ if($("file").files[0]) encode($("file").files[0]); };
+  $("showImg").onclick = () => {
+    let v = $("dec").value.trim();
+    if(!v) return;
+    if(!v.startsWith("data:")) v = "data:image/png;base64," + v;
+    $("decPrev").innerHTML = '<img class="preview" src="'+v+'" alt="decoded" style="max-height:220px;" onerror="this.parentNode.textContent=\'⚠ 无法解码，请检查格式\'" />';
+  };
+})();
+</script>
+</body>
+</html>
