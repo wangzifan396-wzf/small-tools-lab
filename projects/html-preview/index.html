@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HTML 实时预览 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:1100px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  textarea { width:100%; min-height:300px; border:1px solid var(--bd); border-radius:10px; padding:12px; font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; resize:vertical; background:#fcfbf9; color:var(--ink); }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  iframe { width:100%; min-height:320px; border:1px solid var(--bd); border-radius:10px; background:#fff; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span style="color:var(--ac2)">🖥️</span> HTML 实时预览</h1>
+  <p class="sub">左侧写 HTML，右侧即时渲染。纯浏览器零依赖，可导入示例、清空、下载为 .html 文件。</p>
+
+  <div class="card">
+    <div class="row">
+      <button class="pri" id="render">▶ 渲染</button>
+      <button id="sample">载入示例</button>
+      <button id="clear">清空</button>
+      <button id="download">下载 .html</button>
+      <label style="margin:0 0 0 auto;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="auto" checked /> 输入时自动渲染</label>
+    </div>
+    <div class="cols">
+      <div>
+        <label>HTML 源码</label>
+        <textarea id="src" spellcheck="false" placeholder="<h1>Hello</h1>&#10;<p>在这里输入 HTML…</p>"></textarea>
+      </div>
+      <div>
+        <label>预览</label>
+        <iframe id="preview" title="HTML 预览"></iframe>
+      </div>
+    </div>
+    <p class="note">预览运行在独立 iframe 中，与外部页面隔离；但请注意：直接在预览里加载外部脚本/资源仍会按普通网页执行。</p>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端零依赖</footer>
+</div>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const src = $('src'), preview = $('preview');
+  const SAMPLE = '<!doctype html>\n<html>\n<head><style>\nbody{font-family:sans-serif;padding:24px;color:#234}\nh1{color:#2f7d7b}\n.card{background:#eef7f6;border:1px solid #cfe7e5;border-radius:12px;padding:16px;max-width:320px}\n</style></head>\n<body>\n<h1>卡片示例</h1>\n<div class="card"><b>Small Tools Lab</b><p>这是一个实时预览的 HTML 卡片。</p></div>\n</body>\n</html>';
+  function render() {
+    const doc = preview.contentDocument || preview.contentWindow.document;
+    doc.open(); doc.write(src.value); doc.close();
+  }
+  $('render').onclick = render;
+  $('sample').onclick = () => { src.value = SAMPLE; render(); };
+  $('clear').onclick = () => { src.value = ''; render(); src.focus(); };
+  $('download').onclick = () => {
+    const blob = new Blob([src.value], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'preview.html'; a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  $('auto').onchange = () => { if ($('auto').checked) render(); };
+  src.addEventListener('input', () => { if ($('auto').checked) render(); });
+  // initial
+  src.value = SAMPLE; render();
+</script>
+</body>
+</html>

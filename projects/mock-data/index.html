@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>假数据生成 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:980px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  .field { display:flex; flex-direction:column; gap:6px; }
+  input[type=number] { width:120px; border:1px solid var(--bd); border-radius:8px; padding:8px 10px; font:14px ui-monospace,monospace; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  table { width:100%; border-collapse:collapse; font-size:13px; margin-top:6px; }
+  th, td { text-align:left; padding:7px 9px; border-bottom:1px solid var(--bd); }
+  th { color:var(--mut); font-weight:600; background:#faf9f7; position:sticky; top:0; }
+  .tblbox { max-height:360px; overflow:auto; border:1px solid var(--bd); border-radius:10px; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span style="color:var(--ac2)">🎲</span> 假数据生成</h1>
+  <p class="sub">生成用于原型、测试与演示的虚构人员数据。内置词表，纯浏览器随机生成，零依赖、不上传。</p>
+
+  <div class="card">
+    <div class="row">
+      <div class="field"><label>生成条数</label><input type="number" id="n" min="1" max="500" value="12" /></div>
+      <div class="field"><label>地区</label>
+        <select id="locale" style="padding:8px 10px;border:1px solid var(--bd);border-radius:8px;font:14px inherit;">
+          <option value="zh">中文</option><option value="en">English</option>
+        </select>
+      </div>
+      <button class="pri" id="gen" style="align-self:flex-end;">生成</button>
+      <button id="copyJson" style="align-self:flex-end;">复制 JSON</button>
+      <button id="copyCsv" style="align-self:flex-end;">复制 CSV</button>
+    </div>
+    <div class="tblbox"><table id="tbl"></table></div>
+    <p class="note">数据为随机虚构，请勿用于真实个人。表格仅预览前 50 条；复制按钮导出全部。</p>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端零依赖</footer>
+</div>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const ZH_F = ['伟','芳','娜','秀英','敏','静','丽','强','磊','军','洋','勇','艳','杰','娟','涛','明','超','霞','平'];
+  const ZH_S = ['张','王','李','赵','刘','陈','杨','黄','周','吴','徐','孙','胡','朱','高','林','何','郭','马','罗'];
+  const ZH_CITY = ['北京','上海','广州','深圳','杭州','成都','武汉','南京','西安','重庆'];
+  const ZH_ST = ['人民路','建设路','解放大道','中山路','和平街','文化路','科技园','滨江道'];
+  const EN_F = ['James','Mary','John','Patricia','Robert','Jennifer','Michael','Linda','David','Elizabeth','William','Barbara','Richard','Susan','Joseph','Jessica'];
+  const EN_S = ['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Hernandez','Lopez','Wilson','Anderson','Thomas','Lee'];
+  const EN_CITY = ['Springfield','Riverton','Franklin','Clinton','Greenville','Bristol','Fairview','Madison','Georgetown','Salem'];
+  const EN_ST = ['Main St','Oak Ave','Pine Rd','Maple Dr','Cedar Ln','Elm St','Washington Ave','Lake Rd'];
+  const DOM = ['example.com','mail.com','test.org','demo.net','sample.io'];
+  const rnd = (a) => a[Math.floor(Math.random() * a.length)];
+  const pad = (n) => String(n).padStart(2, '0');
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function genOne(i, zh) {
+    const id = 'U' + String(1000 + i).padStart(5, '0');
+    let first, last, city, street, name, email, phone;
+    if (zh) {
+      last = pick(ZH_S); first = pick(ZH_F);
+      name = last + first;
+      city = pick(ZH_CITY); street = pick(ZH_ST);
+      phone = '1' + pick(['3','5','7','8','9']) + String(Math.floor(1e8 + Math.random() * 9e8));
+      email = (last + first + Math.floor(Math.random() * 99)) + '@' + pick(DOM);
+    } else {
+      first = pick(EN_F); last = pick(EN_S);
+      name = first + ' ' + last;
+      city = pick(EN_CITY); street = pick(EN_ST);
+      phone = '+1 ' + (200 + Math.floor(Math.random() * 700)) + '-' + String(Math.floor(1e7 + Math.random() * 9e6));
+      email = (first + '.' + last).toLowerCase() + Math.floor(Math.random() * 99) + '@' + pick(DOM);
+    }
+    const y = 2018 + Math.floor(Math.random() * 8), mo = 1 + Math.floor(Math.random() * 12), d = 1 + Math.floor(Math.random() * 28);
+    return { id, name, email, phone, city, address: street + ' ' + (1 + Math.floor(Math.random() * 200)) + ' 号', joined: `${y}-${pad(mo)}-${pad(d)}` };
+  }
+  let DATA = [];
+  const COLS = [['id','ID'],['name','姓名'],['email','邮箱'],['phone','电话'],['city','城市'],['address','地址'],['joined','加入日期']];
+  function generate() {
+    const n = Math.max(1, Math.min(500, +$('n').value || 12));
+    const zh = $('locale').value === 'zh';
+    DATA = Array.from({ length: n }, (_, i) => genOne(i, zh));
+    const rows = DATA.slice(0, 50).map((r) =>
+      '<tr>' + COLS.map(([k]) => `<td>${esc(r[k])}</td>`).join('') + '</tr>').join('');
+    $('tbl').innerHTML = '<thead><tr>' + COLS.map(([, h]) => `<th>${h}</th>`).join('') + '</tr></thead><tbody>' + rows + '</tbody>';
+  }
+  function esc(s) { return String(s).replace(/[&<>]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c])); }
+  function csv() {
+    const head = COLS.map(([k]) => k).join(',');
+    const body = DATA.map((r) => COLS.map(([k]) => {
+      const v = String(r[k]); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    }).join(',')).join('\n');
+    return head + '\n' + body;
+  }
+  $('gen').onclick = generate;
+  $('copyJson').onclick = () => { const t = JSON.stringify(DATA, null, 2); navigator.clipboard.writeText(t).then(() => toast('已复制 JSON')); };
+  $('copyCsv').onclick = () => { navigator.clipboard.writeText(csv()).then(() => toast('已复制 CSV')); };
+  function toast(m) { const e = document.createElement('div'); e.textContent = m; e.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#23211e;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;z-index:99'; document.body.appendChild(e); setTimeout(() => e.remove(), 1400); }
+  generate();
+</script>
+</body>
+</html>

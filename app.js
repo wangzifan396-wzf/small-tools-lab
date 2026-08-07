@@ -797,6 +797,102 @@ const TOOLS = [
     docs: "projects/cipher/README.md",
     featured: false,
   },
+  {
+    id: "yaml-json",
+    name: "YamlFlow",
+    category: "browser",
+    label: "YAML ⇄ JSON",
+    description:
+      "YAML（block 子集）与 JSON 互转，支持嵌套映射与序列，纯浏览器零依赖。",
+    tech: "Browser · YAML",
+    live: "projects/yaml-json/",
+    docs: "projects/yaml-json/README.md",
+    featured: false,
+  },
+  {
+    id: "html-preview",
+    name: "HTMLPreview",
+    category: "browser",
+    label: "HTML 实时预览",
+    description:
+      "左侧写 HTML、右侧隔离 iframe 即时渲染，可下载 .html，纯浏览器零依赖。",
+    tech: "Browser · HTML",
+    live: "projects/html-preview/",
+    docs: "projects/html-preview/README.md",
+    featured: false,
+  },
+  {
+    id: "chart-maker",
+    name: "ChartForge",
+    category: "browser",
+    label: "图表生成器",
+    description:
+      "纯 SVG 生成柱状 / 折线 / 饼图，可下载矢量 .svg，纯浏览器零依赖。",
+    tech: "Browser · SVG",
+    live: "projects/chart-maker/",
+    docs: "projects/chart-maker/README.md",
+    featured: false,
+  },
+  {
+    id: "mock-data",
+    name: "MockGen",
+    category: "browser",
+    label: "假数据生成",
+    description:
+      "中 / 英词表生成虚构人员数据，支持 JSON / CSV 导出，纯浏览器零依赖。",
+    tech: "Browser · Data",
+    live: "projects/mock-data/",
+    docs: "projects/mock-data/README.md",
+    featured: false,
+  },
+  {
+    id: "ini-json",
+    name: "IniFlow",
+    category: "browser",
+    label: "INI ⇄ JSON",
+    description:
+      "INI 配置与 JSON 互转，支持分段与类型推断，纯浏览器零依赖。",
+    tech: "Browser · INI",
+    live: "projects/ini-json/",
+    docs: "projects/ini-json/README.md",
+    featured: false,
+  },
+  {
+    id: "lorem-ipsum",
+    name: "LoremGen",
+    category: "browser",
+    label: "Lorem Ipsum",
+    description:
+      "生成 Latin / 中文占位文段，可调段落与句数，纯浏览器零依赖。",
+    tech: "Browser · Text",
+    live: "projects/lorem-ipsum/",
+    docs: "projects/lorem-ipsum/README.md",
+    featured: false,
+  },
+  {
+    id: "markdown-preview",
+    name: "MDView",
+    category: "browser",
+    label: "Markdown 预览",
+    description:
+      "轻量 Markdown 子集渲染（已转义 + 链接校验），输入即预览，纯浏览器零依赖。",
+    tech: "Browser · Markdown",
+    live: "projects/markdown-preview/",
+    docs: "projects/markdown-preview/README.md",
+    featured: false,
+  },
+  {
+    id: "diff-text",
+    name: "DiffLab",
+    category: "browser",
+    label: "文本对比 Diff",
+    description:
+      "逐行 LCS 差异对比，字符级内联高亮，纯浏览器零依赖。",
+    tech: "Browser · Diff",
+    live: "projects/diff-text/",
+    docs: "projects/diff-text/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {

@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (46)
+### Browser tools (54)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -73,6 +73,14 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [QueryParse](projects/query-parse/README.md) | Parse URL query strings into editable key/value pairs and rebuild | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/query-parse/) |
 | [NanoID](projects/nanoid/README.md) | Secure random ID / token generator with custom alphabet and bulk | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/nanoid/) |
 | [CipherLab](projects/cipher/README.md) | Caesar / ROT13 / Atbash / Vigenère / Base64 classical ciphers | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cipher/) |
+| [YamlFlow](projects/yaml-json/README.md) | YAML (block subset) ⇄ JSON, nested maps & sequences | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/yaml-json/) |
+| [HTMLPreview](projects/html-preview/README.md) | Live HTML render in isolated iframe, download .html | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/html-preview/) |
+| [ChartForge](projects/chart-maker/README.md) | Bar / line / pie charts as downloadable SVG | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/chart-maker/) |
+| [MockGen](projects/mock-data/README.md) | Fake person data (zh/en), export JSON / CSV | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/mock-data/) |
+| [IniFlow](projects/ini-json/README.md) | INI config ⇄ JSON, sections & type inference | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/ini-json/) |
+| [LoremGen](projects/lorem-ipsum/README.md) | Lorem Ipsum / 中文 placeholder generator | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/lorem-ipsum/) |
+| [MDView](projects/markdown-preview/README.md) | Lightweight Markdown preview (escaped + link-checked) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/markdown-preview/) |
+| [DiffLab](projects/diff-text/README.md) | Line-level LCS diff with inline char highlighting | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/diff-text/) |
 
 ### Developer CLIs (20)
 

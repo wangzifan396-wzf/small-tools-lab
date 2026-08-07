@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>INI ⇄ JSON · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:1000px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  textarea { width:100%; min-height:280px; border:1px solid var(--bd); border-radius:10px; padding:12px; font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; resize:vertical; background:#fcfbf9; color:var(--ink); }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .err { color:#b3261e; font-size:12.5px; min-height:16px; }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span style="color:var(--ac2)">⚙️</span> INI ⇄ JSON</h1>
+  <p class="sub">INI 配置文件与 JSON 互转。支持分段 [section]、注释（; 与 #）、以及基础类型推断。纯浏览器零依赖。</p>
+
+  <div class="card">
+    <div class="row">
+      <button class="pri" id="toJson">INI → JSON</button>
+      <button id="toIni">JSON → INI</button>
+      <button id="sample">载入示例</button>
+      <button id="clear">清空</button>
+      <label style="margin:0 0 0 auto;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="types" checked /> 类型推断（数字/布尔/null）</label>
+    </div>
+    <div class="cols">
+      <div><label>INI / JSON 输入</label><textarea id="src" spellcheck="false"></textarea></div>
+      <div><label>输出</label><textarea id="out" spellcheck="false" readonly></textarea></div>
+    </div>
+    <div class="err" id="err"></div>
+    <p class="note">约定：无 [section] 的顶层键归入根对象；[a.b] 视为嵌套分节。JSON → INI 仅支持对象/字符串/数字/布尔/null（数组展开为带索引注释）。</p>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端零依赖</footer>
+</div>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const SAMPLE = '; app 配置示例\n[server]\nhost = 127.0.0.1\nport = 8080\ndebug = true\n\n[database]\nurl = postgres://localhost/app\npool = 10\n# 是否启用 ssl\nssl = false';
+  function infer(v) {
+    if (!$('types').checked) return v;
+    if (v === 'true') return true;
+    if (v === 'false') return false;
+    if (v === 'null' || v === '~' || v === '') return null;
+    if (/^-?\d+(\.\d+)?$/.test(v)) return Number(v);
+    return v;
+  }
+  function parseINI(text) {
+    const root = {};
+    let cur = root;
+    for (const raw of text.split(/\r?\n/)) {
+      const line = raw.trim();
+      if (!line || line.startsWith(';') || line.startsWith('#')) continue;
+      const sec = line.match(/^\[(.+)\]$/);
+      if (sec) {
+        const parts = sec[1].split('.');
+        cur = root;
+        for (const p of parts) cur = (cur[p] = cur[p] || {});
+        continue;
+      }
+      const eq = line.indexOf('=');
+      if (eq < 0) { if (line) cur[line] = infer(''); continue; }
+      const k = line.slice(0, eq).trim();
+      let v = line.slice(eq + 1).trim();
+      if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) v = v.slice(1, -1);
+      cur[k] = infer(v);
+    }
+    return root;
+  }
+  function val(v, indent) {
+    if (typeof v === 'string') { const q = /[:#;\[\]]/.test(v) || v === '' ? JSON.stringify(v) : v; return `${' '.repeat(indent)}${q}`; }
+    if (typeof v === 'number' || typeof v === 'boolean') return `${' '.repeat(indent)}${v}`;
+    if (v === null) return `${' '.repeat(indent)}null`;
+    if (Array.isArray(v)) return `${' '.repeat(indent)}${v.map((x) => JSON.stringify(x)).join(', ')}`;
+    return '';
+  }
+  function toINI(obj) {
+    let out = '';
+    const top = [];
+    for (const [k, v] of Object.entries(obj)) {
+      if (v && typeof v === 'object' && !Array.isArray(v)) continue;
+      top.push(`${k} = ${val(v, 0)}`);
+    }
+    if (top.length) out += top.join('\n') + '\n';
+    for (const [k, v] of Object.entries(obj)) {
+      if (!v || typeof v !== 'object' || Array.isArray(v)) continue;
+      out += `\n[${k}]\n`;
+      for (const [kk, vv] of Object.entries(v)) out += `${kk} = ${val(vv, 0)}\n`;
+    }
+    return out.replace(/\n+$/, '\n');
+  }
+  $('toJson').onclick = () => {
+    $('err').textContent = '';
+    try { $('out').value = JSON.stringify(parseINI($('src').value), null, 2); }
+    catch (e) { $('err').textContent = '解析失败：' + e.message; }
+  };
+  $('toIni').onclick = () => {
+    $('err').textContent = '';
+    try { const o = JSON.parse($('src').value); $('out').value = toINI(o); }
+    catch (e) { $('err').textContent = 'JSON 解析失败：' + e.message; }
+  };
+  $('sample').onclick = () => { $('src').value = SAMPLE; $('toJson').click(); };
+  $('clear').onclick = () => { $('src').value = ''; $('out').value = ''; $('err').textContent = ''; };
+  $('src').value = SAMPLE; $('toJson').click();
+</script>
+</body>
+</html>

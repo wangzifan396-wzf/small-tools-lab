@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lorem Ipsum 生成器 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .field { display:flex; flex-direction:column; gap:6px; }
+  input[type=number] { width:110px; border:1px solid var(--bd); border-radius:8px; padding:8px 10px; font:14px ui-monospace,monospace; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  textarea { width:100%; min-height:220px; border:1px solid var(--bd); border-radius:10px; padding:12px; font:13px/1.6 ui-monospace,monospace; resize:vertical; background:#fcfbf9; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span style="color:var(--ac2)">📝</span> Lorem Ipsum 生成器</h1>
+  <p class="sub">生成占位文段，用于排版、原型与演示。可选择段落数 / 每句词数，并切换中文占位文。</p>
+
+  <div class="card">
+    <div class="row" style="margin-bottom:14px;">
+      <div class="field">
+        <label>段落数</label>
+        <input type="number" id="paras" min="1" max="50" value="3" />
+      </div>
+      <div class="field">
+        <label>每段句数</label>
+        <input type="number" id="sents" min="1" max="20" value="4" />
+      </div>
+      <div class="field">
+        <label>语言</label>
+        <select id="lang" style="padding:8px 10px;border:1px solid var(--bd);border-radius:8px;font:14px inherit;">
+          <option value="en">Latin (Lorem Ipsum)</option>
+          <option value="zh">中文占位文</option>
+        </select>
+      </div>
+      <button class="pri" id="gen" style="margin-left:auto;align-self:flex-end;">生成</button>
+      <button id="copy" style="align-self:flex-end;">复制</button>
+    </div>
+    <textarea id="out" spellcheck="false" readonly></textarea>
+    <p class="note">纯浏览器生成，无随机种子持久化；每次点击重新随机。</p>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端零依赖</footer>
+</div>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const EN_WORDS = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum'.split(' ');
+  const ZH_SYL = '的 一 是 了 不 在 人 有 我 他 这 中 大 来 上 国 个 到 说 们 为 子 和 你 地 出 道 也 时 要 就 下 得 于 看 或 对 后 与 那 她 及 其 因 日 由 上 义 之 年 长 自 者 理 位 更 着 事 无 定 内 心 前 还 走 水 但 将 又 如 文 间 领 点 正'.split(' ');
+  const ZH_TAIL = '。公司正在评估一项新的产品方案，团队需要更清晰地理解用户需求与落地路径。我们注意到不同场景下的表现存在差异，因此应当结合数据再做判断。后续会持续迭代，并邀请相关同事参与评审。'.split('。');
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function genEn(sents) {
+    const out = [];
+    for (let i = 0; i < sents; i++) {
+      const n = 8 + Math.floor(Math.random() * 12);
+      const words = [];
+      for (let j = 0; j < n; j++) words.push(pick(EN_WORDS));
+      let s = cap(words.join(' ')) + '.';
+      out.push(s);
+    }
+    return out.join(' ');
+  }
+  function genZh(sents) {
+    const out = [];
+    for (let i = 0; i < sents; i++) {
+      const n = 6 + Math.floor(Math.random() * 10);
+      let s = '';
+      for (let j = 0; j < n; j++) s += pick(ZH_SYL);
+      s += pick(ZH_TAIL) + '。';
+      out.push(s);
+    }
+    return out.join('');
+  }
+  function generate() {
+    const paras = Math.max(1, Math.min(50, +$('paras').value || 3));
+    const sents = Math.max(1, Math.min(20, +$('sents').value || 4));
+    const zh = $('lang').value === 'zh';
+    const blocks = [];
+    for (let p = 0; p < paras; p++) blocks.push(zh ? genZh(sents) : genEn(sents));
+    $('out').value = blocks.join('\n\n');
+  }
+  $('gen').onclick = generate;
+  $('copy').onclick = () => { $('out').select(); document.execCommand('copy'); };
+  generate();
+</script>
+</body>
+</html>

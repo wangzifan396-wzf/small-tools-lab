@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>文本对比 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:1000px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  textarea { width:100%; min-height:160px; border:1px solid var(--bd); border-radius:10px; padding:12px; font:13px/1.5 ui-monospace,monospace; resize:vertical; background:#fcfbf9; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  #out { border:1px solid var(--bd); border-radius:10px; padding:12px 14px; background:#fff; min-height:220px; font:13px/1.6 ui-monospace,monospace; white-space:pre-wrap; overflow:auto; }
+  .ln { display:flex; gap:10px; }
+  .ln .ln-no { flex:none; width:34px; text-align:right; color:var(--mut); user-select:none; }
+  .ln.del { background:#fdeaea; } .ln.del .ln-no { color:#b3261e; }
+  .ln.add { background:#e7f5ec; } .ln.add .ln-no { color:#1d7a43; }
+  .ln.eq .ln-no { color:#8a857d; }
+  ins { background:#c8eccf; text-decoration:none; } del { background:#f6c9c6; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span style="color:var(--ac2)">🔍</span> 文本对比（Diff）</h1>
+  <p class="sub">逐行 LCS 差异，标红删除 / 标绿新增；开启字符级可在变更行内高亮具体改动。纯浏览器零依赖。</p>
+
+  <div class="card">
+    <div class="row">
+      <button class="pri" id="diff">对比</button>
+      <label style="margin:0 0 0 8px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="char" checked /> 字符级内联高亮</label>
+      <label style="margin:0 0 0 8px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="context" /> 仅看变更</label>
+    </div>
+    <div class="cols">
+      <div><label>原文本（A）</label><textarea id="a" spellcheck="false">function add(a, b) {\n  return a + b;\n}\nconst x = add(1, 2);</textarea></div>
+      <div><label>新文本（B）</label><textarea id="b" spellcheck="false">function add(a, b) {\n  // 求和\n  return a + b + 0;\n}\nconst x = add(1, 2);\nconst y = x * 2;</textarea></div>
+    </div>
+    <div id="out" style="margin-top:14px;"></div>
+    <p class="note">算法为 longest common subsequence，时间复杂度 O(n·m)，适合中小文本。</p>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端零依赖</footer>
+</div>
+<script>
+  const $ = (id) => document.getElementById(id);
+  function lcs(a, b) {
+    const n = a.length, m = b.length;
+    const dp = Array.from({ length: n + 1 }, () => new Int32Array(m + 1));
+    for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--)
+      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    const res = []; let i = 0, j = 0;
+    while (i < n && j < m) {
+      if (a[i] === b[j]) { res.push({ t: 'eq', a: a[i], b: b[j] }); i++; j++; }
+      else if (dp[i + 1][j] >= dp[i][j + 1]) { res.push({ t: 'del', a: a[i] }); i++; }
+      else { res.push({ t: 'add', b: b[j] }); j++; }
+    }
+    while (i < n) res.push({ t: 'del', a: a[i++] });
+    while (j < m) res.push({ t: 'add', b: b[j++] });
+    return res;
+  }
+  function charDiff(a, b) {
+    const d = lcs([...a], [...b]);
+    let s = '', t = '';
+    for (const x of d) {
+      if (x.t === 'eq') { s += esc(x.a); t += esc(x.a); }
+      else if (x.t === 'del') s += '<del>' + esc(x.a) + '</del>';
+      else t += '<ins>' + esc(x.b) + '</ins>';
+    }
+    return { left: s, right: t };
+  }
+  function esc(s) { return s.replace(/[&<>]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c])); }
+  function render() {
+    const A = $('a').value.split('\n'), B = $('b').value.split('\n');
+    const diff = lcs(A, B);
+    const useChar = $('char').checked, onlyChanged = $('context').checked;
+    let nA = 0, nB = 0, html = '';
+    // pair del/add adjacent for inline char diff
+    for (let k = 0; k < diff.length; k++) {
+      const x = diff[k];
+      if (x.t === 'eq') {
+        nA++; nB++;
+        if (!onlyChanged) html += row('eq', nA, nB, esc(x.a));
+      } else if (x.t === 'del') {
+        nA++;
+        const nxt = diff[k + 1];
+        if (useChar && nxt && nxt.t === 'add') {
+          const cd = charDiff(x.a, nxt.b);
+          html += row('del', nA, '', cd.left);
+          html += row('add', '', ++nB, cd.right);
+          k++;
+        } else html += row('del', nA, '', esc(x.a));
+      } else {
+        nB++;
+        html += row('add', '', nB, esc(x.b));
+      }
+    }
+    $('out').innerHTML = html || '<span style="color:#8a857d">无差异</span>';
+  }
+  function row(cls, na, nb, text) {
+    const la = na ? na : '', lb = nb ? nb : '';
+    return `<div class="ln ${cls}"><span class="ln-no">${la}</span><span class="ln-no">${lb}</span><span>${text || ' '}</span></div>`;
+  }
+  $('diff').onclick = render;
+  render();
+</script>
+</body>
+</html>
