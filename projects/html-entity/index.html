@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HTML 实体编解码 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; --code:#385a7a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  textarea { width:100%; min-height:110px; resize:vertical; border:1px solid var(--bd); border-radius:10px; padding:11px 12px; font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color:var(--code); background:#fcfbf9; }
+  textarea:focus { outline:2px solid var(--ac); outline-offset:1px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  button.ghost { background:transparent; }
+  .opt { color:var(--mut); font-size:13px; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .ico { color:var(--ac2); }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">🏷️</span> HTML 实体编解码</h1>
+  <p class="sub">HTML 实体（命名 / 十进制 / 十六进制）双向转换，纯浏览器零依赖。适合转义用户输入、排查 XSS、阅读富文本。</p>
+
+  <div class="card">
+    <label for="in">原始文本</label>
+    <textarea id="in" placeholder="输入要编码或解码的内容，例如：<div> & “引号” © 中文</textarea>
+    <div class="row">
+      <button class="pri" id="enc">编码 →</button>
+      <button id="dec">← 解码</button>
+      <button class="ghost" id="swap">⇅ 互换</button>
+      <button class="ghost" id="copy">复制结果</button>
+      <span class="opt">
+        <label><input type="radio" name="mode" value="named" checked /> 命名实体</label>
+        <label><input type="radio" name="mode" value="dec" /> 十进制</label>
+        <label><input type="radio" name="mode" value="hex" /> 十六进制</label>
+      </span>
+    </div>
+  </div>
+
+  <div class="card">
+    <label for="out">结果</label>
+    <textarea id="out" readonly placeholder="结果将显示在这里"></textarea>
+    <div class="note" id="note"></div>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const inp = $('in'), out = $('out'), note = $('note');
+
+  // 常见命名实体（覆盖最常用的可显示字符）
+  const NAMED = { '&':'amp', '<':'lt', '>':'gt', '"':'quot', "'":'apos', ' ': 'nbsp',
+    '©':'copy', '®':'reg', '™':'trade', '§':'sect', '¶':'para', '•':'bull',
+    '—':'mdash', '–':'ndash', '…':'hellip', '€':'euro', '£':'pound', '¥':'yen',
+    '×':'times', '÷':'divide', '±':'plusmn', '≠':'ne', '≤':'le', '≥':'ge',
+    '←':'larr', '→':'rarr', '↑':'uarr', '↓':'darr', '♥':'hearts', '☀':'sun',
+    '★':'starf', '☆':'star', '✓':'check', '✗':'cross', '“':'ldquo', '”':'rdquo',
+    '‘':'lsquo', '’':'rsquo', '«':'laquo', '»':'raquo', '°':'deg', '²':'sup2',
+    '³':'sup3', '½':'frac12', '¼':'frac14', '¾':'frac34', 'µ':'micro', 'æ':'aelig' };
+
+  function escForNamed(ch) {
+    if (NAMED[ch]) return '&' + NAMED[ch] + ';';
+    const cp = ch.codePointAt(0);
+    if (cp > 127) return '&#' + cp + ';';
+    return ch; // ASCII 可见字符原样保留
+  }
+  function encode(text) {
+    const mode = document.querySelector('input[name=mode]:checked').value;
+    let r = '';
+    for (const ch of text) {
+      if (mode === 'named') r += escForNamed(ch);
+      else if (mode === 'dec') {
+        const cp = ch.codePointAt(0);
+        r += (cp > 127 || '&<>"\''.includes(ch)) ? '&#' + cp + ';' : ch;
+      } else { // hex
+        const cp = ch.codePointAt(0);
+        r += (cp > 127 || '&<>"\''.includes(ch)) ? '&#x' + cp.toString(16).toUpperCase() + ';' : ch;
+      }
+    }
+    return r;
+  }
+  function decode(text) {
+    return text.replace(/&(#x?[0-9A-Fa-f]+|[a-zA-Z][a-zA-Z0-9]*);/g, (m, body) => {
+      if (body[0] === '#') {
+        const hex = body[1] === 'x' || body[1] === 'X';
+        const num = parseInt(body.slice(hex ? 2 : 1), hex ? 16 : 10);
+        try { return String.fromCodePoint(num); } catch { return m; }
+      }
+      for (const k in NAMED) if (NAMED[k] === body) return k;
+      return m;
+    });
+  }
+  function setOut(v) { out.value = v; }
+
+  $('enc').onclick = () => { setOut(encode(inp.value)); note.textContent = '已转义为 HTML 实体。'; };
+  $('dec').onclick = () => { setOut(decode(inp.value)); note.textContent = '已还原实体为字符。'; };
+  $('swap').onclick = () => { const t = inp.value; inp.value = out.value; out.value = t; note.textContent = '输入与结果已互换。'; };
+  $('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(out.value); note.textContent = '已复制到剪贴板 ✓'; }
+    catch { out.select(); document.execCommand('copy'); note.textContent = '已复制 ✓'; }
+  };
+})();
+</script>
+</body>
+</html>

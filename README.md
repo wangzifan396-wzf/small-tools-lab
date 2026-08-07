@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (24)
+### Browser tools (30)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -51,6 +51,12 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [RomanNum](projects/roman/README.md) | Convert Arabic and Roman numerals (1–3999) both ways | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/roman/) |
 | [DiceBox](projects/dice/README.md) | Cryptographically secure dice, random integers, and no-repeat draws | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/dice/) |
 | [DateDiff](projects/datediff/README.md) | Compute the year/month/day gap between two dates and age | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/datediff/) |
+| [URLEncode](projects/url-encode/README.md) | Percent-encode / decode text, with form-style space-to-plus | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/url-encode/) |
+| [HTMLEntity](projects/html-entity/README.md) | Encode / decode HTML entities (named, decimal, hex) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/html-entity/) |
+| [LoremGen](projects/lorem/README.md) | Generate Lorem Ipsum by paragraph / sentence / word | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/lorem/) |
+| [Contrast](projects/contrast/README.md) | WCAG 2.1 contrast checker with AA / AAA badges | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/contrast/) |
+| [JSONDiff](projects/json-diff/README.md) | Structural diff of two JSON objects by path | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/json-diff/) |
+| [UnicodeView](projects/unicode/README.md) | Inspect per-character Unicode codepoints and UTF-8 / UTF-16 | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/unicode/) |
 
 ### Developer CLIs (20)
 

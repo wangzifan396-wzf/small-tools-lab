@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JSON 结构差异 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; --code:#385a7a; --add:#1d7a43; --del:#b3261e; --chg:#b8832f; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:980px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:720px){ .grid { grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  textarea { width:100%; min-height:200px; resize:vertical; border:1px solid var(--bd); border-radius:10px; padding:11px 12px; font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color:var(--code); background:#fcfbf9; }
+  textarea:focus { outline:2px solid var(--ac); outline-offset:1px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  button.ghost { background:transparent; }
+  #out { min-height:240px; }
+  .line { padding:2px 8px; border-radius:5px; white-space:pre-wrap; word-break:break-word; font-family:ui-monospace,monospace; font-size:12.5px; }
+  .line.add { background:#e7f5ec; color:var(--add); }
+  .line.del { background:#fdeaea; color:var(--del); }
+  .line.chg { background:#fdf3e3; color:var(--chg); }
+  .line.same { color:var(--mut); }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .legend span { font-size:12px; padding:2px 8px; border-radius:6px; margin-right:6px; }
+  .ico { color:var(--ac2); }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">🔀</span> JSON 结构差异</h1>
+  <p class="sub">比较两个 JSON 对象，逐路径找出「新增 / 删除 / 修改」的键。纯浏览器零依赖。</p>
+
+  <div class="grid">
+    <div class="card">
+      <label for="a">JSON A（原始）</label>
+      <textarea id="a" placeholder='{ "name": "agenite", "v": 1, "tags": ["a","b"] }'></textarea>
+    </div>
+    <div class="card">
+      <label for="b">JSON B（目标）</label>
+      <textarea id="b" placeholder='{ "name": "agenite", "v": 2, "tags": ["a","c"], "new": true }'></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button class="pri" id="diff">比较</button>
+      <button class="ghost" id="copy">复制差异报告</button>
+      <button class="ghost" id="clear">清空</button>
+      <span class="legend"><span class="line add">新增</span><span class="line del">删除</span><span class="line chg">修改</span></span>
+    </div>
+    <div id="out" style="margin-top:12px;"></div>
+    <div class="note" id="note"></div>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const out = $('out'), note = $('note');
+
+  function flatten(obj, prefix, acc) {
+    acc = acc || {};
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      const keys = Object.keys(obj);
+      if (!keys.length) { acc[prefix] = {}; return acc; }
+      for (const k of keys) flatten(obj[k], prefix ? prefix + '.' + k : k, acc);
+    } else if (Array.isArray(obj)) {
+      obj.forEach((v, i) => flatten(v, prefix + '[' + i + ']', acc));
+      if (!obj.length) acc[prefix] = [];
+    } else {
+      acc[prefix] = obj;
+    }
+    return acc;
+  }
+  function compare() {
+    let a, b;
+    try { a = JSON.parse($('a').value || 'null'); }
+    catch (e) { note.textContent = '⚠ JSON A 解析失败：' + e.message; return; }
+    try { b = JSON.parse($('b').value || 'null'); }
+    catch (e) { note.textContent = '⚠ JSON B 解析失败：' + e.message; return; }
+
+    const fa = flatten(a, ''), fb = flatten(b, '');
+    const keys = Array.from(new Set([...Object.keys(fa), ...Object.keys(fb)])).sort();
+    const lines = [];
+    let added = 0, removed = 0, changed = 0, same = 0;
+    for (const k of keys) {
+      const inA = k in fa, inB = k in fb;
+      const va = JSON.stringify(fa[k]), vb = JSON.stringify(fb[k]);
+      const path = k === '' ? '(root)' : k;
+      if (inA && !inB) { lines.push(['del', '− ' + path + ' = ' + va]); removed++; }
+      else if (!inA && inB) { lines.push(['add', '+ ' + path + ' = ' + vb]); added++; }
+      else if (va !== vb) { lines.push(['chg', '~ ' + path + ': ' + va + '  →  ' + vb]); changed++; }
+      else { lines.push(['same', '  ' + path + ' = ' + va]); same++; }
+    }
+    out.innerHTML = lines.map(([cls, t]) => '<div class="line ' + cls + '">' + escapeHtml(t) + '</div>').join('') || '<div class="line same">（两个 JSON 完全一致）</div>';
+    note.textContent = `共 ${keys.length} 个路径 · 新增 ${added} · 删除 ${removed} · 修改 ${changed} · 相同 ${same}。`;
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+
+  $('diff').onclick = compare;
+  $('clear').onclick = () => { $('a').value = ''; $('b').value = ''; out.innerHTML = ''; note.textContent = ''; };
+  $('copy').onclick = async () => {
+    const text = Array.from(out.querySelectorAll('.line')).map((d) => d.textContent).join('\n');
+    try { await navigator.clipboard.writeText(text); note.textContent = '已复制差异报告 ✓'; }
+    catch { note.textContent = '复制失败，请手动选择。'; }
+  };
+  compare();
+})();
+</script>
+</body>
+</html>

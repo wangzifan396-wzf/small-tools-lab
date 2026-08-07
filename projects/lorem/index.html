@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lorem 生成器 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; --code:#385a7a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  textarea { width:100%; min-height:160px; resize:vertical; border:1px solid var(--bd); border-radius:10px; padding:11px 12px; font:13.5px/1.6 Georgia,"Times New Roman",serif; color:var(--ink); background:#fcfbf9; }
+  textarea:focus { outline:2px solid var(--ac); outline-offset:1px; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  button.ghost { background:transparent; }
+  input[type=number] { width:84px; border:1px solid var(--bd); border-radius:8px; padding:7px 9px; font:14px ui-monospace,monospace; }
+  .opt { display:flex; gap:16px; align-items:center; flex-wrap:wrap; color:var(--mut); font-size:13px; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .ico { color:var(--ac2); }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">📝</span> Lorem 生成器</h1>
+  <p class="sub">生成 Lorem Ipsum 占位文本，支持按段落 / 句子 / 单词数量生成，纯浏览器零依赖。</p>
+
+  <div class="card">
+    <div class="opt">
+      <span>生成方式：
+        <label><input type="radio" name="unit" value="para" checked /> 段落</label>
+        <label><input type="radio" name="unit" value="sentence" /> 句子</label>
+        <label><input type="radio" name="unit" value="word" /> 单词</label>
+      </span>
+      <span>数量 <input type="number" id="count" value="3" min="1" max="500" /></span>
+      <span><label><input type="radio" name="start" value="lorem" checked /> 以 Lorem 开头</label>
+        <label><input type="radio" name="start" value="any" /> 任意</label></span>
+    </div>
+    <div class="row">
+      <button class="pri" id="gen">生成</button>
+      <button class="ghost" id="copy">复制结果</button>
+      <button class="ghost" id="clear">清空</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <label for="out">生成的占位文本</label>
+    <textarea id="out" readonly placeholder="点击「生成」后显示在这里"></textarea>
+    <div class="note" id="note"></div>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const out = $('out'), note = $('note');
+  const WORDS = ('lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum').split(' ');
+
+  function rnd(n) { return Math.floor(Math.random() * n); }
+  function sentence() {
+    const len = 8 + rnd(10);
+    const arr = [];
+    for (let i = 0; i < len; i++) arr.push(WORDS[rnd(WORDS.length)]);
+    let s = arr.join(' ');
+    s = s.charAt(0).toUpperCase() + s.slice(1);
+    return s + '.';
+  }
+  function paragraph(startLorem) {
+    const n = 4 + rnd(4);
+    const parts = [];
+    if (startLorem) {
+      parts.push('Lorem ipsum dolor sit amet, consectetur adipiscing elit.');
+      for (let i = 1; i < n; i++) parts.push(sentence());
+    } else {
+      for (let i = 0; i < n; i++) parts.push(sentence());
+    }
+    return parts.join(' ');
+  }
+  function generate() {
+    const unit = document.querySelector('input[name=unit]:checked').value;
+    const count = Math.max(1, Math.min(500, parseInt($('count').value, 10) || 1));
+    const startLorem = document.querySelector('input[name=start]:checked').value === 'lorem';
+    let text = '';
+    if (unit === 'para') {
+      text = [];
+      for (let i = 0; i < count; i++) text.push(paragraph(startLorem && i === 0));
+      text = text.join('\n\n');
+    } else if (unit === 'sentence') {
+      const arr = [];
+      if (startLorem) arr.push('Lorem ipsum dolor sit amet, consectetur adipiscing elit.');
+      for (let i = arr.length; i < count; i++) arr.push(sentence());
+      text = arr.join(' ');
+    } else {
+      const arr = [];
+      if (startLorem) arr.push('Lorem', 'ipsum', 'dolor', 'sit', 'amet,', 'consectetur', 'adipiscing', 'elit.');
+      for (let i = arr.length; i < count; i++) arr.push(WORDS[rnd(WORDS.length)]);
+      text = arr.join(' ');
+    }
+    out.value = text;
+    note.textContent = '已生成约 ' + text.replace(/\s+/g, ' ').trim().split(' ').length + ' 个单词。';
+  }
+  $('gen').onclick = generate;
+  $('clear').onclick = () => { out.value = ''; note.textContent = ''; };
+  $('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(out.value); note.textContent = '已复制到剪贴板 ✓'; }
+    catch { out.select(); document.execCommand('copy'); note.textContent = '已复制 ✓'; }
+  };
+})();
+</script>
+</body>
+</html>

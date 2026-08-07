@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>对比度检查 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  .swatches { display:flex; gap:14px; flex-wrap:wrap; }
+  .field { display:flex; flex-direction:column; gap:6px; }
+  input[type=text] { width:140px; border:1px solid var(--bd); border-radius:8px; padding:8px 10px; font:14px ui-monospace,monospace; text-transform:uppercase; }
+  .picker { display:flex; align-items:center; gap:8px; }
+  input[type=color] { width:38px; height:34px; border:1px solid var(--bd); border-radius:8px; padding:2px; background:#fff; cursor:pointer; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  .result { display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  .ratio { font-size:34px; font-weight:700; color:var(--ac2); }
+  .preview { padding:26px 30px; border-radius:12px; font-size:20px; font-weight:600; border:1px solid var(--bd); }
+  .badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+  .badge { font-size:12px; padding:4px 10px; border-radius:999px; border:1px solid var(--bd); }
+  .badge.pass { background:#e7f5ec; color:#1d7a43; border-color:#bfe6cd; }
+  .badge.fail { background:#fdeaea; color:#b3261e; border-color:#f4c9c6; }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .ico { color:var(--ac2); }
+  table { width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+  th, td { text-align:left; padding:7px 9px; border-bottom:1px solid var(--bd); }
+  th { color:var(--mut); font-weight:600; }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">🎨</span> 对比度检查（WCAG）</h1>
+  <p class="sub">计算前景色与背景色的 WCAG 2.1 相对亮度对比度，判断文字可读性是否达标。纯浏览器零依赖。</p>
+
+  <div class="card">
+    <div class="swatches">
+      <div class="field">
+        <label>文字颜色（前景）</label>
+        <div class="picker"><input type="color" id="fgColor" value="#23211e" /><input type="text" id="fg" value="#23211E" /></div>
+      </div>
+      <div class="field">
+        <label>背景颜色</label>
+        <div class="picker"><input type="color" id="bgColor" value="#faf9f7" /><input type="text" id="bg" value="#FAF9F7" /></div>
+      </div>
+      <div class="field" style="justify-content:flex-end;">
+        <button class="pri" id="calc">计算对比度</button>
+      </div>
+    </div>
+    <div class="result" style="margin-top:16px;">
+      <div>
+        <div class="ratio" id="ratio">—</div>
+        <div class="badges" id="badges"></div>
+      </div>
+      <div class="preview" id="preview">Aa 文字预览</div>
+    </div>
+    <div class="note" id="note">支持 HEX（#RGB / #RRGGBB）与 rgb()/rgba()。</div>
+  </div>
+
+  <div class="card">
+    <label>WCAG 2.1 通过标准</label>
+    <table>
+      <tr><th>等级</th><th>普通文字</th><th>大号文字（≥18.66px 粗体 / ≥24px）</th></tr>
+      <tr><td>AA</td><td>≥ 4.5:1</td><td>≥ 3:1</td></tr>
+      <tr><td>AAA</td><td>≥ 7:1</td><td>≥ 4.5:1</td></tr>
+    </table>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  function parseColor(str) {
+    str = (str || '').trim();
+    if (str.startsWith('#')) {
+      let h = str.slice(1);
+      if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+      if (h.length === 6) return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+      if (h.length === 8) return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+      return null;
+    }
+    const m = str.match(/rgba?\(([^)]+)\)/i);
+    if (m) { const p = m[1].split(/[,\s/]+/).filter(Boolean).map(Number); if (p.length >= 3) return [p[0], p[1], p[2]]; }
+    return null;
+  }
+  function lin(c) { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+  function luminance(rgb) { return 0.2126 * lin(rgb[0]) + 0.7152 * lin(rgb[1]) + 0.0722 * lin(rgb[2]); }
+  function contrast(fg, bg) {
+    const l1 = luminance(fg), l2 = luminance(bg);
+    const hi = Math.max(l1, l2), lo = Math.min(l1, l2);
+    return (hi + 0.05) / (lo + 0.05);
+  }
+  function toHex(rgb) { return '#' + rgb.map((c) => c.toString(16).padStart(2, '0')).join('').toUpperCase(); }
+
+  function syncFromColor(inputId, textId) {
+    $(inputId).oninput = () => { $(textId).value = $(inputId).value.toUpperCase(); compute(); };
+    $(textId).oninput = () => {
+      const rgb = parseColor($(textId).value);
+      if (rgb) $(inputId).value = toHex(rgb);
+      compute();
+    };
+  }
+  function compute() {
+    const fg = parseColor($('fg').value), bg = parseColor($('bg').value);
+    if (!fg || !bg) { $('note').textContent = '⚠ 颜色格式无法识别，请用 #RGB / #RRGGBB / rgb()。'; return; }
+    const r = contrast(fg, bg);
+    $('ratio').textContent = r.toFixed(2) + ':1';
+    $('preview').style.color = toHex(fg);
+    $('preview').style.background = toHex(bg);
+    const aaNormal = r >= 4.5, aaLarge = r >= 3, aaaNormal = r >= 7, aaaLarge = r >= 4.5;
+    $('badges').innerHTML =
+      badge('AA 普通', aaNormal) + badge('AA 大号', aaLarge) +
+      badge('AAA 普通', aaaNormal) + badge('AAA 大号', aaaLarge);
+    $('note').textContent = 'WCAG 2.1 相对亮度对比度 = ' + r.toFixed(2) + '。' + (aaNormal ? '已达 AA 普通标准。' : '未达 AA 普通标准，建议调高对比。');
+  }
+  function badge(label, ok) { return '<span class="badge ' + (ok ? 'pass' : 'fail') + '">' + label + '：' + (ok ? '通过' : '不通过') + '</span>'; }
+
+  syncFromColor('fgColor', 'fg');
+  syncFromColor('bgColor', 'bg');
+  $('calc').onclick = compute;
+  compute();
+})();
+</script>
+</body>
+</html>

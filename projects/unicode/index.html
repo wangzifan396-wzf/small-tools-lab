@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Unicode 码点查看 · Small Tools Lab</title>
+<style>
+  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; --code:#385a7a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
+  textarea { width:100%; min-height:90px; resize:vertical; border:1px solid var(--bd); border-radius:10px; padding:11px 12px; font:15px/1.6 inherit; color:var(--ink); background:#fcfbf9; }
+  textarea:focus { outline:2px solid var(--ac); outline-offset:1px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
+  button:hover { border-color:var(--ac); }
+  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
+  button.ghost { background:transparent; }
+  table { width:100%; border-collapse:collapse; margin-top:6px; font-size:13px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--bd); vertical-align:top; }
+  th { color:var(--mut); font-weight:600; }
+  td.ch { font-size:22px; text-align:center; width:46px; }
+  td.cp { font-family:ui-monospace,monospace; color:var(--code); }
+  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .ico { color:var(--ac2); }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ico">🔣</span> Unicode 码点查看</h1>
+  <p class="sub">逐字符查看 Unicode 码点（码位）、UTF-8 / UTF-16 编码与名称。纯浏览器零依赖。</p>
+
+  <div class="card">
+    <label for="in">输入任意文本</label>
+    <textarea id="in" placeholder="例如：A 中 🌟 © →"></textarea>
+    <div class="row">
+      <button class="pri" id="run">分析</button>
+      <button class="ghost" id="copy">复制码点列表</button>
+      <span class="opt" style="color:var(--mut);font-size:13px;">含代理对（emoji）会自动按码位正确拆分</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <label>字符明细</label>
+    <table id="tbl">
+      <thead><tr><th>字符</th><th>码点</th><th>UTF-8</th><th>UTF-16</th><th>名称 / 类别</th></tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+    <div class="note" id="note"></div>
+  </div>
+
+  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const body = $('body'), note = $('note');
+
+  function utf8(cp) {
+    if (cp < 0x80) return [cp];
+    if (cp < 0x800) return [0xC0 | (cp >> 6), 0x80 | (cp & 0x3F)];
+    if (cp < 0x10000) return [0xE0 | (cp >> 12), 0x80 | ((cp >> 6) & 0x3F), 0x80 | (cp & 0x3F)];
+    return [0xF0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3F), 0x80 | ((cp >> 6) & 0x3F), 0x80 | (cp & 0x3F)];
+  }
+  function hexBytes(arr) { return arr.map((b) => b.toString(16).toUpperCase().padStart(2, '0')).join(' '); }
+  function utf16(cp) {
+    if (cp < 0x10000) return '0x' + cp.toString(16).toUpperCase().padStart(4, '0');
+    const c = cp - 0x10000;
+    const hi = 0xD800 + (c >> 10), lo = 0xDC00 + (c & 0x3FF);
+    return '0x' + hi.toString(16).toUpperCase().padStart(4, '0') + ' 0x' + lo.toString(16).toUpperCase().padStart(4, '0');
+  }
+  function category(cp) {
+    if (cp < 0x80 && /[A-Za-z]/.test(String.fromCodePoint(cp))) return 'ASCII 字母';
+    if (cp < 0x80 && /[0-9]/.test(String.fromCodePoint(cp))) return 'ASCII 数字';
+    if (cp >= 0x4E00 && cp <= 0x9FFF) return 'CJK 统一表意文字';
+    if (cp >= 0x3040 && cp <= 0x30FF) return '日文假名';
+    if (cp >= 0xAC00 && cp <= 0xD7A3) return '韩文音节';
+    if (cp >= 0x1F000) return 'emoji / 符号';
+    if (cp === 0x20) return '空格';
+    if (cp < 0x100) return 'Latin-1 / 控制符';
+    return '其他';
+  }
+  function analyze() {
+    const text = $('in').value;
+    const rows = [];
+    for (const ch of text) {
+      const cp = ch.codePointAt(0);
+      rows.push(
+        '<tr><td class="ch">' + escapeHtml(ch) + '</td>' +
+        '<td class="cp">U+' + cp.toString(16).toUpperCase().padStart(4, '0') + '</td>' +
+        '<td class="cp">' + hexBytes(utf8(cp)) + '</td>' +
+        '<td class="cp">' + utf16(cp) + '</td>' +
+        '<td>' + category(cp) + '</td></tr>'
+      );
+    }
+    body.innerHTML = rows.join('') || '<tr><td colspan="5" style="color:var(--mut)">（空）</td></tr>';
+    note.textContent = '共 ' + (text ? Array.from(text).length : 0) + ' 个 Unicode 码位。';
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+
+  $('run').onclick = analyze;
+  $('copy').onclick = async () => {
+    const text = Array.from($('in').value).map((ch) => {
+      const cp = ch.codePointAt(0);
+      return ch + '  U+' + cp.toString(16).toUpperCase().padStart(4, '0');
+    }).join('\n');
+    try { await navigator.clipboard.writeText(text); note.textContent = '已复制码点列表 ✓'; }
+    catch { note.textContent = '复制失败，请手动选择。'; }
+  };
+  analyze();
+})();
+</script>
+</body>
+</html>
