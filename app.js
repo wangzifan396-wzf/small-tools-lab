@@ -893,6 +893,28 @@ const TOOLS = [
     docs: "projects/diff-text/README.md",
     featured: false,
   },
+  {
+    id: "port-origin",
+    name: "Port Origin",
+    category: "cli",
+    label: "端口与进程溯源",
+    description:
+      "Trace a listening port or PID to its command, owner, parent-process chain, and runtime hints across Windows, Linux, and macOS.",
+    tech: "Node.js · Process · Cross-platform",
+    docs: "projects/port-origin/README.md",
+    featured: true,
+  },
+  {
+    id: "mcp-probe",
+    name: "MCP Probe",
+    category: "cli",
+    label: "只读 MCP 能力检查",
+    description:
+      "Initialize an MCP stdio server, list advertised capabilities, measure latency, and flag risky metadata without invoking tools or reading resources.",
+    tech: "Node.js · MCP · JSON-RPC · SARIF",
+    docs: "projects/mcp-probe/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {

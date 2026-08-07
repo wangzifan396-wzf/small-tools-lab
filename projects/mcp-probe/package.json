@@ -1,0 +1,17 @@
+{
+  "name": "mcp-capability-probe",
+  "version": "0.1.0",
+  "description": "Read-only stdio inspector for MCP initialization, capability manifests, latency, and risky tool metadata.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "types": "types/index.d.ts",
+  "exports": { ".": { "types": "./types/index.d.ts", "import": "./src/index.js" } },
+  "main": "src/index.js",
+  "bin": { "mcp-probe": "bin/mcp-probe.js" },
+  "files": ["bin", "src", "types", "README.md", "README.zh-CN.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md"],
+  "scripts": { "test": "node --test" },
+  "keywords": ["mcp", "model-context-protocol", "inspector", "json-rpc", "security"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

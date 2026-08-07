@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 42 focused tools across three categories (20 browser, 20 CLI, 2 local-AI)
-- 40 Node.js projects and 2 Python local-AI experiments with 636 focused project-level tests
+- 78 focused tools across three categories (54 browser, 22 CLI, 2 local-AI)
+- 42 Node.js projects and 2 Python local-AI experiments with 660 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -82,7 +82,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [MDView](projects/markdown-preview/README.md) | Lightweight Markdown preview (escaped + link-checked) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/markdown-preview/) |
 | [DiffLab](projects/diff-text/README.md) | Line-level LCS diff with inline char highlighting | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/diff-text/) |
 
-### Developer CLIs (20)
+### Developer CLIs (22)
 
 | Project | Purpose |
 | --- | --- |
@@ -106,6 +106,8 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [Text Forge](projects/text-forge/README.md) | Zero-dependency text toolkit: slugify, case conversion, Unicode normalization, diacritic removal, full/half-width conversion, and whitespace cleaning |
 | [Agent Trace](projects/agent-trace/README.md) | Analyze local coding-agent JSONL for token use, tool latency, repeated reads, and failure loops without prompt bodies |
 | [Skill Sentry](projects/skill-sentry/README.md) | Statically scan AI agent skills for injection, exfiltration, destructive behavior, unsafe references, and supply-chain risk |
+| [Port Origin](projects/port-origin/README.md) | Trace a port or PID to its command, runtime hints, and bounded parent-process ancestry across major operating systems |
+| [MCP Probe](projects/mcp-probe/README.md) | Read-only MCP stdio initialization, capability inventory, latency measurement, and risky metadata checks |
 
 ### Local AI
 
