@@ -1,0 +1,7 @@
+{
+  "name": "base64",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zero-dependency UTF-8-safe Base64 encoder/decoder that runs in the browser.",
+  "type": "module"
+}

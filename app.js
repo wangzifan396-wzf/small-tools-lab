@@ -427,6 +427,42 @@ const TOOLS = [
     docs: "projects/uuidgen/README.md",
     featured: false,
   },
+  {
+    id: "base64",
+    name: "Base64 编解码",
+    category: "browser",
+    label: "文本编码",
+    description:
+      "UTF-8 安全的 Base64 编解码，用 TextEncoder/TextDecoder 正确处理中文与 emoji，支持编码、解码、互换与复制，纯浏览器零依赖。",
+    tech: "Browser · Encoding",
+    live: "projects/base64/",
+    docs: "projects/base64/README.md",
+    featured: false,
+  },
+  {
+    id: "jsonfmt",
+    name: "JSON 格式化",
+    category: "browser",
+    label: "数据美化",
+    description:
+      "JSON 美化（缩进）、压缩（单行）与仅校验三种模式，错误定位清晰，纯浏览器零依赖。",
+    tech: "Browser · Format",
+    live: "projects/jsonfmt/",
+    docs: "projects/jsonfmt/README.md",
+    featured: false,
+  },
+  {
+    id: "colorconv",
+    name: "颜色转换",
+    category: "browser",
+    label: "色彩工具",
+    description:
+      "HEX ⇄ RGB ⇄ HSL 互转，实时色块预览，支持常见格式解析，纯浏览器零依赖。",
+    tech: "Browser · Color",
+    live: "projects/colorconv/",
+    docs: "projects/colorconv/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {

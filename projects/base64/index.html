@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>base64 · Base64 编解码</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --border: #e7e4dd; --border-strong: #d8d4ca;
+    --text: #22211e; --text-2: #56534c; --muted: #8b877e;
+    --accent: #6a5acd; --accent-soft: #ece9f9; --ok: #3d8f61; --warn: #c0792b; --bad: #c0392b;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --border: #232b3a; --border-strong: #34415a;
+      --text: #e9edf5; --text-2: #aab3c6; --muted: #6e788e;
+      --accent: #9d8cff; --accent-soft: #1d1a2e; --ok: #5fd0a0; --warn: #f0b269; --bad: #ff8a7a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px;
+    display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 760px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  select, button {
+    padding: 10px 14px; border-radius: var(--r); border: 1px solid var(--border);
+    background: var(--panel); color: var(--text); font-size: 14px; cursor: pointer;
+  }
+  button.primary { background: var(--accent); color: #fff; border-color: transparent; font-weight: 600; }
+  button.primary:hover { filter: brightness(1.06); }
+  textarea {
+    width: 100%; min-height: 130px; box-sizing: border-box; resize: vertical;
+    padding: 12px 14px; border-radius: var(--r); border: 1px solid var(--border);
+    background: var(--panel); color: var(--text); font-size: 14px; font-family: var(--mono); line-height: 1.55;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); }
+  .field { margin-top: 14px; }
+  .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8px; }
+  .err { color: var(--bad); font-size: 13px; margin-top: 8px; min-height: 18px; }
+  .ok { color: var(--ok); }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+  code { background: var(--accent-soft); padding: 1px 5px; border-radius: 5px; font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔤 base64 · Base64 编解码</h1>
+  <p class="sub">文本与 Base64 互转，<strong>完整支持中文等 UTF-8</strong>。纯前端运行，零依赖，双击即可用。</p>
+
+  <div class="row">
+    <select id="mode">
+      <option value="encode">编码（文本 → Base64）</option>
+      <option value="decode">解码（Base64 → 文本）</option>
+    </select>
+    <button class="primary" id="run">转换</button>
+    <button id="copy">复制结果</button>
+    <button id="swap">⇄ 互换</button>
+  </div>
+
+  <div class="field">
+    <p class="label">输入</p>
+    <textarea id="input" placeholder="在此粘贴文本或 Base64…"></textarea>
+  </div>
+  <div class="field">
+    <p class="label">输出</p>
+    <textarea id="output" readonly placeholder="结果将显示在这里…"></textarea>
+  </div>
+  <div class="err" id="err"></div>
+
+  <p class="foot">UTF-8 安全 · 零依赖 · 数据不出本机</p>
+</div>
+
+<script>
+"use strict";
+function utf8ToBytes(str){ return new TextEncoder().encode(str); }
+function bytesToBase64(bytes){ let bin=""; for(let i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]); return btoa(bin); }
+function base64ToBytes(b64){ const bin=atob(b64); const bytes=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i); return bytes; }
+function bytesToUtf8(bytes){ return new TextDecoder().decode(bytes); }
+
+const $=(id)=>document.getElementById(id);
+function render(){
+  const mode=$('mode').value;
+  const input=$('input').value;
+  const err=$('err');
+  err.textContent=""; err.className="err";
+  if(!input){ $('output').value=""; return; }
+  try{
+    let out;
+    if(mode==="encode"){ out=bytesToBase64(utf8ToBytes(input)); }
+    else {
+      const trimmed=input.trim().replace(/\s+/g,"");
+      out=bytesToUtf8(base64ToBytes(trimmed));
+    }
+    $('output').value=out;
+  }catch(e){
+    err.textContent="解码失败：不是合法的 Base64（" + (e && e.message ? e.message : e) + "）";
+  }
+}
+function copy(){
+  const v=$('output').value;
+  if(!v){ return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(v).then(()=>{ flash("已复制"); }, ()=>fallbackCopy(v));
+  } else fallbackCopy(v);
+}
+function fallbackCopy(v){
+  const t=$('output'); t.removeAttribute("readonly"); t.select();
+  try{ document.execCommand("copy"); flash("已复制"); }catch(e){ flash("复制失败，请手动选择"); }
+  t.setAttribute("readonly","");
+}
+function flash(msg){
+  const err=$('err'); err.textContent=msg; err.className="err ok";
+  setTimeout(()=>{ if(err.textContent===msg) err.textContent=""; }, 1400);
+}
+function swap(){
+  const out=$('output').value;
+  if(!out) return;
+  $('mode').value = $('mode').value==="encode" ? "decode" : "encode";
+  $('input').value=out; $('output').value=""; render();
+}
+
+$('mode').addEventListener("change", render);
+$('run').addEventListener("click", render);
+$('copy').addEventListener("click", copy);
+$('swap').addEventListener("click", swap);
+$('input').addEventListener("input", render);
+render();
+</script>
+</body>
+</html>

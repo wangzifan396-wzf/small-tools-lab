@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>colorconv · 颜色格式转换</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --border: #e7e4dd; --border-strong: #d8d4ca;
+    --text: #22211e; --text-2: #56534c; --muted: #8b877e;
+    --accent: #6a5acd; --accent-soft: #ece9f9; --ok: #3d8f61; --warn: #c0792b; --bad: #c0392b;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --border: #232b3a; --border-strong: #34415a;
+      --text: #e9edf5; --text-2: #aab3c6; --muted: #6e788e;
+      --accent: #9d8cff; --accent-soft: #1d1a2e; --ok: #5fd0a0; --warn: #f0b269; --bad: #ff8a7a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px;
+    display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 720px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  input[type=text] {
+    flex: 1; min-width: 220px; padding: 10px 12px; border-radius: var(--r);
+    border: 1px solid var(--border); background: var(--panel); color: var(--text);
+    font-size: 14px; font-family: var(--mono);
+  }
+  input[type=text]:focus { outline: none; border-color: var(--accent); }
+  .preview {
+    width: 64px; height: 64px; border-radius: var(--r); border: 1px solid var(--border);
+    flex: 0 0 auto;
+  }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; margin-top: 14px; }
+  .grid { display: grid; grid-template-columns: 90px 1fr auto; gap: 10px; align-items: center; }
+  .grid + .grid { margin-top: 10px; }
+  .k { font-size: 13px; color: var(--muted); }
+  .v { font-family: var(--mono); font-size: 14px; word-break: break-all; }
+  button {
+    padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--panel-2); color: var(--text); font-size: 12.5px; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8px; }
+  .err { color: var(--bad); font-size: 13px; margin-top: 10px; min-height: 18px; }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎨 colorconv · 颜色格式转换</h1>
+  <p class="sub">在 <strong>HEX / RGB / HSL</strong> 之间互转，实时预览。纯前端运行，零依赖。</p>
+
+  <div class="row">
+    <input id="input" type="text" value="#6a5acd" placeholder="例如 #6a5acd / rgb(106,90,205) / hsl(251,49%,58%)" />
+    <div class="preview" id="preview"></div>
+  </div>
+  <div class="err" id="err"></div>
+
+  <div class="card">
+    <p class="label">转换结果</p>
+    <div class="grid">
+      <span class="k">HEX</span><span class="v" id="hex">—</span><button data-copy="hex">复制</button>
+    </div>
+    <div class="grid">
+      <span class="k">RGB</span><span class="v" id="rgb">—</span><button data-copy="rgb">复制</button>
+    </div>
+    <div class="grid">
+      <span class="k">HSL</span><span class="v" id="hsl">—</span><button data-copy="hsl">复制</button>
+    </div>
+  </div>
+
+  <p class="foot">HEX ↔ RGB ↔ HSL · 零依赖 · 数据不出本机</p>
+</div>
+
+<script>
+"use strict";
+const $=(id)=>document.getElementById(id);
+function clamp(v,min,max){ return Math.min(max, Math.max(min, v)); }
+function parseColor(str){
+  const s=String(str==null?"":str).trim().toLowerCase();
+  if(!s) throw new Error("输入为空");
+  // hex
+  if(s[0]==="#"){
+    let h=s.slice(1);
+    if(h.length===3) h=h.split("").map(c=>c+c).join("");
+    if(h.length!==6 || /[^0-9a-f]/.test(h)) throw new Error("非法 HEX");
+    return { r:parseInt(h.slice(0,2),16), g:parseInt(h.slice(2,4),16), b:parseInt(h.slice(4,6),16) };
+  }
+  // rgb()
+  let m=s.match(/^rgba?\(([^)]+)\)$/);
+  if(m){
+    const parts=m[1].split(/[,\s/]+/).filter(x=>x!=="");
+    if(parts.length<3) throw new Error("非法 RGB");
+    return { r:clamp(parseInt(parts[0],10),0,255), g:clamp(parseInt(parts[1],10),0,255), b:clamp(parseInt(parts[2],10),0,255) };
+  }
+  // hsl()
+  m=s.match(/^hsla?\(([^)]+)\)$/);
+  if(m){
+    const parts=m[1].split(/[,\s/]+/).filter(x=>x!=="");
+    if(parts.length<3) throw new Error("非法 HSL");
+    return hslToRgb(parseFloat(parts[0]), parseFloat(parts[1])/100, parseFloat(parts[2].replace("%",""))/100);
+  }
+  throw new Error("无法识别的颜色格式（支持 #hex / rgb() / hsl()）");
+}
+function rgbToHex({r,g,b}){
+  const h=(n)=>clamp(Math.round(n),0,255).toString(16).padStart(2,"0");
+  return "#" + h(r) + h(g) + h(b);
+}
+function rgbToHsl({r,g,b}){
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  let h,s,l=(max+min)/2;
+  if(max===min){ h=s=0; }
+  else {
+    const d=max-min;
+    s = l>0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d + (g<b?6:0); break;
+      case g: h=(b-r)/d + 2; break;
+      default: h=(r-g)/d + 4;
+    }
+    h/=6;
+  }
+  return { h:Math.round(h*360), s:Math.round(s*100), l:Math.round(l*100) };
+}
+function hslToRgb(hh,ss,ll){
+  let r,g,b;
+  if(ss===0){ r=g=b=ll; }
+  else {
+    const hue2rgb=(p,q,t)=>{
+      if(t<0) t+=1; if(t>1) t-=1;
+      if(t<1/6) return p+(q-p)*6*t;
+      if(t<1/2) return q;
+      if(t<2/3) return p+(q-p)*(2/3-t)*6;
+      return p;
+    };
+    const q = ll<0.5 ? ll*(1+ss) : ll+ss-ll*ss;
+    const p = 2*ll-q;
+    r=hue2rgb(p,q,hh/360+1/3); g=hue2rgb(p,q,hh/360); b=hue2rgb(p,q,hh/360-1/3);
+  }
+  return { r:Math.round(r*255), g:Math.round(g*255), b:Math.round(b*255) };
+}
+function render(){
+  const err=$('err'); err.textContent="";
+  try{
+    const rgb=parseColor($('input').value);
+    const hex=rgbToHex(rgb);
+    const hsl=rgbToHsl(rgb);
+    $('hex').textContent=hex;
+    $('rgb').textContent=`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+    $('hsl').textContent=`hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+    $('preview').style.background=hex;
+  }catch(e){
+    err.textContent="✗ " + (e && e.message ? e.message : e);
+    ['hex','rgb','hsl'].forEach(id=>$(id).textContent="—");
+  }
+}
+document.querySelectorAll('[data-copy]').forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const v=$(btn.dataset.copy).textContent;
+    if(!v || v==="—") return;
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v);
+  });
+});
+$('input').addEventListener("input", render);
+render();
+</script>
+</body>
+</html>
