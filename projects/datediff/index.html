@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>datediff · 日期差 / 年龄</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --panel-2: #f3f1ec; --border: #e7e4dd; --border-strong: #d8d4ca;
+    --text: #22211e; --text-2: #56534c; --muted: #8b877e;
+    --accent: #6a5acd; --accent-soft: #ece9f9; --ok: #3d8f61; --warn: #c0792b; --bad: #c0392b;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --panel-2: #1b2230; --border: #232b3a; --border-strong: #34415a;
+      --text: #e9edf5; --text-2: #aab3c6; --muted: #6e788e;
+      --accent: #9d8cff; --accent-soft: #1d1a2e; --ok: #5fd0a0; --warn: #f0b269; --bad: #ff8a7a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px; display: flex; justify-content: center; }
+  .wrap { width: 100%; max-width: 640px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; }
+  .field { margin-bottom: 14px; }
+  label { display: block; font-size: 13px; color: var(--text-2); margin-bottom: 6px; }
+  input[type=date], input[type=time] { padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--border); background: var(--panel-2); color: var(--text); font-family: var(--mono); font-size: 14px; }
+  input:focus { outline: none; border-color: var(--accent); }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .mini { padding: 9px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--text); cursor: pointer; font-size: 13px; }
+  .mini:hover { border-color: var(--accent); color: var(--accent); }
+  .res { margin-top: 10px; padding: 14px 16px; border-radius: var(--r); background: var(--accent-soft); border: 1px solid var(--border); font-size: 15px; line-height: 1.9; }
+  .res b { font-family: var(--mono); }
+  .err { color: var(--bad); font-size: 13px; min-height: 18px; margin-top: 6px; }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 12px; line-height: 1.7; }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📅 datediff · 日期差 / 年龄</h1>
+  <p class="sub">计算两个日期之间相差的年 / 月 / 日与总天数，也可算年龄。纯前端、零依赖。</p>
+  <div class="card">
+    <div class="field">
+      <label>起始日期</label>
+      <div class="row">
+        <input type="date" id="d1" value="1990-01-01" />
+        <input type="time" id="t1" value="00:00" />
+      </div>
+    </div>
+    <div class="field">
+      <label>结束日期</label>
+      <div class="row">
+        <input type="date" id="d2" />
+        <input type="time" id="t2" value="00:00" />
+      </div>
+    </div>
+    <div class="row">
+      <button class="mini" id="calc">计算</button>
+      <button class="mini" id="today">结束设为今天</button>
+    </div>
+    <div class="res" id="res">—</div>
+    <div class="err" id="err"></div>
+    <div class="hint">常用于算「距今多少岁 / 多少天」「项目工期」「纪念日倒计时」等。</div>
+  </div>
+  <p class="foot">纯前端 · 数据不出本机</p>
+</div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const WK = ["日", "一", "二", "三", "四", "五", "六"];
+
+function toDate(d, t) {
+  if (!d) return null;
+  const dt = new Date(d + "T" + (t || "00:00") + ":00");
+  if (isNaN(dt.getTime())) throw new Error("日期格式无效");
+  return dt;
+}
+// 计算 a→b 的 年/月/日（借位法，符合直觉）
+function ymd(a, b) {
+  let y = b.getFullYear() - a.getFullYear();
+  let m = b.getMonth() - a.getMonth();
+  let d = b.getDate() - a.getDate();
+  if (d < 0) { m--; const prev = new Date(b.getFullYear(), b.getMonth(), 0); d += prev.getDate(); }
+  if (m < 0) { y--; m += 12; }
+  return { y, m, d };
+}
+
+function calc() {
+  $("err").textContent = "";
+  try {
+    const a = toDate($("d1").value, $("t1").value);
+    const b = toDate($("d2").value, $("t2").value);
+    if (!a || !b) throw new Error("请填写两个日期");
+    const fwd = b >= a;
+    const lo = fwd ? a : b, hi = fwd ? b : a;
+    const { y, m, d } = ymd(lo, hi);
+    const days = Math.round((hi - lo) / 86400000);
+    const wk = Math.floor(days / 7);
+    const age = (y > 0 ? y + " 年 " : "") + (m > 0 ? m + " 个月 " : "") + d + " 天";
+    $("res").innerHTML =
+      `相差：<b>${y}</b> 年 <b>${m}</b> 个月 <b>${d}</b> 天<br/>` +
+      `总计：<b>${days.toLocaleString()}</b> 天（约 <b>${wk}</b> 周）<br/>` +
+      `方向：${fwd ? "起始 → 结束" : "结束早于起始，已自动取绝对值"}<br/>` +
+      `起始：周${WK[a.getDay()]} · 结束：周${WK[b.getDay()]}`;
+  } catch (e) { $("err").textContent = e.message; }
+}
+
+$("calc").onclick = calc;
+$("today").onclick = () => {
+  const n = new Date();
+  $("d2").value = n.toISOString().slice(0, 10);
+  const pad = (x) => String(x).padStart(2, "0");
+  $("t2").value = pad(n.getHours()) + ":" + pad(n.getMinutes());
+  calc();
+};
+calc();
+</script>
+</body>
+</html>

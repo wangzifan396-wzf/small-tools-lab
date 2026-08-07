@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>morse · 摩斯电码互译</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --panel-2: #f3f1ec; --border: #e7e4dd; --border-strong: #d8d4ca;
+    --text: #22211e; --text-2: #56534c; --muted: #8b877e;
+    --accent: #6a5acd; --accent-soft: #ece9f9; --ok: #3d8f61; --warn: #c0792b; --bad: #c0392b;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --panel-2: #1b2230; --border: #232b3a; --border-strong: #34415a;
+      --text: #e9edf5; --text-2: #aab3c6; --muted: #6e788e;
+      --accent: #9d8cff; --accent-soft: #1d1a2e; --ok: #5fd0a0; --warn: #f0b269; --bad: #ff8a7a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px; display: flex; justify-content: center; }
+  .wrap { width: 100%; max-width: 720px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; }
+  .field { margin-bottom: 14px; }
+  label { display: block; font-size: 13px; color: var(--text-2); margin-bottom: 6px; }
+  textarea, input[type=text] { width: 100%; padding: 11px 13px; border-radius: var(--r); border: 1px solid var(--border); background: var(--panel-2); color: var(--text); font-family: var(--mono); font-size: 14px; resize: vertical; }
+  textarea { min-height: 90px; }
+  textarea:focus, input:focus { outline: none; border-color: var(--accent); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .mini { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--text); cursor: pointer; font-size: 13px; }
+  .mini:hover { border-color: var(--accent); color: var(--accent); }
+  .err { color: var(--bad); font-size: 13px; min-height: 18px; margin-top: 6px; }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 12px; line-height: 1.7; }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+  code { background: var(--panel-2); padding: 1px 6px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📻 morse · 摩斯电码互译</h1>
+  <p class="sub">在文本与摩斯电码之间互译，支持字母、数字、常用标点与单词间隔。纯前端、零依赖。</p>
+  <div class="card">
+    <div class="field">
+      <label>输入</label>
+      <textarea id="in" spellcheck="false" placeholder="输入英文/数字，或摩斯电码（. - 分隔，词间用 /）">SOS</textarea>
+    </div>
+    <div class="row">
+      <button class="mini" id="toMorse">文本 → 摩斯</button>
+      <button class="mini" id="toText">摩斯 → 文本</button>
+      <button class="mini" id="copy">复制结果</button>
+    </div>
+    <div class="field" style="margin-top:14px">
+      <label>结果</label>
+      <textarea id="out" readonly></textarea>
+    </div>
+    <div class="err" id="err"></div>
+    <div class="hint">
+      电码用 <code>.</code>（点）与 <code>-</code>（划）表示，字母/数字间以空格分隔，单词间以 <code>/</code> 分隔。<br/>
+      例：<code>SOS</code> → <code>... --- ...</code>；<code>HELLO WORLD</code> → <code>.... . .-.. .-.. --- / .-- --- .-. .-.. -..</code>
+    </div>
+  </div>
+  <p class="foot">纯前端 · 数据不出本机</p>
+</div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const MAP = {
+  A: ".-", B: "-...", C: "-.-.", D: "-..", E: ".", F: "..-.", G: "--.", H: "....", I: "..",
+  J: ".---", K: "-.-", L: ".-..", M: "--", N: "-.", O: "---", P: ".--.", Q: "--.-", R: ".-.", S: "...",
+  T: "-", U: "..-", V: "...-", W: ".--", X: "-..-", Y: "-.--", Z: "--..",
+  "0": "-----", "1": ".----", "2": "..---", "3": "...--", "4": "....-", "5": ".....",
+  "6": "-....", "7": "--...", "8": "---..", "9": "----.",
+  ".": ".-.-.-", ",": "--..--", "?": "..--..", "'": ".----.", "!": "-.-.--", "/": "-..-.",
+  "(": "-.--.", ")": "-.--.-", "&": ".-...", ":": "---...", ";": "-.-.-.", "=": "-...-",
+  "+": ".-.-.", "-": "-....-", "_": "..--.-", '"': ".-..-.", "$": "...-..-", "@": ".--.-."
+};
+const INV = Object.fromEntries(Object.entries(MAP).map(([k, v]) => [v, k]));
+
+function toMorse(text) {
+  return text.toUpperCase().trim().split(/\s+/).map((word) =>
+    [...word].map((ch) => {
+      const code = MAP[ch];
+      if (!code) throw new Error("不支持的字符: " + ch);
+      return code;
+    }).join(" ")
+  ).join(" / ");
+}
+function toText(morse) {
+  return morse.trim().split(" / ").map((word) =>
+    word.trim().split(/\s+/).map((code) => {
+      const ch = INV[code];
+      if (!ch) throw new Error("无法识别的电码: " + code);
+      return ch;
+    }).join("")
+  ).join(" ");
+}
+
+function run(fn) {
+  $("err").textContent = "";
+  try { $("out").value = fn($("in").value); }
+  catch (e) { $("err").textContent = e.message; }
+}
+$("toMorse").onclick = () => run(toMorse);
+$("toText").onclick = () => run(toText);
+$("copy").onclick = () => {
+  const t = $("out").value;
+  if (t) navigator.clipboard.writeText(t).then(() => { const b = $("copy"); b.textContent = "已复制"; setTimeout(() => (b.textContent = "复制"), 1200); });
+};
+run(toMorse);
+</script>
+</body>
+</html>

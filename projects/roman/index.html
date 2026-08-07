@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>roman · 罗马数字互转</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --panel-2: #f3f1ec; --border: #e7e4dd; --border-strong: #d8d4ca;
+    --text: #22211e; --text-2: #56534c; --muted: #8b877e;
+    --accent: #6a5acd; --accent-soft: #ece9f9; --ok: #3d8f61; --warn: #c0792b; --bad: #c0392b;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --panel-2: #1b2230; --border: #232b3a; --border-strong: #34415a;
+      --text: #e9edf5; --text-2: #aab3c6; --muted: #6e788e;
+      --accent: #9d8cff; --accent-soft: #1d1a2e; --ok: #5fd0a0; --warn: #f0b269; --bad: #ff8a7a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px; display: flex; justify-content: center; }
+  .wrap { width: 100%; max-width: 640px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; }
+  .field { margin-bottom: 14px; }
+  label { display: block; font-size: 13px; color: var(--text-2); margin-bottom: 6px; }
+  input[type=text] { width: 100%; padding: 12px 14px; border-radius: var(--r); border: 1px solid var(--border); background: var(--panel-2); color: var(--text); font-family: var(--mono); font-size: 16px; }
+  input:focus { outline: none; border-color: var(--accent); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .mini { padding: 9px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--text); cursor: pointer; font-size: 13px; }
+  .mini:hover { border-color: var(--accent); color: var(--accent); }
+  .res { margin-top: 8px; padding: 14px 16px; border-radius: var(--r); background: var(--accent-soft); border: 1px solid var(--border); font-family: var(--mono); font-size: 18px; word-break: break-all; }
+  .err { color: var(--bad); font-size: 13px; min-height: 18px; margin-top: 6px; }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 12px; line-height: 1.7; }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+  code { background: var(--panel-2); padding: 1px 6px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🏛️ roman · 罗马数字互转</h1>
+  <p class="sub">阿拉伯数字 ⇄ 罗马数字（1–3999），双向转换。纯前端、零依赖。</p>
+  <div class="card">
+    <div class="field">
+      <label>输入（阿拉伯数字 或 罗马数字）</label>
+      <input type="text" id="in" value="1994" spellcheck="false" />
+    </div>
+    <div class="row">
+      <button class="mini" id="toRoman">转为罗马数字</button>
+      <button class="mini" id="toArabic">转为阿拉伯数字</button>
+      <button class="mini" id="copy">复制</button>
+    </div>
+    <div class="res" id="res">—</div>
+    <div class="err" id="err"></div>
+    <div class="hint">
+      罗马数字范围 <code>1–3999</code>（无零与负数）。<br/>
+      例：<code>1994</code> → <code>MCMXCIV</code>；<code>MMXXIV</code> → <code>2024</code>。
+    </div>
+  </div>
+  <p class="foot">纯前端 · 数据不出本机</p>
+</div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const TABLE = [
+  [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"],
+  [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]
+];
+
+function toRoman(n) {
+  n = parseInt(n, 10);
+  if (!Number.isFinite(n) || n < 1 || n > 3999) throw new Error("请输入 1–3999 的整数");
+  let s = "";
+  for (const [v, sym] of TABLE) { while (n >= v) { s += sym; n -= v; } }
+  return s;
+}
+function toArabic(str) {
+  const s = String(str).trim().toUpperCase();
+  if (!/^[IVXLCDM]+$/.test(s)) throw new Error("含非法罗马数字字符");
+  let total = 0, prev = 0;
+  for (const ch of s) {
+    const v = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 }[ch];
+    total += v > prev ? v - 2 * prev : v;
+    prev = v;
+  }
+  if (toRoman(total) !== s) throw new Error("不是规范的罗马数字（如 IIIM 不合法）");
+  return total;
+}
+
+function run(fn) {
+  $("err").textContent = "";
+  try { const r = fn($("in").value); $("res").textContent = r; $("res").dataset.val = r; }
+  catch (e) { $("err").textContent = e.message; }
+}
+$("toRoman").onclick = () => run(toRoman);
+$("toArabic").onclick = () => run(toArabic);
+$("copy").onclick = () => {
+  const t = $("res").textContent;
+  if (t && t !== "—") navigator.clipboard.writeText(t).then(() => { const b = $("copy"); b.textContent = "已复制"; setTimeout(() => (b.textContent = "复制"), 1200); });
+};
+$("in").addEventListener("keydown", (e) => { if (e.key === "Enter") run(toRoman); });
+run(toRoman);
+</script>
+</body>
+</html>

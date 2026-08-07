@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (20)
+### Browser tools (24)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -47,6 +47,10 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [Base64](projects/base64/README.md) | Encode and decode UTF-8 text safely, including CJK and emoji | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base64/) |
 | [JSON Format](projects/jsonfmt/README.md) | Format, minify, and validate JSON with clear local errors | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/jsonfmt/) |
 | [Color Convert](projects/colorconv/README.md) | Convert HEX, RGB, and HSL colors with a live preview | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/colorconv/) |
+| [Morse](projects/morse/README.md) | Translate text and Morse code in both directions | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/morse/) |
+| [RomanNum](projects/roman/README.md) | Convert Arabic and Roman numerals (1–3999) both ways | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/roman/) |
+| [DiceBox](projects/dice/README.md) | Cryptographically secure dice, random integers, and no-repeat draws | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/dice/) |
+| [DateDiff](projects/datediff/README.md) | Compute the year/month/day gap between two dates and age | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/datediff/) |
 
 ### Developer CLIs (20)
 
