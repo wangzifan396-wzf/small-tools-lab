@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>二维码生成器 · Small Tools Lab</title>
+<style>
+  :root {
+    --bg: #f6f4f0; --panel: #ffffff; --ink: #2a2723; --muted: #8a8378;
+    --line: #e7e2d9; --accent: #c2683f; --accent-soft: #f6e7df; --ok: #3f9d6b;
+    --shadow: 0 8px 30px rgba(60, 50, 40, 0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16140f; --panel: #211e18; --ink: #ece7df; --muted: #9b9384;
+      --line: #322d25; --accent: #e08a5c; --accent-soft: #2f2620; --ok: #5fc28c;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 15px/1.6 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink); padding: 32px 16px; display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 720px; }
+  header { margin-bottom: 22px; }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.3px; }
+  h1 .ico { color: var(--accent); }
+  .sub { color: var(--muted); margin: 0; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px;
+  }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+  textarea {
+    width: 100%; min-height: 110px; resize: vertical; padding: 12px 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; font-size: 14px;
+  }
+  textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 14px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .seg button {
+    border: 0; background: transparent; color: var(--ink); padding: 8px 16px; cursor: pointer; font: inherit;
+    font-weight: 600; border-right: 1px solid var(--line);
+  }
+  .seg button:last-child { border-right: 0; }
+  .seg button.on { background: var(--accent); color: #fff; }
+  .meta { color: var(--muted); font-size: 13px; }
+  .meta b { color: var(--ink); }
+  .qr-stage { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  canvas { background: #fff; border-radius: 12px; padding: 14px; box-shadow: var(--shadow); image-rendering: pixelated; max-width: 100%; }
+  .qr-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  button.act, a.act {
+    text-decoration: none; border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    padding: 9px 16px; border-radius: 10px; cursor: pointer; font: inherit; font-weight: 600; transition: .15s;
+  }
+  button.act:hover, a.act:hover { border-color: var(--accent); color: var(--accent); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.primary:hover { filter: brightness(1.05); color: #fff; }
+  .err { color: #c0392b; font-size: 13px; min-height: 18px; margin-top: 8px; }
+  .tip { color: var(--muted); font-size: 12px; margin-top: 10px; }
+  @media (prefers-color-scheme: dark) { canvas { background: #fff; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="ico">▦</span> 二维码生成器</h1>
+    <p class="sub">纯前端零依赖 · 字节模式 · 支持版本 1–10 与 L/M/Q/H 纠错等级 · 数据不出本机</p>
+  </header>
+
+  <div class="card">
+    <label for="txt">文本内容 / 链接</label>
+    <textarea id="txt" placeholder="https://github.com/wangzifan396-wzf/agenite">https://github.com/wangzifan396-wzf/agenite</textarea>
+    <div class="row">
+      <div>
+        <label style="margin-bottom:6px">纠错等级</label>
+        <div class="seg" id="ec">
+          <button data-ec="L">L</button>
+          <button data-ec="M" class="on">M</button>
+          <button data-ec="Q">Q</button>
+          <button data-ec="H">H</button>
+        </div>
+      </div>
+      <div class="meta" id="meta">—</div>
+    </div>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div class="card qr-stage">
+    <canvas id="qr" width="240" height="240"></canvas>
+    <div class="qr-actions">
+      <button class="act primary" id="dl">下载 PNG</button>
+      <button class="act" id="copy">复制图片</button>
+      <button class="act" id="svg">下载 SVG</button>
+    </div>
+    <p class="tip">提示：纠错等级越高，二维码越密集、抗破损能力越强，但可容纳的信息越少。</p>
+  </div>
+</div>
+
+<script src="src/qr.js"></script>
+<script>
+  (function () {
+    var QR = window.QRCode;
+    var txt = document.getElementById('txt');
+    var ecEl = document.getElementById('ec');
+    var meta = document.getElementById('meta');
+    var errEl = document.getElementById('err');
+    var canvas = document.getElementById('qr');
+    var ctx = canvas.getContext('2d');
+    var ec = 'M';
+    var last = null;
+
+    ecEl.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      ec = b.getAttribute('data-ec');
+      Array.prototype.forEach.call(ecEl.children, function (x) { x.classList.toggle('on', x === b); });
+      render();
+    });
+    txt.addEventListener('input', render);
+
+    function render() {
+      errEl.textContent = '';
+      var text = txt.value;
+      if (!text) { meta.textContent = '—'; clear(); return; }
+      var m;
+      try { m = QR.genQR(text, ec); }
+      catch (e) { errEl.textContent = e.message; clear(); return; }
+      last = m;
+      var size = m.size;
+      var scale = Math.max(2, Math.floor(260 / (size + 8)));
+      var dim = (size + 8) * scale;
+      canvas.width = dim; canvas.height = dim;
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, dim, dim);
+      ctx.fillStyle = '#000';
+      for (var r = 0; r < size; r++) for (var c = 0; c < size; c++) {
+        if (m.mod[r][c]) ctx.fillRect((c + 4) * scale, (r + 4) * scale, scale, scale);
+      }
+      meta.innerHTML = '版本 <b>v' + ((size - 17) / 4) + '</b> · 模块 <b>' + size + '×' + size + '</b> · 纠错 <b>' + ec + '</b>';
+    }
+
+    function clear() { ctx.clearRect(0, 0, canvas.width, canvas.height); last = null; }
+
+    function toSVG() {
+      if (!last) return '';
+      var size = last.size, s = 10, pad = 4;
+      var rects = '';
+      for (var r = 0; r < size; r++) for (var c = 0; c < size; c++)
+        if (last.mod[r][c]) rects += '<rect x="' + ((c + pad) * s) + '" y="' + ((r + pad) * s) + '" width="' + s + '" height="' + s + '"/>';
+      return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + ((size + 8) * s) + ' ' + ((size + 8) * s) + '" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><g fill="#000">' + rects + '</g></svg>';
+    }
+
+    document.getElementById('dl').addEventListener('click', function () {
+      if (!last) return;
+      var a = document.createElement('a');
+      a.download = 'qrcode-v' + ((last.size - 17) / 4) + '-' + ec + '.png';
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    });
+    document.getElementById('svg').addEventListener('click', function () {
+      if (!last) return;
+      var svg = toSVG();
+      var blob = new Blob([svg], { type: 'image/svg+xml' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.download = 'qrcode-v' + ((last.size - 17) / 4) + '-' + ec + '.svg'; a.href = url; a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    });
+    document.getElementById('copy').addEventListener('click', function () {
+      if (!last) return;
+      canvas.toBlob(function (blob) {
+        if (navigator.clipboard && navigator.clipboard.write) {
+          navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(
+            function () { flash('已复制到剪贴板'); }, function () { flash('复制失败，请改用下载'); }
+          );
+        } else flash('当前环境不支持复制图片，请改用下载');
+      });
+    });
+    var tip = document.querySelector('.tip');
+    function flash(msg) { var old = tip.textContent; tip.textContent = msg; tip.style.color = 'var(--ok)'; setTimeout(function () { tip.textContent = old; tip.style.color = ''; }, 1600); }
+
+    render();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>条形码生成 · Small Tools Lab</title>
+<style>
+  :root { --bg:#f6f4f0;--panel:#fff;--ink:#2a2723;--muted:#8a8378;--line:#e7e2d9;--accent:#c2683f;--accent-soft:#f6e7df;--err:#c0392b;--shadow:0 8px 30px rgba(60,50,40,.10); }
+  @media (prefers-color-scheme: dark){ :root{ --bg:#16140f;--panel:#211e18;--ink:#ece7df;--muted:#9b9384;--line:#322d25;--accent:#e08a5c;--accent-soft:#2f2620;--shadow:0 8px 30px rgba(0,0,0,.4);} }
+  *{box-sizing:border-box;} body{margin:0;font:15px/1.6 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);padding:32px 16px;display:flex;justify-content:center;}
+  .wrap{width:100%;max-width:720px;} header{margin-bottom:22px;} h1{font-size:26px;margin:0 0 6px;} h1 .ico{color:var(--accent);} .sub{color:var(--muted);margin:0;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px;}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600;} input[type=text]{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:15px;} input:focus{outline:2px solid var(--accent-soft);border-color:var(--accent);}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+  button.act{border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:9px 16px;border-radius:10px;cursor:pointer;font:inherit;font-weight:600;transition:.15s;} button.act:hover{border-color:var(--accent);color:var(--accent);} button.primary{background:var(--accent);color:#fff;border-color:var(--accent);} button.primary:hover{filter:brightness(1.05);color:#fff;}
+  .err{color:var(--err);font-size:13px;min-height:18px;margin-top:10px;} .meta{color:var(--muted);font-size:13px;} .meta b{color:var(--ink);}
+  #bars{background:#fff;border-radius:10px;padding:14px;display:flex;justify-content:center;align-items:center;min-height:120px;overflow:auto;} #bars svg{max-width:100%;height:auto;}
+  .bw{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;word-break:break-all;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1><span class="ico">▦</span> 条形码生成（Code 128）</h1><p class="sub">Code B · ASCII 32–127 · 零依赖 · 本地运行</p></header>
+  <div class="card">
+    <label for="in">文本内容（ASCII 可打印字符）</label>
+    <input type="text" id="in" value="HELLO-2026" placeholder="HELLO-2026" />
+    <div class="row">
+      <button class="act primary" id="gen">生成条形码</button>
+      <span class="meta" id="meta">—</span>
+    </div>
+    <div class="err" id="err"></div>
+  </div>
+  <div class="card">
+    <label>预览（SVG，可扫码）</label>
+    <div id="bars"><span class="meta">点击「生成条形码」</span></div>
+    <div class="row"><button class="act" id="copy">复制 SVG</button> <button class="act" id="download">下载 .svg</button></div>
+    <div class="bw" id="raw" style="margin-top:12px;display:none;"></div>
+  </div>
+</div>
+<script src="src/barcode.js"></script>
+<script>
+  (function(){
+    var B=window.Barcode, inp=document.getElementById('in'), bars=document.getElementById('bars'), err=document.getElementById('err'), meta=document.getElementById('meta'), raw=document.getElementById('raw');
+    var lastSVG='';
+    function gen(){
+      err.textContent='';var v=inp.value;
+      if(!v){bars.innerHTML='<span class="meta">请输入文本</span>';meta.textContent='—';return;}
+      try{
+        var out=B.renderSVG(v);
+        lastSVG=out.svg;
+        bars.innerHTML=out.svg;
+        meta.innerHTML='字符数 <b>'+v.length+'</b> · 宽度 <b>'+out.width+'</b> 模块';
+        raw.style.display='block';raw.textContent=out.svg;
+      }catch(e){err.textContent=e.message;bars.innerHTML='<span class="meta">无法生成</span>';meta.textContent='—';raw.style.display='none';}
+    }
+    document.getElementById('gen').addEventListener('click',gen);
+    document.getElementById('copy').addEventListener('click',function(){if(!lastSVG)return;navigator.clipboard&&navigator.clipboard.writeText(lastSVG);});
+    document.getElementById('download').addEventListener('click',function(){
+      if(!lastSVG)return;var blob=new Blob([lastSVG],{type:'image/svg+xml'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='barcode.svg';a.click();URL.revokeObjectURL(a.href);
+    });
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')gen();});
+    inp.addEventListener('input',function(){err.textContent='';});
+    gen();
+  })();
+</script>
+</body>
+</html>

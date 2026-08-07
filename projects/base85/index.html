@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Base85 编解码 · Small Tools Lab</title>
+<style>
+  :root { --bg:#f6f4f0;--panel:#fff;--ink:#2a2723;--muted:#8a8378;--line:#e7e2d9;--accent:#c2683f;--accent-soft:#f6e7df;--err:#c0392b;--shadow:0 8px 30px rgba(60,50,40,.10); }
+  @media (prefers-color-scheme: dark){ :root{ --bg:#16140f;--panel:#211e18;--ink:#ece7df;--muted:#9b9384;--line:#322d25;--accent:#e08a5c;--accent-soft:#2f2620;--shadow:0 8px 30px rgba(0,0,0,.4);} }
+  *{box-sizing:border-box;} body{margin:0;font:15px/1.6 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);padding:32px 16px;display:flex;justify-content:center;}
+  .wrap{width:100%;max-width:720px;} header{margin-bottom:22px;} h1{font-size:26px;margin:0 0 6px;} h1 .ico{color:var(--accent);} .sub{color:var(--muted);margin:0;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px;}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600;} textarea{width:100%;min-height:120px;resize:vertical;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;} textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent);}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center;} .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;} .seg button{border:0;background:transparent;color:var(--ink);padding:8px 14px;cursor:pointer;font:inherit;font-weight:600;border-right:1px solid var(--line);} .seg button:last-child{border-right:0;} .seg button.on{background:var(--accent);color:#fff;}
+  button.act{border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:9px 16px;border-radius:10px;cursor:pointer;font:inherit;font-weight:600;transition:.15s;} button.act:hover{border-color:var(--accent);color:var(--accent);} button.primary{background:var(--accent);color:#fff;border-color:var(--accent);} button.primary:hover{filter:brightness(1.05);color:#fff;}
+  .err{color:var(--err);font-size:13px;min-height:18px;margin-top:8px;} .meta{color:var(--muted);font-size:13px;} .meta b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1><span class="ico">🔡</span> Base85 编解码</h1><p class="sub">Ascii85 (Adobe) / Z85 (ZeroMQ) · 零依赖 · 本地运行</p></header>
+  <div class="card">
+    <label for="in">输入（编码：文本；解码：Base85 字符串）</label>
+    <textarea id="in" placeholder="Hello, Base85!">Hello, Base85!</textarea>
+    <div class="row">
+      <div class="seg" id="mode"><button data-m="enc" class="on">编码 →</button><button data-m="dec">← 解码</button></div>
+      <div class="seg" id="variant"><button data-v="ascii85" class="on">Ascii85</button><button data-v="z85">Z85</button></div>
+      <button class="act primary" id="go">运行</button>
+      <button class="act" id="swap">交换</button>
+    </div>
+    <div class="err" id="err"></div>
+  </div>
+  <div class="card">
+    <label for="out">输出</label>
+    <textarea id="out" readonly placeholder="结果将显示在这里"></textarea>
+    <div class="row"><span class="meta" id="meta">—</span> <button class="act" id="copy">复制</button></div>
+  </div>
+</div>
+<script src="src/base85.js"></script>
+<script>
+  (function(){
+    var B=window.Base85, inp=document.getElementById('in'), out=document.getElementById('out'), err=document.getElementById('err'), meta=document.getElementById('meta');
+    var mode='enc', variant='ascii85';
+    document.getElementById('mode').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;mode=b.getAttribute('data-m');Array.prototype.forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});});
+    document.getElementById('variant').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;variant=b.getAttribute('data-v');Array.prototype.forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});});
+    function go(){
+      err.textContent='';var v=inp.value;var api=B[variant];
+      if(mode==='enc'){
+        if(!v){out.value='';meta.textContent='—';return;}
+        try{var s=api.encode(Array.from(new TextEncoder().encode(v)));out.value=s;meta.textContent='字符数 <b>'+v.length+'</b> · Base85 长度 <b>'+s.length+'</b>';}catch(e){err.textContent=e.message;out.value='';}
+      } else {
+        if(!v.trim()){out.value='';meta.textContent='—';return;}
+        try{
+          var bytes=api.decode(v.trim());
+          var txt=new TextDecoder().decode(new Uint8Array(bytes));
+          out.value=txt;meta.textContent='字节数 <b>'+bytes.length+'</b>';
+        }catch(e){err.textContent=e.message;out.value='';}
+      }
+    }
+    document.getElementById('go').addEventListener('click',go);
+    document.getElementById('swap').addEventListener('click',function(){inp.value=out.value;out.value='';meta.textContent='—';err.textContent='';});
+    document.getElementById('copy').addEventListener('click',function(){if(!out.value)return;navigator.clipboard&&navigator.clipboard.writeText(out.value);});
+    inp.addEventListener('input',function(){meta.textContent='—';err.textContent='';});
+  })();
+</script>
+</body>
+</html>

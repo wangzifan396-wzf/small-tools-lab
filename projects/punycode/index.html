@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Punycode / IDN 转换 · Small Tools Lab</title>
+<style>
+  :root { --bg:#f6f4f0;--panel:#fff;--ink:#2a2723;--muted:#8a8378;--line:#e7e2d9;--accent:#c2683f;--accent-soft:#f6e7df;--err:#c0392b;--shadow:0 8px 30px rgba(60,50,40,.10); }
+  @media (prefers-color-scheme: dark){ :root{ --bg:#16140f;--panel:#211e18;--ink:#ece7df;--muted:#9b9384;--line:#322d25;--accent:#e08a5c;--accent-soft:#2f2620;--shadow:0 8px 30px rgba(0,0,0,.4);} }
+  *{box-sizing:border-box;} body{margin:0;font:15px/1.6 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);padding:32px 16px;display:flex;justify-content:center;}
+  .wrap{width:100%;max-width:720px;} header{margin-bottom:22px;} h1{font-size:26px;margin:0 0 6px;} h1 .ico{color:var(--accent);} .sub{color:var(--muted);margin:0;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px;}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600;} textarea{width:100%;min-height:90px;resize:vertical;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;} textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent);}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center;} button.act{border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:9px 16px;border-radius:10px;cursor:pointer;font:inherit;font-weight:600;transition:.15s;} button.act:hover{border-color:var(--accent);color:var(--accent);} button.primary{background:var(--accent);color:#fff;border-color:var(--accent);} button.primary:hover{filter:brightness(1.05);color:#fff;}
+  .err{color:var(--err);font-size:13px;min-height:18px;margin-top:8px;} .meta{color:var(--muted);font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1><span class="ico">🌐</span> Punycode / IDN 转换</h1><p class="sub">RFC 3492 Punycode · 国际化域名（中文域名等）与 xn-- 编码互转 · 零依赖 · 本地运行</p></header>
+  <div class="card">
+    <label for="in">域名或标签</label>
+    <textarea id="in" placeholder="例子.中国">例子.中国</textarea>
+    <div class="row">
+      <button class="act primary" id="toA">→ Punycode (toASCII)</button>
+      <button class="act" id="toU">← Unicode (toUnicode)</button>
+      <button class="act" id="copy">复制</button>
+    </div>
+    <div class="err" id="err"></div>
+  </div>
+  <div class="card">
+    <label for="out">输出</label>
+    <textarea id="out" readonly placeholder="结果将显示在这里"></textarea>
+    <div class="row"><span class="meta" id="meta">—</span></div>
+  </div>
+</div>
+<script src="src/punycode.js"></script>
+<script>
+  (function(){
+    var P=window.Punycode, inp=document.getElementById('in'), out=document.getElementById('out'), err=document.getElementById('err'), meta=document.getElementById('meta');
+    function toA(){err.textContent='';var v=inp.value.trim();if(!v){out.value='';return;}try{var r=P.toASCII(v);out.value=r;meta.textContent='已转为 Punycode 兼容 ASCII 域名';}catch(e){err.textContent=e.message;}}
+    function toU(){err.textContent='';var v=inp.value.trim();if(!v){out.value='';return;}try{var r=P.toUnicode(v);out.value=r;meta.textContent='已还原为 Unicode 域名';}catch(e){err.textContent=e.message;}}
+    document.getElementById('toA').addEventListener('click',toA);
+    document.getElementById('toU').addEventListener('click',toU);
+    document.getElementById('copy').addEventListener('click',function(){if(out.value)navigator.clipboard&&navigator.clipboard.writeText(out.value);});
+    inp.addEventListener('input',function(){err.textContent='';meta.textContent='—';});
+  })();
+</script>
+</body>
+</html>

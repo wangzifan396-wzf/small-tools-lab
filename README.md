@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (54)
+### Browser tools (61)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -45,6 +45,13 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [CSV ⇄ JSON](projects/csvjson/README.md) | Strict quoted-field CSV parser and loss-aware JSON converter | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/csvjson/) |
 | [UUID Gen](projects/uuidgen/README.md) | Generate RFC 4122 v4 identifiers using cryptographically secure randomness | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/uuidgen/) |
 | [Base64](projects/base64/README.md) | Encode and decode UTF-8 text safely, including CJK and emoji | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base64/) |
+| [Base58](projects/base58/README.md) | Bitcoin-style Base58 codec (no 0/O/I/l), handy for wallet addresses and short IDs | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base58/) |
+| [Base32](projects/base32/README.md) | RFC 4648 and Crockford Base32 codec, 5-bit grouping with case tolerance | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base32/) |
+| [Base85](projects/base85/README.md) | Ascii85 and Z85 Base85 codec, packing 4 bytes into 5 characters | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/base85/) |
+| [CRC](projects/crc/README.md) | CRC-16/CCITT-FALSE, XMODEM, IBM-ARC, MODBUS, and CRC-32 checksum calculator | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/crc/) |
+| [Punycode](projects/punycode/README.md) | RFC 3492 Punycode codec for Chinese / emoji domain toASCII / toUnicode | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/punycode/) |
+| [QR Code](projects/qrcode/README.md) | Generate scalable SVG QR codes with selectable error correction and quiet zone | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/qrcode/) |
+| [Barcode](projects/barcode/README.md) | Generate Code 128 (Code B) barcodes as SVG with checksum and quiet zone | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/barcode/) |
 | [JSON Format](projects/jsonfmt/README.md) | Format, minify, and validate JSON with clear local errors | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/jsonfmt/) |
 | [Color Convert](projects/colorconv/README.md) | Convert HEX, RGB, and HSL colors with a live preview | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/colorconv/) |
 | [Morse](projects/morse/README.md) | Translate text and Morse code in both directions | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/morse/) |
