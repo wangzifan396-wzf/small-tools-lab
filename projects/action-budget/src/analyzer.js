@@ -2,7 +2,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { parseDocument } = require("yaml");
+const { parseDocument } = require("./yaml-lite.js");
 
 const RULES = {
   AB001: { title: "Matrix exceeds GitHub's job limit", severity: "high", category: "fanout" },

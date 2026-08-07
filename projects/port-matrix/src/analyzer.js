@@ -2,7 +2,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const YAML = require("yaml");
+const YAML = require("./yaml-lite.js");
 
 const VERSION = "0.1.0";
 const DEFAULTS = { ignore: ["**/node_modules/**", "**/.git/**", "**/coverage/**", "**/dist/**"], allowedPrivilegedPorts: [80, 443], allowDocsOnlyPorts: [11434], reportDynamic: false };

@@ -10,7 +10,7 @@ const { commit, repository, write } = require("./helpers.js");
 const cli = path.resolve(__dirname, "../bin/git-risk-map.js");
 
 function run(root, args, cwd) {
-  return spawnSync(process.execPath, [cli, root, ...args], { cwd: cwd || root, encoding: "utf8" });
+  return spawnSync(process.execPath, [cli, root, ...args], { cwd: cwd || root, encoding: "utf8", timeout: 30000 });
 }
 
 test("uses exit codes for risk gates and usage errors", (t) => {
