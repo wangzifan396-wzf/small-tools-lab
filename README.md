@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (72)
+### Browser tools (75)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -53,6 +53,9 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [TOTP 动态口令](projects/totp/README.md) | RFC 6238 TOTP generator, SHA-1/256/512, Base32/Hex/text secrets, countdown & otpauth URI | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/totp/) |
 | [User-Agent 解析](projects/uaparse/README.md) | Parse UA into browser, engine (Blink/Gecko/WebKit), OS and device type/vendor/model | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/uaparse/) |
 | [哈希类型识别](projects/hashid/README.md) | Identify hash algorithm by prefix/length/charset: bcrypt, Argon2, MD5, SHA families | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/hashid/) |
+| [MAC 地址工具](projects/macaddr/README.md) | Normalize/reformat MAC, random generate, OUI vendor lookup, unicast/multicast & local/global bits | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/macaddr/) |
+| [NATO 音标字母](projects/nato/README.md) | Text ↔ NATO/ICAO phonetic alphabet, full 26-letter + 10-digit chart | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/nato/) |
+| [RSA 加解密](projects/rsa/README.md) | Pure-JS RSA keygen + encrypt/decrypt, PKCS#1 v1.5, interoperable with OpenSSL/Node | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/rsa/) |
 | [MIME 类型查询](projects/mime/README.md) | Look up MIME type by extension (or the reverse), with charset hints | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/mime/) |
 | [CIDR 子网计算](projects/cidr/README.md) | IPv4 subnet calculator: network/broadcast, mask, host range & count | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cidr/) |
 | [ULID 生成 / 解析](projects/ulid/README.md) | Generate / decode sortable 26-char ULIDs (Crockford Base32) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/ulid/) |

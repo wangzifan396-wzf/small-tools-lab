@@ -536,6 +536,42 @@ const TOOLS = [
     featured: false,
   },
   {
+    id: "macaddr",
+    name: "MAC 地址工具",
+    category: "browser",
+    label: "网络工具",
+    description:
+      "零依赖 MAC 处理：规范化与任意分隔符重排、随机生成、OUI 厂商识别，并解析单播/多播与本地/全局管理位。",
+    tech: "Browser · MAC",
+    live: "projects/macaddr/",
+    docs: "projects/macaddr/README.md",
+    featured: false,
+  },
+  {
+    id: "nato",
+    name: "NATO 音标字母",
+    category: "browser",
+    label: "文本工具",
+    description:
+      "零依赖 NATO/ICAO 音标转换：文字编码为 Alfa Bravo Charlie，或音标词解码回文本，附完整字母表速查。",
+    tech: "Browser · Text",
+    live: "projects/nato/",
+    docs: "projects/nato/README.md",
+    featured: false,
+  },
+  {
+    id: "rsa",
+    name: "RSA 加解密",
+    category: "browser",
+    label: "安全工具",
+    description:
+      "纯 JS RSA：Miller–Rabin 生成密钥对并加解密，PKCS#1 v1.5 填充与 OpenSSL/Node 互通，file:// 双击即跑。",
+    tech: "Browser · RSA",
+    live: "projects/rsa/",
+    docs: "projects/rsa/README.md",
+    featured: false,
+  },
+  {
     id: "mime",
     name: "MIME 类型查询",
     category: "browser",
