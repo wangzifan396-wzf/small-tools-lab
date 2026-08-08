@@ -1,12 +1,35 @@
-# semver
+# SemVer Check
 
-语义化版本（SemVer）检查工具。
+A strict SemVer 2.0 parser, precedence comparator, stable sorter, and practical range evaluator with no runtime dependencies.
 
-## 特性
-- 校验版本号是否合法（支持 `v` 前缀与预发布 / 构建元）。
-- 多版本排序（按 major.minor.patch 与预发布）。
-- 范围匹配：`^`、`~`、`x` 通配、`>=`/`>`/`<`/`<=`、空格或 `||` 组合。
-- 纯前端零依赖。
+[Open the browser tool](https://wangzifan396-wzf.github.io/small-tools-lab/projects/semver/) · [Security notes](SECURITY.md)
 
-## 用法
-打开 `index.html`，粘贴版本列表点「排序 / 校验」；在下方输入范围与候选版本检验是否满足。
+## Highlights
+
+- Strict core and prerelease validation, with an optional `v` prefix for CLI/UI convenience
+- Correct prerelease precedence and build-metadata handling
+- Decimal-string comparison for identifiers larger than JavaScript's safe integer range
+- Exact, comparator, caret, tilde, wildcard, missing-component, AND, `||`, and hyphen ranges
+- Standard prerelease exclusion unless the range opts into the same core version
+
+## Library API
+
+```js
+import { compareVersions, parseVersion, satisfies, sortVersions } from './src/index.js';
+
+parseVersion('v1.2.3-rc.1+linux');
+compareVersions('1.0.0-beta.11', '1.0.0-rc.1'); // -1
+sortVersions(['2.0.0', '1.5.0']);
+satisfies('1.7.2', '^1.2.0'); // true
+```
+
+Also exported: `formatVersion` and `isValidVersion`. TypeScript declarations are included. Build metadata is ignored for precedence as required by SemVer 2.0.
+
+## Develop
+
+```bash
+npm test
+npm start -- 4173
+```
+
+Then open `http://localhost:4173`.

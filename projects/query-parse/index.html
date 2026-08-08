@@ -1,108 +1,16 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>查询参数解析 · Small Tools Lab</title>
-<style>
-  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
-  * { box-sizing:border-box; }
-  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
-  .wrap { max-width:880px; margin:0 auto; padding:28px 20px 60px; }
-  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
-  .sub { color:var(--mut); margin:0 0 22px; }
-  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
-  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
-  input[type=text], textarea { width:100%; border:1px solid var(--bd); border-radius:8px; padding:9px 11px; font:14px ui-monospace,monospace; background:#fff; color:var(--ink); }
-  textarea { min-height:70px; resize:vertical; }
-  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
-  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
-  button:hover { border-color:var(--ac); }
-  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
-  button.ghost { color:var(--mut); }
-  .pairs { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
-  .pair { display:flex; gap:8px; align-items:center; }
-  .pair input { flex:1; }
-  .pair .del { flex:0 0 auto; padding:8px 11px; color:#b3261e; border-color:#f4c9c6; }
-  .out { border:1px solid var(--bd); border-radius:10px; padding:10px 12px; background:#fcfbf9; font:13px ui-monospace,monospace; word-break:break-all; }
-  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
-  .ico { color:var(--ac2); }
-  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
-</style>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; connect-src 'none'">
+  <title>Query Parse · Small Tools Lab</title>
+  <style>
+    :root{--bg:#f7f5f0;--card:#fff;--text:#24221e;--muted:#746f66;--line:#e5e0d7;--accent:#a66b19;--bad:#b3261e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,"Microsoft YaHei",sans-serif}.wrap{max-width:980px;margin:auto;padding:32px 20px 60px}h1{margin:0;font-size:26px}.sub{color:var(--muted);margin:5px 0 22px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:14px}label{color:var(--muted);font-size:13px}textarea,input{border:1px solid var(--line);border-radius:8px;background:#fcfbf8;padding:9px;font:14px ui-monospace,monospace}textarea{display:block;width:100%;min-height:80px;margin:6px 0 10px;resize:vertical}.actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}button{border:1px solid var(--line);border-radius:9px;background:#fff;padding:8px 13px;cursor:pointer}button.primary{background:var(--accent);border-color:var(--accent);color:#fff}button.danger{color:var(--bad)}.pair{display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;margin:8px 0;align-items:center}.pair label{white-space:nowrap}.output{background:#f4f1eb;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font:13px ui-monospace,monospace;word-break:break-all}.error{min-height:24px;color:var(--bad);margin-top:7px}.hint{color:var(--muted);font-size:13px}@media(max-width:660px){.pair{grid-template-columns:1fr 1fr}.pair button,.pair label{justify-self:start}}
+  </style>
 </head>
-<body>
-<div class="wrap">
-  <h1><span class="ico">🔗</span> 查询参数解析</h1>
-  <p class="sub">解析 URL 或查询串为键值对，可编辑后重建。纯浏览器零依赖。</p>
-
-  <div class="card">
-    <label>URL 或查询串</label>
-    <textarea id="url" placeholder="https://example.com/search?q=agenite&page=2&sort=desc">https://example.com/search?q=agenite&page=2&sort=desc&tag=%E5%B7%A5%E5%85%B7</textarea>
-    <div class="row">
-      <button class="pri" id="parse">解析</button>
-      <button class="ghost" id="clear">清空参数</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <label>键值对（可编辑 / 增删）</label>
-    <div class="pairs" id="pairs"></div>
-    <div class="row"><button id="add">+ 添加参数</button></div>
-  </div>
-
-  <div class="card">
-    <label>重建结果</label>
-    <div class="out" id="qs"></div>
-    <div class="out" id="full" style="margin-top:8px; background:#f4f7f5;"></div>
-    <div class="row"><button id="copy">复制查询串</button></div>
-    <div class="note">中文等非 ASCII 会自动做 percent-encode；解码时自动还原。</div>
-  </div>
-
-  <footer>Small Tools Lab · 纯前端 · 数据不出本机</footer>
-</div>
-<script>
-(function () {
-  const $ = (id) => document.getElementById(id);
-  function parse(){
-    let raw = $("url").value.trim();
-    const qIdx = raw.indexOf("?");
-    let base = "", qs = raw;
-    if(qIdx >= 0){ base = raw.slice(0, qIdx); qs = raw.slice(qIdx+1); }
-    const pairs = [];
-    for(const part of qs.split("&")){
-      if(!part) continue;
-      const eq = part.indexOf("=");
-      if(eq < 0) pairs.push([decodeURIComponent(part), ""]);
-      else pairs.push([decodeURIComponent(part.slice(0,eq)), decodeURIComponent(part.slice(eq+1))]);
-    }
-    renderPairs(pairs);
-    rebuild(base);
-    window.__base = base;
-  }
-  function renderPairs(pairs){
-    $("pairs").innerHTML = pairs.map(([k,v],i)=>
-      '<div class="pair"><input data-i="'+i+'" data-k="1" value="'+esc(k)+'" placeholder="键" /><input data-i="'+i+'" data-k="0" value="'+esc(v)+'" placeholder="值" /><button class="del" data-i="'+i+'">✕</button></div>'
-    ).join("");
-    $("pairs").querySelectorAll("input").forEach(inp=>inp.oninput=()=>rebuild(window.__base||""));
-    $("pairs").querySelectorAll(".del").forEach(b=>b.onclick=()=>{ b.closest(".pair").remove(); rebuild(window.__base||""); });
-  }
-  function esc(s){ return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-  function collect(){
-    const rows = [...$("pairs").querySelectorAll(".pair")];
-    return rows.map(r=>{ const ins=r.querySelectorAll("input"); return [ins[0].value, ins[1].value]; }).filter(([k])=>k!=="" || true);
-  }
-  function rebuild(base){
-    const rows = collect();
-    const qs = rows.filter(([k])=>k!=="").map(([k,v])=>encodeURIComponent(k)+"="+encodeURIComponent(v)).join("&");
-    $("qs").textContent = qs || "(空)";
-    $("full").textContent = (base ? base + (qs?"?"+qs:"") : qs);
-  }
-  $("parse").onclick = parse;
-  $("add").onclick = () => { const box=$("pairs"); const i=box.children.length; const d=document.createElement("div"); d.className="pair"; d.innerHTML='<input data-i="'+i+'" data-k="1" placeholder="键" /><input data-i="'+i+'" data-k="0" placeholder="值" /><button class="del">✕</button>'; d.querySelector("input").oninput=()=>rebuild(window.__base||""); d.querySelector(".del").onclick=()=>{d.remove();rebuild(window.__base||"");}; box.appendChild(d); };
-  $("clear").onclick = () => { $("pairs").innerHTML=""; rebuild(window.__base||""); };
-  $("copy").onclick = () => navigator.clipboard.writeText($("qs").textContent);
-  parse();
-})();
-</script>
-</body>
+<body><main class="wrap"><h1>Query Parse</h1><p class="sub">无损区分 flag 与 flag=，保留重复键和 fragment，安全解析并确定性重建。</p>
+  <section class="card"><label for="input">URL、相对地址或裸查询串</label><textarea id="input">https://example.com/search?q=small+tools&tag=web&tag=dev&debug#results</textarea><div class="actions"><button class="primary" id="parse">解析</button><label><input id="plus" type="checkbox" checked> 将 + 解释为空格</label></div><div class="error" id="error" role="alert"></div></section>
+  <section class="card"><div id="pairs"></div><div class="actions"><button id="add">添加参数</button><button id="clear">清空参数</button></div></section>
+  <section class="card"><div class="hint">查询串</div><div class="output" id="query-output"></div><div class="hint">完整重建结果</div><div class="output" id="url-output"></div><div class="actions"><button id="copy">复制查询串</button></div></section>
+</main><script type="module" src="./src/app.js"></script></body>
 </html>

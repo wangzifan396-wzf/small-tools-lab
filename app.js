@@ -721,8 +721,8 @@ const TOOLS = [
     category: "browser",
     label: "密码生成器",
     description:
-      "Web Crypto 密码学安全随机，可配字符集与批量生成并估算熵强度，纯浏览器零依赖。",
-    tech: "Browser · Crypto",
+      "Web Crypto 无偏随机与安全洗牌，保证每类字符出现，可批量生成并估算熵强度。",
+    tech: "Browser · Crypto · Library",
     live: "projects/password-generator/",
     docs: "projects/password-generator/README.md",
     featured: false,
@@ -899,8 +899,8 @@ const TOOLS = [
     category: "browser",
     label: "SemVer 检查",
     description:
-      "校验 / 排序语义化版本号并匹配范围，纯浏览器零依赖。",
-    tech: "Browser · SemVer",
+      "严格校验、精确排序 SemVer 2.0，并支持常用范围语法与预发布规则。",
+    tech: "Browser · SemVer · Library",
     live: "projects/semver/",
     docs: "projects/semver/README.md",
     featured: false,
@@ -947,8 +947,8 @@ const TOOLS = [
     category: "browser",
     label: "查询参数解析",
     description:
-      "解析 URL 查询串为键值对并可编辑重建，纯浏览器零依赖。",
-    tech: "Browser · URL",
+      "无损解析与重建 URL 查询串，保留重复键、flag / 空值差异和 fragment。",
+    tech: "Browser · URL · Library",
     live: "projects/query-parse/",
     docs: "projects/query-parse/README.md",
     featured: false,
@@ -983,8 +983,8 @@ const TOOLS = [
     category: "browser",
     label: "YAML ⇄ JSON",
     description:
-      "YAML（block 子集）与 JSON 互转，支持嵌套映射与序列，纯浏览器零依赖。",
-    tech: "Browser · YAML",
+      "严格 YAML block 子集与 JSON 互转，行号错误、重复键检测与原型污染防护。",
+    tech: "Browser · YAML · Library",
     live: "projects/yaml-json/",
     docs: "projects/yaml-json/README.md",
     featured: false,

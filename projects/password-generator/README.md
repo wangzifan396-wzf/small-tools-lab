@@ -1,21 +1,37 @@
-# 密码生成器
+# Secure Password Generator
 
-纯前端、零依赖的强密码生成工具，使用 Web Crypto 密码学安全随机。
+A browser and Node.js password generator built on Web Crypto, with unbiased sampling and explicit character-set guarantees.
 
-## 功能
-- 可配置**长度**与**批量数量**（一次生成多条）。
-- 字符集开关：小写 / 大写 / 数字 / 符号，并可「排除易混字符」(0O1lI 等)。
-- 每条结果标注**熵估算强度**（弱 / 中 / 强 / 极强）。
-- 一键复制全部。
+[Open the browser tool](https://wangzifan396-wzf.github.io/small-tools-lab/projects/password-generator/) · [Security notes](SECURITY.md)
 
-## 用法
-打开 `index.html`，勾选字符集、设置长度与数量，点「生成」。
+## Security properties
 
-## 安全性
-- 基于 `crypto.getRandomValues` + **拒绝采样**，保证每个字符均匀分布、无模偏差。
-- 全程在浏览器本地完成，不联网、不上传。
+- Requires `crypto.getRandomValues`; never falls back to `Math.random`
+- Uses rejection sampling, avoiding modulo bias
+- Includes at least one character from every enabled set
+- Uses a secure Fisher-Yates shuffle after satisfying set guarantees
+- Can remove ambiguous characters such as `0`, `O`, `1`, `l`, and `I`
+- Renders generated values with `textContent`, not HTML interpolation
 
-## 适用场景
-- 注册账号时生成高强度密码。
-- 为服务生成 API Key / 令牌占位。
-- 教学演示「为什么不能用 Math.random 做密码」。
+## Library API
+
+```js
+import { estimateEntropy, generatePassword, generatePasswords } from './src/index.js';
+
+generatePassword(24, { symbols: true, excludeAmbiguous: true });
+generatePasswords(5, { length: 20, digits: true });
+estimateEntropy(20); // approximate bits based on the selected alphabet
+```
+
+Also exported: `randomInt`, `buildCharacterSets`, and `classifyEntropy`. TypeScript declarations are included.
+
+Entropy output is an estimate, not a password audit. Clipboard managers, screenshots, extensions, and compromised devices can still expose generated passwords.
+
+## Develop
+
+```bash
+npm test
+npm start -- 4173
+```
+
+Then open `http://localhost:4173`.

@@ -1,193 +1,22 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>YAML ⇄ JSON · Small Tools Lab</title>
-<style>
-  :root { --bg:#faf9f7; --panel:#fff; --ink:#23211e; --mut:#8a857d; --bd:#e7e3dc; --ac:#b8832f; --ac2:#2f7d7b; }
-  * { box-sizing:border-box; }
-  body { margin:0; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
-  .wrap { max-width:1000px; margin:0 auto; padding:28px 20px 60px; }
-  h1 { font-size:23px; margin:0 0 4px; letter-spacing:.3px; }
-  .sub { color:var(--mut); margin:0 0 22px; }
-  .card { background:var(--panel); border:1px solid var(--bd); border-radius:14px; padding:16px; margin-bottom:16px; }
-  label { font-size:13px; color:var(--mut); display:block; margin:0 0 6px; }
-  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
-  button { font:14px/1 inherit; border:1px solid var(--bd); background:#fff; color:var(--ink); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.15s; }
-  button:hover { border-color:var(--ac); }
-  button.pri { background:var(--ac); color:#fff; border-color:var(--ac); }
-  textarea { width:100%; min-height:280px; border:1px solid var(--bd); border-radius:10px; padding:12px; font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; resize:vertical; background:#fcfbf9; color:var(--ink); }
-  .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .err { color:#b3261e; font-size:12.5px; min-height:16px; }
-  .note { font-size:12.5px; color:var(--mut); margin-top:8px; }
-  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:30px; }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'self' data:">
+  <title>YAML ↔ JSON · Small Tools Lab</title>
+  <style>
+    :root{color-scheme:light;--bg:#f7f5f0;--card:#fff;--text:#24221e;--muted:#746f66;--line:#e5e0d7;--accent:#a66b19;--danger:#b3261e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,"Microsoft YaHei",sans-serif}.wrap{max-width:1080px;margin:auto;padding:32px 20px 60px}h1{margin:0;font-size:26px}.sub{color:var(--muted);margin:5px 0 22px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}button{border:1px solid var(--line);border-radius:9px;background:#fff;padding:9px 14px;cursor:pointer}button.primary{color:#fff;background:var(--accent);border-color:var(--accent)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}textarea{width:100%;min-height:370px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fcfbf8;color:var(--text);font:13px/1.55 ui-monospace,monospace}.error{min-height:24px;color:var(--danger);margin-top:9px}.note{color:var(--muted);font-size:13px}@media(max-width:760px){.grid{grid-template-columns:1fr}}
+  </style>
 </head>
-<body>
-<div class="wrap">
-  <h1><span style="color:var(--ac2)">🔀</span> YAML ⇄ JSON</h1>
-  <p class="sub">YAML（block 风格子集）与 JSON 互转。支持嵌套映射、序列、内联 [ ] / { } 与基础标量。纯浏览器零依赖。</p>
-
-  <div class="card">
-    <div class="row">
-      <button class="pri" id="toJson">YAML → JSON</button>
-      <button id="toYaml">JSON → YAML</button>
-      <button id="sample">载入示例</button>
-      <button id="clear">清空</button>
-    </div>
-    <div class="cols">
-      <div><label>YAML / JSON 输入</label><textarea id="src" spellcheck="false"></textarea></div>
-      <div><label>输出</label><textarea id="out" spellcheck="false" readonly></textarea></div>
-    </div>
-    <div class="err" id="err"></div>
-    <p class="note">解析器覆盖常见 block YAML；不支持锚点（&amp;/*）、多文档分隔、复杂流标量等。JSON → YAML 产出 2 空格缩进的 block 风格。</p>
-  </div>
-
-  <footer>Small Tools Lab · 纯前端零依赖</footer>
-</div>
-<script>
-  const $ = (id) => document.getElementById(id);
-  const SAMPLE = 'server:\n  host: 127.0.0.1\n  port: 8080\n  debug: true\n  tags:\n    - api\n    - web\n  pool:\n    min: 2\n    max: 10\nname: "Small Tools Lab"\nnote: null';
-
-  function splitTop(s, sep) {
-    const out = []; let depth = 0, q = null, cur = '';
-    for (let i = 0; i < s.length; i++) {
-      const c = s[i];
-      if (q) { cur += c; if (c === q) q = null; continue; }
-      if (c === '"' || c === "'") { q = c; cur += c; continue; }
-      if (c === '[' || c === '{') depth++;
-      if (c === ']' || c === '}') depth--;
-      if (c === sep && depth === 0) { out.push(cur); cur = ''; continue; }
-      cur += c;
-    }
-    if (cur.trim() !== '' || out.length) out.push(cur);
-    return out.map((x) => x.trim()).filter((x, i, a) => x !== '' || i < a.length - 1);
-  }
-  function unquote(s) {
-    s = s.trim();
-    if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
-      return s.slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
-    }
-    return s;
-  }
-  function parseScalar(v) {
-    v = v.trim();
-    if (v === '') return null;
-    if (v === 'true') return true;
-    if (v === 'false') return false;
-    if (v === 'null' || v === '~') return null;
-    if (v.startsWith('[')) return splitTop(v.slice(1, -1), ',').map(parseScalar);
-    if (v.startsWith('{')) {
-      const o = {};
-      splitTop(v.slice(1, -1), ',').forEach((p) => {
-        const c = p.indexOf(':'); if (c < 0) return;
-        o[unquote(p.slice(0, c))] = parseScalar(p.slice(c + 1));
-      });
-      return o;
-    }
-    if (/^-?\d+(\.\d+)?$/.test(v)) return Number(v);
-    return unquote(v);
-  }
-  function firstColon(s) {
-    let q = null;
-    for (let i = 0; i < s.length; i++) {
-      const c = s[i];
-      if (q) { if (c === q) q = null; continue; }
-      if (c === '"' || c === "'") q = c;
-      else if (c === ':' && (i + 1 >= s.length || /\s/.test(s[i + 1]))) return i;
-    }
-    return s.indexOf(':');
-  }
-  function parseYAML(text) {
-    const lines = [];
-    for (let raw of text.split(/\r?\n/)) {
-      const t = raw.trim();
-      if (!t || t.startsWith('#')) continue;
-      lines.push({ indent: raw.length - raw.trimStart().length, text: t });
-    }
-    let pos = 0;
-    function parseBlock(indent) {
-      if (pos < lines.length && lines[pos].text.startsWith('- ') && lines[pos].indent === indent) {
-        const arr = [];
-        while (pos < lines.length && lines[pos].indent === indent && lines[pos].text.startsWith('-')) {
-          let rest = lines[pos].text.slice(1).trim(); pos++;
-          if (rest === '') {
-            if (pos < lines.length && lines[pos].indent > indent) arr.push(parseBlock(lines[pos].indent));
-            else arr.push(null);
-          } else if (rest.startsWith('[') || rest.startsWith('{')) {
-            arr.push(parseScalar(rest));
-          } else if (/^[^:\s]+:(\s|$)/.test(rest)) {
-            const item = {};
-            let c = firstColon(rest);
-            const k = unquote(rest.slice(0, c));
-            const v = rest.slice(c + 1).trim();
-            if (v === '') { if (pos < lines.length && lines[pos].indent > indent) item[k] = parseBlock(lines[pos].indent); }
-            else item[k] = parseScalar(v);
-            while (pos < lines.length && lines[pos].indent > indent && !lines[pos].text.startsWith('-')) {
-              const l = lines[pos]; const c2 = firstColon(l.text);
-              const kk = unquote(l.text.slice(0, c2)); const vv = l.text.slice(c2 + 1).trim(); pos++;
-              if (vv === '') { if (pos < lines.length && lines[pos].indent > l.indent) item[kk] = parseBlock(lines[pos].indent); else item[kk] = null; }
-              else item[kk] = parseScalar(vv);
-            }
-            arr.push(item);
-          } else arr.push(parseScalar(rest));
-        }
-        return arr;
-      }
-      const obj = {};
-      while (pos < lines.length && lines[pos].indent === indent && !lines[pos].text.startsWith('-')) {
-        const l = lines[pos]; const c = firstColon(l.text);
-        const k = unquote(l.text.slice(0, c)); const v = l.text.slice(c + 1).trim(); pos++;
-        if (v === '') {
-          if (pos < lines.length && lines[pos].indent > indent) obj[k] = parseBlock(lines[pos].indent);
-          else obj[k] = null;
-        } else obj[k] = parseScalar(v);
-      }
-      return obj;
-    }
-    return parseBlock(0);
-  }
-  function toYAML(obj, indent) {
-    const pad = ' '.repeat(indent);
-    if (Array.isArray(obj)) {
-      if (!obj.length) return '[]';
-      return obj.map((v) => {
-        if (v && typeof v === 'object') return pad + '- ' + toYAML(v, indent + 2).replace(/^\s*/, '').replace(/\n/g, '\n' + pad + '  ');
-        return pad + '- ' + scalar(v);
-      }).join('\n');
-    }
-    if (obj && typeof obj === 'object') {
-      const ks = Object.keys(obj);
-      if (!ks.length) return '{}';
-      return ks.map((k) => {
-        const v = obj[k];
-        if (v && typeof v === 'object') return pad + needsQuote(k) + ':\n' + toYAML(v, indent + 2);
-        return pad + needsQuote(k) + ': ' + scalar(v);
-      }).join('\n');
-    }
-    return pad + scalar(obj);
-  }
-  function needsQuote(k) { return /[:#\[\]{}&*!|>'"%@`,]/.test(k) || k === '' ? JSON.stringify(k) : k; }
-  function scalar(v) {
-    if (v === null || v === undefined) return 'null';
-    if (typeof v === 'number' || typeof v === 'boolean') return String(v);
-    if (typeof v === 'string') return /[:#\[\]{}&*!|>'"%@`,\n]/.test(v) || v === '' ? JSON.stringify(v) : v;
-    return JSON.stringify(v);
-  }
-  $('toJson').onclick = () => {
-    $('err').textContent = '';
-    try { $('out').value = JSON.stringify(parseYAML($('src').value), null, 2); }
-    catch (e) { $('err').textContent = '解析失败：' + e.message; }
-  };
-  $('toYaml').onclick = () => {
-    $('err').textContent = '';
-    try { const o = JSON.parse($('src').value); $('out').value = toYAML(o, 0); }
-    catch (e) { $('err').textContent = 'JSON 解析失败：' + e.message; }
-  };
-  $('sample').onclick = () => { $('src').value = SAMPLE; $('toJson').click(); };
-  $('clear').onclick = () => { $('src').value = ''; $('out').value = ''; $('err').textContent = ''; };
-  $('src').value = SAMPLE; $('toJson').click();
-</script>
-</body>
+<body><main class="wrap">
+  <h1>YAML ↔ JSON</h1>
+  <p class="sub">严格、可预测的 YAML block 子集转换器。数据仅在本机处理。</p>
+  <section class="card">
+    <div class="actions"><button class="primary" id="to-json">YAML → JSON</button><button id="to-yaml">JSON → YAML</button><button id="sample">载入示例</button><button id="clear">清空</button></div>
+    <div class="grid"><div><label for="source">输入</label><textarea id="source" spellcheck="false"></textarea></div><div><label for="output">输出</label><textarea id="output" readonly spellcheck="false"></textarea></div></div>
+    <div class="error" id="error" role="alert"></div>
+    <p class="note">支持嵌套映射、序列、flow 数组/对象、引号字符串及基础标量；锚点、标签、merge key、block scalar 与多文档会被明确拒绝。</p>
+  </section>
+</main><script type="module" src="./src/app.js"></script></body>
 </html>
