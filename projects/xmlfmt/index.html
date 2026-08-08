@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>XML 美化 / 压缩</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --line:#262b36; --fg:#e7eaf0; --muted:#9aa4b2; --accent:#6ea8fe; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--fg); padding:28px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 18px; font-size:13.5px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:760px){ .grid { grid-template-columns:1fr; } }
+  label { display:block; color:var(--muted); font-size:12.5px; margin:0 0 6px; }
+  textarea { width:100%; min-height:260px; resize:vertical; background:var(--panel); color:var(--fg);
+    border:1px solid var(--line); border-radius:10px; padding:12px; font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  .bar { display:flex; gap:10px; margin:14px 0; flex-wrap:wrap; }
+  button { background:var(--accent); color:#0b1020; border:0; border-radius:9px; padding:9px 16px; font-weight:600; cursor:pointer; font-size:14px; }
+  button.ghost { background:transparent; color:var(--fg); border:1px solid var(--line); font-weight:500; }
+  .out { position:relative; }
+  .copy { position:absolute; top:10px; right:10px; padding:5px 11px; font-size:12px; }
+  .hint { color:var(--muted); font-size:12px; margin-top:6px; }
+</style>
+</head>
+<body>
+  <h1>XML 美化 / 压缩</h1>
+  <p class="sub">零依赖 · 按元素嵌套缩进美化、去除注释压缩成单行；CDATA、处理指令与属性字符串原样保留。数据不出本机。</p>
+  <div class="grid">
+    <div>
+      <label>输入 XML</label>
+      <textarea id="in" placeholder="<note><to>A</to><from>B</from></note>"></textarea>
+    </div>
+    <div class="out">
+      <label>输出</label>
+      <textarea id="out" readonly placeholder="结果将显示在这里"></textarea>
+      <button class="ghost copy" id="copy">复制</button>
+    </div>
+  </div>
+  <div class="bar">
+    <button id="fmt">美化</button>
+    <button class="ghost" id="min">压缩</button>
+    <button class="ghost" id="clear">清空</button>
+    <span class="hint" id="stat"></span>
+  </div>
+  <script src="src/xmlfmt.js"></script>
+  <script>
+    var $ = function (id) { return document.getElementById(id); };
+    function run(fn) {
+      var src = $('in').value;
+      if (!src.trim()) { $('out').value = ''; $('stat').textContent=''; return; }
+      try {
+        var res = fn(src);
+        $('out').value = res;
+        $('stat').textContent = res.length + ' 字符';
+      } catch (e) { $('out').value = '错误：' + e.message; }
+    }
+    $('fmt').onclick = function () { run(XmlFmt.beautify); };
+    $('min').onclick = function () { run(XmlFmt.minify); };
+    $('clear').onclick = function () { $('in').value=''; $('out').value=''; $('stat').textContent=''; };
+    $('copy').onclick = function () {
+      navigator.clipboard.writeText($('out').value).then(function () { $('copy').textContent='已复制'; setTimeout(function(){ $('copy').textContent='复制'; },1200); });
+    };
+    $('in').value = '<note><to>Alice</to><from>Bob</from><body>Hi &amp; welcome!</body><items><item id="1"/><item id="2"/></items></note>';
+  </script>
+</body>
+</html>

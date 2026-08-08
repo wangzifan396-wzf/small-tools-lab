@@ -476,6 +476,30 @@ const TOOLS = [
     featured: false,
   },
   {
+    id: "htmlfmt",
+    name: "HTML 美化 / 压缩",
+    category: "browser",
+    label: "代码格式化",
+    description:
+      "零依赖 HTML 排版：按标签嵌套层级缩进美化，或去除注释压缩成单行；script/style 与属性字符串原样保留。",
+    tech: "Browser · HTML",
+    live: "projects/htmlfmt/",
+    docs: "projects/htmlfmt/README.md",
+    featured: false,
+  },
+  {
+    id: "xmlfmt",
+    name: "XML 美化 / 压缩",
+    category: "browser",
+    label: "代码格式化",
+    description:
+      "零依赖 XML 排版：按元素嵌套缩进美化，或去除注释压缩成单行；CDATA、处理指令与属性字符串原样保留。",
+    tech: "Browser · XML",
+    live: "projects/xmlfmt/",
+    docs: "projects/xmlfmt/README.md",
+    featured: false,
+  },
+  {
     id: "mime",
     name: "MIME 类型查询",
     category: "browser",

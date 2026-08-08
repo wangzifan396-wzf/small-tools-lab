@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (67)
+### Browser tools (69)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -48,6 +48,8 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [SQL 格式化 / 压缩](projects/sqlfmt/README.md) | Keyword-upper, clause-line-break, AND/OR indent; string & comment safe | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/sqlfmt/) |
 | [curl 转代码](projects/curlcon/README.md) | Convert a curl command to JS fetch and Python requests | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/curlcon/) |
 | [CSS 美化 / 压缩](projects/cssfmt/README.md) | Brace-aware CSS beautify and minify, strings/comments preserved | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cssfmt/) |
+| [HTML 美化 / 压缩](projects/htmlfmt/README.md) | Tag-aware HTML beautify and minify, script/style & attr strings preserved | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/htmlfmt/) |
+| [XML 美化 / 压缩](projects/xmlfmt/README.md) | Element-aware XML beautify and minify, CDATA/comments/PIs preserved | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/xmlfmt/) |
 | [MIME 类型查询](projects/mime/README.md) | Look up MIME type by extension (or the reverse), with charset hints | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/mime/) |
 | [CIDR 子网计算](projects/cidr/README.md) | IPv4 subnet calculator: network/broadcast, mask, host range & count | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cidr/) |
 | [ULID 生成 / 解析](projects/ulid/README.md) | Generate / decode sortable 26-char ULIDs (Crockford Base32) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/ulid/) |
