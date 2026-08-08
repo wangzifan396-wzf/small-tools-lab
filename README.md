@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (69)
+### Browser tools (72)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -50,6 +50,9 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [CSS 美化 / 压缩](projects/cssfmt/README.md) | Brace-aware CSS beautify and minify, strings/comments preserved | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cssfmt/) |
 | [HTML 美化 / 压缩](projects/htmlfmt/README.md) | Tag-aware HTML beautify and minify, script/style & attr strings preserved | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/htmlfmt/) |
 | [XML 美化 / 压缩](projects/xmlfmt/README.md) | Element-aware XML beautify and minify, CDATA/comments/PIs preserved | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/xmlfmt/) |
+| [TOTP 动态口令](projects/totp/README.md) | RFC 6238 TOTP generator, SHA-1/256/512, Base32/Hex/text secrets, countdown & otpauth URI | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/totp/) |
+| [User-Agent 解析](projects/uaparse/README.md) | Parse UA into browser, engine (Blink/Gecko/WebKit), OS and device type/vendor/model | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/uaparse/) |
+| [哈希类型识别](projects/hashid/README.md) | Identify hash algorithm by prefix/length/charset: bcrypt, Argon2, MD5, SHA families | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/hashid/) |
 | [MIME 类型查询](projects/mime/README.md) | Look up MIME type by extension (or the reverse), with charset hints | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/mime/) |
 | [CIDR 子网计算](projects/cidr/README.md) | IPv4 subnet calculator: network/broadcast, mask, host range & count | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cidr/) |
 | [ULID 生成 / 解析](projects/ulid/README.md) | Generate / decode sortable 26-char ULIDs (Crockford Base32) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/ulid/) |

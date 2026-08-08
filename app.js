@@ -500,6 +500,42 @@ const TOOLS = [
     featured: false,
   },
   {
+    id: "totp",
+    name: "TOTP 动态口令",
+    category: "browser",
+    label: "安全工具",
+    description:
+      "零依赖 RFC 6238 动态口令：SHA-1/256/512 三算法，Base32/Hex/文本密钥，倒计时自动刷新，可生成 otpauth 导入链接。",
+    tech: "Browser · TOTP",
+    live: "projects/totp/",
+    docs: "projects/totp/README.md",
+    featured: false,
+  },
+  {
+    id: "uaparse",
+    name: "User-Agent 解析",
+    category: "browser",
+    label: "类型查询",
+    description:
+      "零依赖 UA 解析：识别浏览器、渲染引擎（Blink/Gecko/WebKit…）、操作系统与设备类型/厂商/型号，含爬虫判定。",
+    tech: "Browser · UA",
+    live: "projects/uaparse/",
+    docs: "projects/uaparse/README.md",
+    featured: false,
+  },
+  {
+    id: "hashid",
+    name: "哈希类型识别",
+    category: "browser",
+    label: "安全工具",
+    description:
+      "零依赖哈希识别：依前缀/长度/字符集推断算法，覆盖 bcrypt/Argon2/MD5/SHA 系列等，仅识别类型不还原明文。",
+    tech: "Browser · Hash",
+    live: "projects/hashid/",
+    docs: "projects/hashid/README.md",
+    featured: false,
+  },
+  {
     id: "mime",
     name: "MIME 类型查询",
     category: "browser",

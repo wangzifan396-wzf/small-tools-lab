@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>User-Agent 解析器</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --line:#262b36; --fg:#e7eaf0; --muted:#9aa4b2; --accent:#6ea8fe; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--fg); padding:28px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 18px; font-size:13.5px; }
+  label { display:block; color:var(--muted); font-size:12.5px; margin:0 0 6px; }
+  textarea { width:100%; min-height:84px; resize:vertical; background:var(--panel); color:var(--fg);
+    border:1px solid var(--line); border-radius:10px; padding:11px; font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  .bar { display:flex; gap:10px; margin:14px 0; flex-wrap:wrap; }
+  button { background:var(--accent); color:#0b1020; border:0; border-radius:9px; padding:9px 16px; font-weight:600; cursor:pointer; font-size:14px; }
+  button.ghost { background:transparent; color:var(--fg); border:1px solid var(--line); font-weight:500; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+  @media (max-width:760px){ .grid { grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .card h3 { margin:0 0 10px; font-size:13px; color:var(--accent); letter-spacing:.04em; }
+  .kv { display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--line); font-size:14px; }
+  .kv:last-child { border-bottom:0; }
+  .kv .k { color:var(--muted); }
+  .kv .v { font-weight:600; text-align:right; word-break:break-all; }
+  .hint { color:var(--muted); font-size:12px; margin-top:8px; }
+</style>
+</head>
+<body>
+  <h1>User-Agent 解析器</h1>
+  <p class="sub">零依赖 · 从 UA 字符串识别浏览器、渲染引擎、操作系统与设备类型。纯本地解析，数据不出本机。</p>
+
+  <label>User-Agent 字符串</label>
+  <textarea id="in" placeholder="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"></textarea>
+  <div class="bar">
+    <button id="parse">解析</button>
+    <button class="ghost" id="sample">填入示例</button>
+    <button class="ghost" id="clear">清空</button>
+    <span class="hint" id="stat"></span>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>浏览器 Browser</h3><div id="browser"></div></div>
+    <div class="card"><h3>引擎 Engine</h3><div id="engine"></div></div>
+    <div class="card"><h3>系统 OS</h3><div id="os"></div></div>
+    <div class="card"><h3>设备 Device</h3><div id="device"></div></div>
+  </div>
+
+  <script src="src/uaparse.js"></script>
+  <script>
+    var $ = function (id) { return document.getElementById(id); };
+    function kv(k, v) { return '<div class="kv"><span class="k">' + k + '</span><span class="v">' + (v || "—") + '</span></div>'; }
+    function render(obj) {
+      var b = obj.browser, e = obj.engine, o = obj.os, d = obj.device;
+      $('browser').innerHTML = kv("名称", b.name) + kv("版本", b.version);
+      $('engine').innerHTML = kv("引擎", e.name) + kv("版本", e.version);
+      $('os').innerHTML = kv("系统", o.name) + kv("版本", o.version);
+      $('device').innerHTML = kv("类型", d.type) + kv("厂商", d.vendor) + kv("型号", d.model) + kv("爬虫", d.isBot ? "是" : "否");
+    }
+    function go() {
+      var ua = $('in').value.trim();
+      if (!ua) { $('stat').textContent = "请输入 UA 字符串"; return; }
+      try { render(Uaparse.parse(ua)); $('stat').textContent = "已解析"; }
+      catch (e) { $('stat').textContent = "错误：" + e.message; }
+    }
+    $('parse').onclick = go;
+    $('sample').onclick = function () { $('in').value = navigator.userAgent; go(); };
+    $('clear').onclick = function () { $('in').value = ''; $('stat').textContent = ''; $('browser').innerHTML = $('engine').innerHTML = $('os').innerHTML = $('device').innerHTML = ''; };
+    $('in').value = navigator.userAgent || "";
+    go();
+  </script>
+</body>
+</html>

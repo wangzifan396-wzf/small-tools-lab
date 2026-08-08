@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TOTP 动态口令生成器</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --line:#262b36; --fg:#e7eaf0; --muted:#9aa4b2; --accent:#6ea8fe; --ok:#54d18c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--fg); padding:28px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 18px; font-size:13.5px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:16px; }
+  label { display:block; color:var(--muted); font-size:12.5px; margin:0 0 6px; }
+  input, select { width:100%; background:#0f1115; color:var(--fg); border:1px solid var(--line);
+    border-radius:9px; padding:9px 11px; font-size:14px; }
+  .row { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .row { grid-template-columns:1fr 1fr; } }
+  .code { text-align:center; padding:22px 10px; }
+  .code .val { font:600 44px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; letter-spacing:6px; color:var(--accent); }
+  .code .meta { color:var(--muted); font-size:13px; margin-top:8px; }
+  .bar { height:6px; background:var(--line); border-radius:4px; overflow:hidden; margin-top:14px; }
+  .bar > i { display:block; height:100%; background:var(--ok); width:100%; transition:width .95s linear; }
+  .out { position:relative; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px){ .grid2 { grid-template-columns:1fr; } }
+  button { background:var(--accent); color:#0b1020; border:0; border-radius:9px; padding:9px 16px; font-weight:600; cursor:pointer; font-size:14px; }
+  button.ghost { background:transparent; color:var(--fg); border:1px solid var(--line); font-weight:500; }
+  .barbtns { display:flex; gap:10px; margin-top:4px; flex-wrap:wrap; }
+  .hint { color:var(--muted); font-size:12px; margin-top:8px; }
+  textarea { width:100%; min-height:80px; resize:vertical; background:#0f1115; color:var(--fg);
+    border:1px solid var(--line); border-radius:9px; padding:10px; font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  .copy { position:absolute; top:10px; right:10px; padding:5px 11px; font-size:12px; }
+</style>
+</head>
+<body>
+  <h1>TOTP 动态口令生成器</h1>
+  <p class="sub">零依赖 · RFC 6238 一次性口令：支持 SHA-1/256/512，密钥兼容 Base32 / Hex / 文本。纯本地计算，数据不出本机。</p>
+
+  <div class="card code">
+    <div class="val" id="code">------</div>
+    <div class="meta" id="meta">填写密钥后生成</div>
+    <div class="bar"><i id="prog"></i></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>密钥 Secret（Base32 / Hex / 文本）</label>
+        <input id="secret" placeholder="JBSWY3DPEHPK3PXP" value="JBSWY3DPEHPK3PXP" />
+      </div>
+      <div>
+        <label>算法</label>
+        <select id="algo"><option value="sha1">SHA-1</option><option value="sha256">SHA-256</option><option value="sha512">SHA-512</option></select>
+      </div>
+      <div>
+        <label>位数</label>
+        <select id="digits"><option value="6">6</option><option value="8">8</option></select>
+      </div>
+      <div>
+        <label>周期(秒)</label>
+        <select id="period"><option value="30">30</option><option value="60">60</option></select>
+      </div>
+    </div>
+    <div class="barbtns">
+      <button id="gen">生成 / 自动刷新</button>
+      <button class="ghost" id="clear">清空</button>
+      <span class="hint">默认每步长自动刷新并显示倒计时；可直接对照手机验证器。</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <label>发行方 Issuer（可选）</label>
+        <input id="issuer" placeholder="Acme" />
+      </div>
+      <div>
+        <label>账号 Account（可选）</label>
+        <input id="account" placeholder="me@acme.com" />
+      </div>
+    </div>
+    <div class="barbtns" style="margin-top:12px">
+      <button class="ghost" id="uri">生成 otpauth:// 导入链接</button>
+    </div>
+    <div class="out" style="margin-top:12px">
+      <textarea id="uriOut" readonly placeholder="otpauth://totp/... 可用于扫码/导入到验证器"></textarea>
+      <button class="ghost copy" id="copyUri">复制</button>
+    </div>
+    <p class="hint">提示：RFC 6238 测试向量密钥 <code>12345678901234567890</code>（SHA-1，8 位，30 秒）在 T=59 时应得 94287082。</p>
+  </div>
+
+  <script src="src/totp.js"></script>
+  <script>
+    var $ = function (id) { return document.getElementById(id); };
+    var timer = null;
+    function opts() {
+      return { algo: $('algo').value, digits: +$('digits').value, period: +$('period').value };
+    }
+    function render() {
+      var sec = $('secret').value.trim();
+      if (!sec) { $('code').textContent = '------'; $('meta').textContent = '请填写密钥'; $('prog').style.width = '100%'; return; }
+      try {
+        var o = opts();
+        var t = Math.floor(Date.now() / 1000);
+        var code = Totp.totpToken(sec, o);
+        var rem = Totp.remaining(o.period);
+        $('code').textContent = o.digits === 6 ? code.slice(0,3) + ' ' + code.slice(3) : code;
+        $('meta').textContent = '剩余 ' + rem + ' 秒 · ' + o.algo.toUpperCase() + ' · ' + o.digits + ' 位';
+        $('prog').style.width = (rem / o.period * 100) + '%';
+      } catch (e) {
+        $('code').textContent = '错误';
+        $('meta').textContent = e.message;
+      }
+    }
+    function start() {
+      if (timer) clearInterval(timer);
+      render();
+      timer = setInterval(render, 1000);
+    }
+    $('gen').onclick = start;
+    $('algo').onchange = render; $('digits').onchange = render; $('period').onchange = render;
+    $('clear').onclick = function () { if (timer) clearInterval(timer); $('secret').value=''; $('issuer').value=''; $('account').value=''; $('uriOut').value=''; $('code').textContent='------'; $('meta').textContent='已清空'; $('prog').style.width='100%'; };
+    $('uri').onclick = function () {
+      try {
+        var o = opts();
+        $('uriOut').value = Totp.otpUri({ secret: $('secret').value.trim(), issuer: $('issuer').value.trim(), account: $('account').value.trim(), algo: o.algo, digits: o.digits, period: o.period });
+      } catch (e) { $('uriOut').value = '错误：' + e.message; }
+    };
+    function copy(id, btn) {
+      navigator.clipboard.writeText($(id).value).then(function () { btn.textContent='已复制'; setTimeout(function(){ btn.textContent='复制'; },1200); });
+    }
+    $('copyUri').onclick = function () { copy('uriOut', $('copyUri')); };
+    start();
+  </script>
+</body>
+</html>
