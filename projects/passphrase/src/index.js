@@ -8,11 +8,11 @@
   const WORDS = "able acid aged also area army atom aunt away baby back ball band bank bare barn base bath bear beat beef bell belt bend best bike bill bird bite blue boat body boil bolt bone book boot born boss both bowl bulb bulk bull burn bush busy cage cake calf call calm camp cane cape card care cart case cash cast cave cell cent chat chef chin chip chop city clad clay clip club coal coat code coil coin cold come cook cool cope copy cord core cork corn cost crab crew crop crowd cube cult cute dale damp dare dark dart dash date dawn deal deck deed deep deer dent desk dial dice diet dime dirt dish dive dock does doll dome done door dose dot dove down drag draw drip drop drum duck dull dust duty each ear ease east easy echo edge edit eel egg epic even ever evil exam exit face fact fade fail fair fall fame farm fast fate fear feast feed feel feet fell fern file fill film find fine fire firm fish fist five flag flat flaw flea flee flew flip flow flux foil folk font food fool foot ford fork form fort foul four free frog from fuel full fund fury fuse gain game gang gap gate gaze gear gem gift girl give glad glow glue goal goat gold golf gone good gown grab gram gray grew grid grim grin grip grow gulf hair half hall halt hand hang hard harm hate hail hawk haze head heal heap".split(/\s+/).filter(Boolean);
 
   const DEFAULTS = {
-    words: 6,
+    words: 10,
     separator: "-",
     capitalize: false,
     includeNumber: false,
-    rng: Math.random,
+    rng: null,
   };
 
   function clampInt(n, min, max, fallback) {
@@ -21,9 +21,25 @@
     return Math.min(max, Math.max(min, v));
   }
 
-  // Cryptographically-lean RNG selection when available; falls back to rng().
+  function secureRandom() {
+    let cryptoApi = typeof globalThis !== "undefined" ? globalThis.crypto : null;
+    if ((!cryptoApi || typeof cryptoApi.getRandomValues !== "function") && typeof require === "function") {
+      try { cryptoApi = require("node:crypto").webcrypto; } catch (_) { cryptoApi = null; }
+    }
+    if (!cryptoApi || typeof cryptoApi.getRandomValues !== "function") {
+      throw new Error("当前环境不支持密码学安全随机数");
+    }
+    const value = new Uint32Array(1);
+    cryptoApi.getRandomValues(value);
+    return value[0] / 0x100000000;
+  }
+
   function pickIndex(rng, size) {
-    return Math.floor(rng() * size) % size;
+    const value = Number(rng());
+    if (!Number.isFinite(value) || value < 0 || value >= 1) {
+      throw new Error("随机函数必须返回 [0, 1) 范围内的数值");
+    }
+    return Math.floor(value * size);
   }
 
   function generate(opts) {
@@ -32,7 +48,7 @@
     const sep = o.separator === undefined || o.separator === null ? "-" : String(o.separator);
     const useCap = !!o.capitalize;
     const useNum = !!o.includeNumber;
-    const rng = typeof o.rng === "function" ? o.rng : Math.random;
+    const rng = typeof o.rng === "function" ? o.rng : secureRandom;
 
     const chosen = [];
     for (let i = 0; i < count; i++) {
@@ -47,9 +63,10 @@
   }
 
   // Entropy estimate in bits for a given word count (log2(listSize) per word).
-  function entropyBits(wordCount) {
+  function entropyBits(wordCount, includeNumber) {
     const n = clampInt(wordCount, 1, 1e6, 1);
-    return Math.round(n * Math.log2(WORDS.length) * 100) / 100;
+    const numberBits = includeNumber ? Math.log2(10) : 0;
+    return Math.round((n * Math.log2(WORDS.length) + numberBits) * 100) / 100;
   }
 
   function strengthLabel(bits) {

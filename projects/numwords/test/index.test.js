@@ -31,3 +31,25 @@ test("rejects non-finite and over-large", () => {
   assert.throws(() => T.toWords("abc"));
   assert.throws(() => T.toWords(1e20));
 });
+
+test("keeps integers above Number.MAX_SAFE_INTEGER exact", () => {
+  const a = T.toWords("9007199254740992");
+  const b = T.toWords("9007199254740993");
+  assert.notEqual(a, b);
+  assert.ok(b.endsWith("nine hundred and ninety-three"));
+  assert.equal(T.toWords(9007199254740993n), b);
+});
+
+test("rejects decimals, exponent notation, and unsafe Number values", () => {
+  assert.throws(() => T.toWords(1.5), /整数/);
+  assert.throws(() => T.toWords("1.5"), /整数/);
+  assert.throws(() => T.toWords("1e3"), /整数/);
+  assert.throws(() => T.toWords(9007199254740992), /字符串/);
+});
+
+test("supports the exact upper boundary and rejects 10^18", () => {
+  const max = T.toWords("999999999999999999");
+  assert.ok(max.startsWith("nine hundred and ninety-nine quadrillion"));
+  assert.ok(max.endsWith("nine hundred and ninety-nine"));
+  assert.throws(() => T.toWords("1000000000000000000"), /quadrillion/);
+});

@@ -34,7 +34,7 @@
     padding: 9px 11px; border-radius: var(--r); border: 1px solid var(--border);
     background: var(--panel); color: var(--text); font-size: 14px; font-family: var(--mono);
   }
-  input[type=number] { flex: 1; min-width: 200px; }
+  #value { flex: 1; min-width: 200px; }
   button {
     padding: 9px 16px; border-radius: var(--r); border: 1px solid transparent; cursor: pointer;
     font-size: 14px; background: var(--accent); color: #fff;
@@ -53,7 +53,7 @@
   <p class="sub">把整数写成英文单词（如 <code>1234</code> → <code>one thousand, two hundred and thirty-four</code>）。<strong>纯前端，零依赖。</strong></p>
 
   <div class="row">
-    <input id="value" type="number" value="1234" placeholder="输入整数…" />
+    <input id="value" type="text" inputmode="numeric" value="1234" placeholder="输入整数…" />
     <label><input id="and" type="checkbox" checked /> 英式 and</label>
     <button id="go">转换</button>
     <button id="copy" class="ghost">复制</button>

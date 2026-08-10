@@ -61,7 +61,7 @@
   <p class="sub">用 <strong>diceware</strong> 思路从 256 词表中随机抽取若干词拼成易记且高熵的口令。<strong>纯前端运行，零依赖，不上传任何数据。</strong></p>
 
   <div class="row">
-    <label>词数 <input id="words" type="number" min="2" max="16" value="6" /></label>
+    <label>词数 <input id="words" type="number" min="2" max="16" value="10" /></label>
     <label>分隔符 <input id="sep" type="text" value="-" maxlength="3" style="width:64px" /></label>
     <label><input id="cap" type="checkbox" /> 首字母大写</label>
     <label><input id="num" type="checkbox" /> 末尾加数字</label>
@@ -98,7 +98,7 @@
     };
     const pass = T.generate(opts);
     $('out').textContent = pass;
-    const bits = T.entropyBits(opts.words + (opts.includeNumber ? 0 : 0));
+    const bits = T.entropyBits(opts.words, opts.includeNumber);
     $('bits').textContent = bits + ' 位';
     $('strength').textContent = T.strengthLabel(bits);
     $('pool').textContent = T.WORDS.length;

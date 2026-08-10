@@ -36,3 +36,16 @@ test("entropy grows linearly with word count", () => {
   assert.ok(b6 > b1 * 5 && b6 < b1 * 7);
   assert.ok(b6 >= 48); // 6 * 8 bits
 });
+
+test("default generation uses a secure source and the recommended word count", () => {
+  const phrase = T.generate();
+  assert.equal(phrase.split("-").length, 10);
+  assert.equal(T.DEFAULTS.rng, null);
+  assert.equal(T.entropyBits(10), 80);
+});
+
+test("entropy includes the optional digit and invalid RNG output is rejected", () => {
+  assert.ok(T.entropyBits(6, true) > T.entropyBits(6, false));
+  assert.throws(() => T.generate({ rng: () => 1 }), /\[0, 1\)/);
+  assert.throws(() => T.generate({ rng: () => -0.1 }), /\[0, 1\)/);
+});
