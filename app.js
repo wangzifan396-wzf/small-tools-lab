@@ -1239,6 +1239,18 @@ const TOOLS = [
     docs: "projects/numwords/README.md",
     featured: false,
   },
+  {
+    id: "jsonpath",
+    name: "JSONPath Explorer",
+    category: "browser",
+    label: "JSON 路径查询",
+    description:
+      "安全查询 JSON 的属性、索引、通配符与递归路径，同时返回每个匹配值的精确位置；无 eval，数据不离开浏览器。",
+    tech: "Browser · JSONPath",
+    live: "projects/jsonpath/",
+    docs: "projects/jsonpath/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {
