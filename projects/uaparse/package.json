@@ -1,0 +1,9 @@
+{
+  "name": "small-tools-lab-uaparse",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": { "test": "node --test tests/uaparse.test.js" },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

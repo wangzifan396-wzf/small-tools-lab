@@ -1,6 +1,6 @@
 # RSA 密钥生成与加解密 (rsa)
 
-零依赖的纯 JavaScript RSA 实现：生成密钥对（Miller–Rabin 素数检测）、用公钥加密、用私钥解密。采用 **PKCS#1 v1.5** 填充，与 OpenSSL / Node `crypto`（`RSA_PKCS1_PADDING`）**完全互通**。纯浏览器运行，无需 Web Crypto，`file://` 双击即跑。
+零依赖的纯 JavaScript RSA 实现：生成密钥对（Miller–Rabin 素数检测）、用公钥加密、用私钥解密。采用 **PKCS#1 v1.5** 填充，与 OpenSSL / Node `crypto`（`RSA_PKCS1_PADDING`）**完全互通**。纯浏览器运行，使用 Web Crypto 安全随机源，`file://` 双击即跑。
 
 ## 功能
 

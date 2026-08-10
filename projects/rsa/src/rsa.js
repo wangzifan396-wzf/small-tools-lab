@@ -1,6 +1,6 @@
 // rsa.js — zero-dependency RSA (UMD)
 // Pure-JS RSA with Miller-Rabin prime generation, PKCS#1 v1.5 padding.
-// Runs in the browser (file://) and in Node. No Web Crypto required.
+// Runs in the browser (file://) and in Node with a secure random source.
 (function (root, factory) {
   if (typeof module === "object" && module.exports) {
     module.exports = factory();
@@ -22,10 +22,7 @@
       globalThis.crypto.getRandomValues(u);
       return u;
     }
-    // last-resort fallback (NOT cryptographically strong): only for non-key paths
-    var a = new Uint8Array(n);
-    for (var i = 0; i < n; i++) a[i] = Math.floor(Math.random() * 256);
-    return a;
+    throw new Error("secure random source unavailable");
   }
 
   // ---- bigint helpers ----

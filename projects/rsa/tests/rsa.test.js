@@ -3,6 +3,7 @@
 const assert = require("node:assert/strict");
 const crypto = require("crypto");
 const RSA = require("../src/rsa.js");
+assert.doesNotMatch(RSA.randBytes.toString(), /Math\.random/);
 
 // ---- primitive correctness ----
 assert.equal(RSA.modExp(7n, 13n, 19n), 7n ** 13n % 19n);
