@@ -58,6 +58,9 @@ assert.throws(() => ev("1 +* 2"), /语法|无法解析/);
 assert.throws(() => ev("2 2"), /多余/);
 assert.throws(() => ev("sqrt()"), /需要 1 个参数/);
 
+assert.throws(() => ev("1 @ + 2"), /无法识别的字符/);
+assert.throws(() => ev("2 + $ 3"), /无法识别的字符/);
+
 // 8. format helper
 assert.equal(M.format(42), "42");
 assert.equal(M.format(3.1400001, 2), "3.14");

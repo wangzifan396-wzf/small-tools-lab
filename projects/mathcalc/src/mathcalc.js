@@ -54,6 +54,8 @@
     var m;
     var end = 0;
     while ((m = re.exec(s)) !== null) {
+      var skipped = s.slice(end, m.index).trim();
+      if (skipped) throw new Error("无法识别的字符: " + skipped[0]);
       var t = m[1];
       if (/^[0-9.]/.test(t)) {
         tokens.push({ t: "num", v: parseFloat(t) });
@@ -67,7 +69,7 @@
       }
       end = m.index + m[0].length;
     }
-    // detect trailing junk (non-whitespace chars the regex did not consume)
+    // Detect junk before, between, or after otherwise valid tokens.
     var rest = s.slice(end).trim();
     if (rest) throw new Error("无法识别的字符: " + rest[0]);
     return tokens;

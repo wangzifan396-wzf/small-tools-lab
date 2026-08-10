@@ -4,6 +4,9 @@
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
 
+  var hasOwn = Function.call.bind(Object.prototype.hasOwnProperty);
+  function createTable() { return Object.create(null); }
+
   // ---------------- Tokenizer ----------------
   var ESC_MAP = { n: "\n", t: "\t", r: "\r", b: "\b", f: "\f", '"': '"', "\\": "\\" };
   function readEscape(src, k) {
@@ -177,7 +180,7 @@
   // parse inline table until RBC
   Parser.prototype.parseInlineTable = function () {
     this.expect("LBC");
-    var obj = {};
+    var obj = createTable();
     if (this.peek() && this.peek().t === "RBC") { this.next(); return obj; }
     for (;;) {
       var keys = this.parseKeyPath();
@@ -212,20 +215,26 @@
     var cur = obj;
     for (var i = 0; i < keys.length - 1; i++) {
       var k = keys[i];
-      if (cur[k] === undefined || cur[k] === null || typeof cur[k] !== "object" || Array.isArray(cur[k])) {
-        cur[k] = {};
+      if (!hasOwn(cur, k)) {
+        cur[k] = createTable();
+      } else if (cur[k] === null || typeof cur[k] !== "object" || Array.isArray(cur[k])) {
+        throw new Error("不能用表覆盖已有值: " + keys.slice(0, i + 1).join("."));
       }
       cur = cur[k];
     }
-    cur[keys[keys.length - 1]] = val;
+    var last = keys[keys.length - 1];
+    if (hasOwn(cur, last)) throw new Error("重复键: " + keys.join("."));
+    cur[last] = val;
   }
 
   function getOrCreateTable(root, keys) {
     var cur = root;
     for (var i = 0; i < keys.length; i++) {
       var k = keys[i];
-      if (cur[k] === undefined || cur[k] === null || typeof cur[k] !== "object" || Array.isArray(cur[k])) {
-        cur[k] = {};
+      if (!hasOwn(cur, k)) {
+        cur[k] = createTable();
+      } else if (cur[k] === null || typeof cur[k] !== "object" || Array.isArray(cur[k])) {
+        throw new Error("不能用表覆盖已有值: " + keys.slice(0, i + 1).join("."));
       }
       cur = cur[k];
     }
@@ -235,7 +244,7 @@
   function parse(src) {
     var toks = tokenize(src);
     var parser = new Parser(toks);
-    var root = {};
+    var root = createTable();
     var current = root;
     while (parser.pos < toks.length) {
       // skip newlines
@@ -249,7 +258,7 @@
           parser.expect("RBR"); parser.expect("RBR");
           var parent = getOrCreateTable(root, aKeys.slice(0, -1));
           var lastKey = aKeys[aKeys.length - 1];
-          var existing = parent[lastKey];
+          var existing = hasOwn(parent, lastKey) ? parent[lastKey] : undefined;
           var arr;
           if (Array.isArray(existing)) {
             arr = existing;
@@ -261,7 +270,7 @@
             arr = [];
             parent[lastKey] = arr;
           }
-          var obj = {};
+          var obj = createTable();
           arr.push(obj);
           current = obj;
         } else {

@@ -104,4 +104,17 @@ assert.equal(back2.items[0].id, 1);
 assert.equal(back2.items[1].id, 2);
 assert.ok(/\[\[items\]\]/.test(s2), "array-of-tables header emitted");
 
+// 7. special keys remain data and cannot mutate Object.prototype
+delete Object.prototype.polluted;
+var protectedObj = T.parse("__proto__.polluted = true\nconstructor.name = 'data'");
+assert.equal({}.polluted, undefined);
+assert.equal(protectedObj.__proto__.polluted, true);
+assert.equal(protectedObj.constructor.name, "data");
+assert.equal(Object.getPrototypeOf(protectedObj), null);
+
+// 8. duplicate keys and scalar/table collisions are rejected
+assert.throws(function () { T.parse("answer = 1\nanswer = 2"); }, /重复键/);
+assert.throws(function () { T.parse("item = 1\nitem.name = 'x'"); }, /不能用表覆盖已有值/);
+assert.throws(function () { T.parse("item = 1\n[item]\nname = 'x'"); }, /不能用表覆盖已有值/);
+
 console.log("toml all assertions passed");
