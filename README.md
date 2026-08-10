@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (75)
+### Browser tools (78)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -56,6 +56,9 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [MAC 地址工具](projects/macaddr/README.md) | Normalize/reformat MAC, random generate, OUI vendor lookup, unicast/multicast & local/global bits | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/macaddr/) |
 | [NATO 音标字母](projects/nato/README.md) | Text ↔ NATO/ICAO phonetic alphabet, full 26-letter + 10-digit chart | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/nato/) |
 | [RSA 加解密](projects/rsa/README.md) | Pure-JS RSA keygen + encrypt/decrypt, PKCS#1 v1.5, interoperable with OpenSSL/Node | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/rsa/) |
+| [数学表达式计算器](projects/mathcalc/README.md) | Safe recursive-descent expression evaluator: +−×÷%^, functions & constants, no eval | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/mathcalc/) |
+| [WiFi 二维码生成器](projects/wifiqr/README.md) | Generate scannable WiFi config QR codes (WPA/WEP/open, hidden SSID) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/wifiqr/) |
+| [TOML ⇄ JSON 转换器](projects/toml/README.md) | Zero-dependency TOML ⇄ JSON: strings/ints/floats/dates/arrays/inline-tables/tables | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/toml/) |
 | [MIME 类型查询](projects/mime/README.md) | Look up MIME type by extension (or the reverse), with charset hints | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/mime/) |
 | [CIDR 子网计算](projects/cidr/README.md) | IPv4 subnet calculator: network/broadcast, mask, host range & count | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cidr/) |
 | [ULID 生成 / 解析](projects/ulid/README.md) | Generate / decode sortable 26-char ULIDs (Crockford Base32) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/ulid/) |

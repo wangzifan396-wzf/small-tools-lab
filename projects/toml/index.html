@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TOML ⇄ JSON 转换器 · Small Tools Lab</title>
+<style>
+  :root {
+    --bg: #f6f4f0; --panel: #ffffff; --ink: #2a2723; --muted: #8a8378;
+    --line: #e7e2d9; --accent: #c2683f; --accent-soft: #f6e7df; --ok: #3f9d6b;
+    --shadow: 0 8px 30px rgba(60, 50, 40, 0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16140f; --panel: #211e18; --ink: #ece7df; --muted: #9b9384;
+      --line: #322d25; --accent: #e08a5c; --accent-soft: #2f2620; --ok: #5fc28c;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 15px/1.6 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink); padding: 32px 16px; display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 920px; }
+  header { margin-bottom: 22px; }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.3px; }
+  h1 .ico { color: var(--accent); }
+  .sub { color: var(--muted); margin: 0; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px;
+  }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+  textarea {
+    width: 100%; min-height: 220px; resize: vertical; padding: 12px 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+  textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 14px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .seg button {
+    border: 0; background: transparent; color: var(--ink); padding: 9px 18px; cursor: pointer; font: inherit;
+    font-weight: 600; border-right: 1px solid var(--line);
+  }
+  .seg button:last-child { border-right: 0; }
+  .seg button.on { background: var(--accent); color: #fff; }
+  button.act {
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    padding: 9px 18px; border-radius: 10px; cursor: pointer; font: inherit; font-weight: 600; transition: .15s;
+  }
+  button.act:hover { border-color: var(--accent); color: var(--accent); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.primary:hover { filter: brightness(1.05); color: #fff; }
+  .err { color: #c0392b; font-size: 13px; min-height: 18px; margin-top: 8px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
+  .tip { color: var(--muted); font-size: 12px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="ico">📄</span> TOML ⇄ JSON 转换器</h1>
+    <p class="sub">纯前端零依赖 · 双向转换 TOML 与 JSON · 离线运行，数据不出本机</p>
+  </header>
+
+  <div class="card">
+    <div class="row">
+      <div class="seg" id="dir">
+        <button data-dir="toJson" class="on">TOML → JSON</button>
+        <button data-dir="toToml">JSON → TOML</button>
+      </div>
+      <button class="act primary" id="conv">转换</button>
+      <button class="act" id="swap">交换</button>
+      <button class="act" id="sample">示例</button>
+      <button class="act" id="copy">复制结果</button>
+    </div>
+    <div class="cols">
+      <div>
+        <label id="lblIn">TOML 输入</label>
+        <textarea id="in" placeholder="在此粘贴 TOML ..."></textarea>
+      </div>
+      <div>
+        <label id="lblOut">JSON 输出</label>
+        <textarea id="out" readonly placeholder="转换结果 ..."></textarea>
+      </div>
+    </div>
+    <div class="err" id="err"></div>
+    <p class="tip">支持：字符串（基础/字面/多行）、整数（十进制/十六/八/二、含下划线）、浮点、布尔、日期时间、数组、内联表、点号键、[表] 与 [[数组表]]。</p>
+  </div>
+</div>
+
+<script src="src/toml.js"></script>
+<script>
+  (function () {
+    var T = window.TOML;
+    var dirEl = document.getElementById('dir');
+    var inEl = document.getElementById('in');
+    var outEl = document.getElementById('out');
+    var lblIn = document.getElementById('lblIn');
+    var lblOut = document.getElementById('lblOut');
+    var errEl = document.getElementById('err');
+    var dir = 'toJson';
+
+    var SAMPLE_TOML = '[server]\nhost = "localhost"\nports = [ 8000, 8001 ]\n\n[database]\nenabled = true\nmeta = { cpu = 12.4, alive = true }\n\n[[products]]\nname = "Hammer"\n\n[[products]]\nname = "Nail"';
+    var SAMPLE_JSON = '{\n  "server": { "host": "localhost", "ports": [8000, 8001] },\n  "database": { "enabled": true, "meta": { "cpu": 12.4, "alive": true } },\n  "products": [ { "name": "Hammer" }, { "name": "Nail" } ]\n}';
+
+    dirEl.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      dir = b.getAttribute('data-dir');
+      Array.prototype.forEach.call(dirEl.children, function (x) { x.classList.toggle('on', x === b); });
+      lblIn.textContent = dir === 'toJson' ? 'TOML 输入' : 'JSON 输入';
+      lblOut.textContent = dir === 'toJson' ? 'JSON 输出' : 'TOML 输出';
+      convert();
+    });
+
+    function convert() {
+      errEl.textContent = '';
+      var src = inEl.value.trim();
+      if (!src) { outEl.value = ''; return; }
+      try {
+        if (dir === 'toJson') {
+          var obj = T.parse(src);
+          outEl.value = JSON.stringify(obj, null, 2);
+        } else {
+          var json = JSON.parse(src);
+          outEl.value = T.stringify(json);
+        }
+      } catch (e) {
+        errEl.textContent = e.message;
+        outEl.value = '';
+      }
+    }
+
+    document.getElementById('conv').addEventListener('click', convert);
+    document.getElementById('swap').addEventListener('click', function () {
+      var tmp = inEl.value; inEl.value = outEl.value; outEl.value = tmp;
+    });
+    document.getElementById('sample').addEventListener('click', function () {
+      inEl.value = dir === 'toJson' ? SAMPLE_TOML : SAMPLE_JSON; convert();
+    });
+    document.getElementById('copy').addEventListener('click', function () {
+      if (!outEl.value) return;
+      navigator.clipboard && navigator.clipboard.writeText(outEl.value);
+    });
+    inEl.addEventListener('input', convert);
+
+    inEl.value = SAMPLE_TOML;
+    convert();
+  })();
+</script>
+</body>
+</html>

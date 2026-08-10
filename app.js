@@ -572,6 +572,42 @@ const TOOLS = [
     featured: false,
   },
   {
+    id: "mathcalc",
+    name: "数学表达式计算器",
+    category: "browser",
+    label: "计算工具",
+    description:
+      "零依赖数学表达式求值：四则、取模、幂（右结合），sqrt/log/sin 等函数与 pi/e 常量，递归下降安全求值（不用 eval）。",
+    tech: "Browser · Math",
+    live: "projects/mathcalc/",
+    docs: "projects/mathcalc/README.md",
+    featured: false,
+  },
+  {
+    id: "wifiqr",
+    name: "WiFi 二维码生成器",
+    category: "browser",
+    label: "二维码",
+    description:
+      "生成可扫码连接的 WiFi 配置二维码：支持 WPA/WEP/开放网络与隐藏网络，自动转义特殊字符，复用内置二维码编码器。",
+    tech: "Browser · WiFi",
+    live: "projects/wifiqr/",
+    docs: "projects/wifiqr/README.md",
+    featured: false,
+  },
+  {
+    id: "toml",
+    name: "TOML ⇄ JSON 转换器",
+    category: "browser",
+    label: "格式转换",
+    description:
+      "零依赖 TOML 与 JSON 双向转换：覆盖字符串/整数/浮点/布尔/日期时间/数组/内联表/点号键/数组表，离线运行。",
+    tech: "Browser · TOML",
+    live: "projects/toml/",
+    docs: "projects/toml/README.md",
+    featured: false,
+  },
+  {
     id: "mime",
     name: "MIME 类型查询",
     category: "browser",

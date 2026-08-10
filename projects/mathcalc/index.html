@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>数学表达式计算器 · Small Tools Lab</title>
+<style>
+  :root {
+    --bg: #f6f4f0; --panel: #ffffff; --ink: #2a2723; --muted: #8a8378;
+    --line: #e7e2d9; --accent: #c2683f; --accent-soft: #f6e7df; --ok: #3f9d6b;
+    --shadow: 0 8px 30px rgba(60, 50, 40, 0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16140f; --panel: #211e18; --ink: #ece7df; --muted: #9b9384;
+      --line: #322d25; --accent: #e08a5c; --accent-soft: #2f2620; --ok: #5fc28c;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 15px/1.6 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink); padding: 32px 16px; display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 760px; }
+  header { margin-bottom: 22px; }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.3px; }
+  h1 .ico { color: var(--accent); }
+  .sub { color: var(--muted); margin: 0; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px;
+  }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+  textarea {
+    width: 100%; min-height: 64px; resize: vertical; padding: 12px 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    font: 600 18px/1.5 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+  textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 14px; }
+  button.act {
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    padding: 9px 18px; border-radius: 10px; cursor: pointer; font: inherit; font-weight: 600; transition: .15s;
+  }
+  button.act:hover { border-color: var(--accent); color: var(--accent); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.primary:hover { filter: brightness(1.05); color: #fff; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip {
+    border: 1px solid var(--line); background: var(--bg); color: var(--muted);
+    padding: 5px 11px; border-radius: 999px; cursor: pointer; font: 600 13px/1 monospace; transition: .15s;
+  }
+  .chip:hover { color: var(--accent); border-color: var(--accent); }
+  .result {
+    font: 700 30px/1.3 "SFMono-Regular", Consolas, monospace; word-break: break-all;
+    padding: 16px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); min-height: 30px;
+  }
+  .result.err { background: #fdecea; color: #c0392b; }
+  .meta { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+  .grid h3 { grid-column: 1 / -1; margin: 6px 0 2px; font-size: 14px; color: var(--ink); }
+  code { font-family: "SFMono-Regular", Consolas, monospace; background: var(--bg); padding: 1px 6px; border-radius: 6px; }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="ico">∑</span> 数学表达式计算器</h1>
+    <p class="sub">纯前端零依赖 · 安全的递归下降求值（不使用 eval）· 支持函数、常量与括号优先级</p>
+  </header>
+
+  <div class="card">
+    <label for="expr">表达式</label>
+    <textarea id="expr" placeholder="例如：2 * (3 + 4) ^ 2 / sqrt(49)">2 * (3 + 4) ^ 2 / sqrt(49)</textarea>
+    <div class="row">
+      <button class="act primary" id="calc">计算 (=)</button>
+      <button class="act" id="clear">清空</button>
+      <span class="meta">支持 <code>+ - * / % ^</code>，<code>^</code> 为右结合幂运算</span>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="card">
+    <label>结果</label>
+    <div class="result" id="result">—</div>
+    <div class="meta" id="meta"></div>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <h3>常量</h3>
+      <div><code>pi</code> 圆周率 ≈ 3.14159</div>
+      <div><code>e</code> 自然对数底 ≈ 2.71828</div>
+      <div><code>tau</code> 2π</div>
+      <div><code>phi</code> 黄金比例</div>
+      <h3>单参数函数</h3>
+      <div><code>sqrt cbrt abs floor ceil round sign</code></div>
+      <div><code>sin cos tan asin acos atan</code></div>
+      <div><code>ln log log2 exp trunc</code></div>
+      <div>（<code>log</code> = 以 10 为底）</div>
+      <h3>多参数函数</h3>
+      <div><code>min(...) max(...) pow(a,b)</code></div>
+      <div><code>atan2(y,x) hypot(x,y)</code></div>
+    </div>
+  </div>
+</div>
+
+<script src="src/mathcalc.js"></script>
+<script>
+  (function () {
+    var M = window.MathCalc;
+    var expr = document.getElementById('expr');
+    var result = document.getElementById('result');
+    var meta = document.getElementById('meta');
+    var chips = document.getElementById('chips');
+
+    // build insert chips
+    var inserts = ["pi", "e", "sqrt(", "pow(", "min(", "max(", "(", ")", "+", "-", "*", "/", "^"];
+    inserts.forEach(function (t) {
+      var b = document.createElement('button');
+      b.className = 'chip'; b.textContent = t;
+      b.addEventListener('click', function () {
+        var s = expr.selectionStart, e = expr.selectionEnd;
+        expr.value = expr.value.slice(0, s) + t + expr.value.slice(e);
+        expr.focus();
+        var p = s + t.length; expr.setSelectionRange(p, p);
+        render();
+      });
+      chips.appendChild(b);
+    });
+
+    function render() {
+      var src = expr.value.trim();
+      if (!src) { result.textContent = '—'; result.className = 'result'; meta.textContent = ''; return; }
+      try {
+        var val = M.evaluate(src);
+        result.textContent = M.format(val);
+        result.className = 'result';
+        meta.textContent = '结果类型：' + (typeof val === 'number' ? '数值' : val);
+      } catch (err) {
+        result.textContent = err.message;
+        result.className = 'result err';
+        meta.textContent = '';
+      }
+    }
+
+    document.getElementById('calc').addEventListener('click', render);
+    document.getElementById('clear').addEventListener('click', function () {
+      expr.value = ''; result.textContent = '—'; result.className = 'result'; meta.textContent = ''; expr.focus();
+    });
+    expr.addEventListener('input', render);
+    expr.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); render(); }
+    });
+    render();
+  })();
+</script>
+</body>
+</html>
