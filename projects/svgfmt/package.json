@@ -1,0 +1,11 @@
+{
+  "name": "svgfmt",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SVG pretty-printer and minifier, zero dependencies.",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": { "test": "node --test" },
+  "keywords": ["svg", "minify", "format", "optimize", "xml"],
+  "license": "MIT"
+}

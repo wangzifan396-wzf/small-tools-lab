@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>svgfmt · SVG 压缩 / 美化</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --border: #e7e4dd; --border-strong: #d8d4ca;
+    --text: #22211e; --text-2: #56534c; --muted: #8b877e;
+    --accent: #6a5acd; --accent-soft: #ece9f9; --ok: #3d8f61; --warn: #c0792b; --bad: #c0392b;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --border: #232b3a; --border-strong: #34415a;
+      --text: #e9edf5; --text-2: #aab3c6; --muted: #6e788e;
+      --accent: #9d8cff; --accent-soft: #1d1a2e; --ok: #5fd0a0; --warn: #f0b269; --bad: #ff8a7a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px;
+    display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 920px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  label { font-size: 13px; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+  button {
+    padding: 9px 16px; border-radius: var(--r); border: 1px solid transparent; cursor: pointer;
+    font-size: 14px; background: var(--accent); color: #fff;
+  }
+  button.ghost { background: transparent; color: var(--accent); border-color: var(--border-strong); }
+  textarea {
+    width: 100%; min-height: 180px; padding: 10px 12px; border-radius: var(--r);
+    border: 1px solid var(--border); background: var(--panel); color: var(--text);
+    font-family: var(--mono); font-size: 13px; resize: vertical;
+  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 680px){ .grid { grid-template-columns: 1fr; } }
+  .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 6px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; margin-top: 14px; }
+  .stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .stat { background: var(--accent-soft); border-radius: 10px; padding: 8px 12px; flex: 1; min-width: 110px; }
+  .stat .k { font-size: 12px; color: var(--muted); }
+  .stat .v { font-size: 15px; font-weight: 700; font-family: var(--mono); }
+  .err { color: var(--bad); font-size: 13px; margin-top: 8px; min-height: 18px; }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🪄 svgfmt · SVG 压缩 / 美化</h1>
+  <p class="sub">粘贴 SVG 源码，一键<strong>压缩</strong>（去注释、去冗余空白）或<strong>美化</strong>（缩进排版）。<strong>纯前端，零依赖，数据不出浏览器。</strong></p>
+
+  <div class="row">
+    <button id="minify">压缩</button>
+    <button id="format">美化</button>
+    <label>缩进 <input id="indent" type="text" value="  " maxlength="4" style="width:60px" /></label>
+    <button id="sample" class="ghost">载入示例</button>
+    <button id="copy" class="ghost">复制结果</button>
+  </div>
+  <div class="err" id="err"></div>
+
+  <div class="grid">
+    <div class="card">
+      <p class="label">输入（SVG 源码）</p>
+      <textarea id="input" placeholder="<svg>…</svg>"></textarea>
+    </div>
+    <div class="card">
+      <p class="label">输出</p>
+      <textarea id="output" readonly></textarea>
+      <div class="stat-row">
+        <div class="stat"><div class="k">输入字节</div><div class="v" id="inB">—</div></div>
+        <div class="stat"><div class="k">输出字节</div><div class="v" id="outB">—</div></div>
+        <div class="stat"><div class="k">节省</div><div class="v" id="saved">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot">SVG 格式化 · 零依赖 · 不上传任何数据</p>
+</div>
+
+<script src="src/index.js"></script>
+<script>
+  const T = window.SvgfmtTool;
+  const $ = (id) => document.getElementById(id);
+  const SAMPLE = '<svg   xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 10 10"><!-- a circle --><circle cx="5" cy="5" r="4" fill="#6a5acd"   /></svg>';
+  function stats() {
+    const inp = $('input').value;
+    const out = $('output').value;
+    const ib = new TextEncoder().encode(inp).length;
+    const ob = new TextEncoder().encode(out).length;
+    $('inB').textContent = ib;
+    $('outB').textContent = ob;
+    $('saved').textContent = ib > 0 ? Math.max(0, ib - ob) + ' B' : '—';
+  }
+  function run(kind) {
+    $('err').textContent = '';
+    const v = $('input').value.trim();
+    if (!v) { $('err').textContent = '请先粘贴 SVG 源码。'; return; }
+    if (!T.isSvg(v)) { $('err').textContent = '未识别到 <svg> 根元素，请检查输入。'; return; }
+    try {
+      $('output').value = kind === 'minify' ? T.minify(v) : T.format(v, $('indent').value);
+    } catch (e) { $('err').textContent = '处理失败：' + e.message; }
+    stats();
+  }
+  $('minify').addEventListener('click', () => run('minify'));
+  $('format').addEventListener('click', () => run('format'));
+  $('sample').addEventListener('click', () => { $('input').value = SAMPLE; run('minify'); });
+  $('copy').addEventListener('click', () => {
+    const t = $('output').value;
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(() => flash());
+    else flash();
+  });
+  function flash() { const b = $('copy'); const o = b.textContent; b.textContent = '已复制'; setTimeout(() => (b.textContent = o), 1000); }
+  $('input').addEventListener('input', stats);
+</script>
+</body>
+</html>

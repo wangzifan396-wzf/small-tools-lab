@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 93 focused tools across three categories (69 browser, 22 CLI, 2 local-AI)
-- 46 Node.js projects and 2 Python local-AI experiments with 709 focused project-level tests
+- 105 focused tools across three categories (81 browser, 22 CLI, 2 local-AI)
+- 49 Node.js projects and 2 Python local-AI experiments with 724 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (78)
+### Browser tools (81)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -105,6 +105,9 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [LoremGen](projects/lorem-ipsum/README.md) | Lorem Ipsum / 中文 placeholder generator | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/lorem-ipsum/) |
 | [MDView](projects/markdown-preview/README.md) | Lightweight Markdown preview (escaped + link-checked) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/markdown-preview/) |
 | [DiffLab](projects/diff-text/README.md) | Line-level LCS diff with inline char highlighting | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/diff-text/) |
+| [Passphrase](projects/passphrase/README.md) | Diceware passphrase generator with live entropy estimate | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/passphrase/) |
+| [SvgFmt](projects/svgfmt/README.md) | SVG minify (strip comments/whitespace) and pretty-print | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/svgfmt/) |
+| [NumWords](projects/numwords/README.md) | Spell integers as English words (negative & UK "and" supported) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/numwords/) |
 
 ### Developer CLIs (22)
 

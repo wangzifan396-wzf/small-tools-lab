@@ -1,0 +1,11 @@
+{
+  "name": "passphrase",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Diceware-style passphrase generator: high-entropy, memorable, offline.",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": { "test": "node --test" },
+  "keywords": ["passphrase", "diceware", "password", "security", "entropy"],
+  "license": "MIT"
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>numwords · 数字转英文单词</title>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #fff; --border: #e7e4dd; --border-strong: #d8d4ca;
+    --text: #22211e; --text-2: #56534c; --muted: #8b877e;
+    --accent: #6a5acd; --accent-soft: #ece9f9; --ok: #3d8f61; --warn: #c0792b; --bad: #c0392b;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --r: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0f14; --panel: #151922; --border: #232b3a; --border-strong: #34415a;
+      --text: #e9edf5; --text-2: #aab3c6; --muted: #6e788e;
+      --accent: #9d8cff; --accent-soft: #1d1a2e; --ok: #5fd0a0; --warn: #f0b269; --bad: #ff8a7a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; padding: 28px 16px;
+    display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 760px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .sub { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  label { font-size: 13px; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+  input[type=text], input[type=number] {
+    padding: 9px 11px; border-radius: var(--r); border: 1px solid var(--border);
+    background: var(--panel); color: var(--text); font-size: 14px; font-family: var(--mono);
+  }
+  input[type=number] { flex: 1; min-width: 200px; }
+  button {
+    padding: 9px 16px; border-radius: var(--r); border: 1px solid transparent; cursor: pointer;
+    font-size: 14px; background: var(--accent); color: #fff;
+  }
+  button.ghost { background: transparent; color: var(--accent); border-color: var(--border-strong); }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; margin-top: 14px; }
+  .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8px; }
+  .out { font-family: var(--mono); font-size: 18px; font-weight: 700; word-break: break-word; background: var(--accent-soft); border-radius: 10px; padding: 12px 14px; color: var(--text); }
+  .err { color: var(--bad); font-size: 13px; margin-top: 8px; min-height: 18px; }
+  .foot { color: var(--muted); font-size: 12px; margin-top: 18px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔢 numwords · 数字转英文单词</h1>
+  <p class="sub">把整数写成英文单词（如 <code>1234</code> → <code>one thousand, two hundred and thirty-four</code>）。<strong>纯前端，零依赖。</strong></p>
+
+  <div class="row">
+    <input id="value" type="number" value="1234" placeholder="输入整数…" />
+    <label><input id="and" type="checkbox" checked /> 英式 and</label>
+    <button id="go">转换</button>
+    <button id="copy" class="ghost">复制</button>
+  </div>
+  <div class="err" id="err"></div>
+
+  <div class="card">
+    <p class="label">结果</p>
+    <div class="out" id="out">—</div>
+  </div>
+
+  <p class="foot">支持负数与千位分隔 · 最大至 quadrillion · 零依赖</p>
+</div>
+
+<script src="src/index.js"></script>
+<script>
+  const T = window.NumwordsTool;
+  const $ = (id) => document.getElementById(id);
+  function render() {
+    $('err').textContent = '';
+    const v = $('value').value.trim();
+    if (v === '') { $('out').textContent = '—'; return; }
+    try {
+      $('out').textContent = T.toWords(v, { useAnd: $('and').checked });
+    } catch (e) {
+      $('err').textContent = '转换失败：' + e.message;
+      $('out').textContent = '—';
+    }
+  }
+  $('go').addEventListener('click', render);
+  $('value').addEventListener('input', render);
+  $('and').addEventListener('change', render);
+  $('copy').addEventListener('click', () => {
+    const t = $('out').textContent;
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(() => flash());
+    else flash();
+  });
+  function flash() { const b = $('copy'); const o = b.textContent; b.textContent = '已复制'; setTimeout(() => (b.textContent = o), 1000); }
+  render();
+</script>
+</body>
+</html>

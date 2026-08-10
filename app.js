@@ -1203,6 +1203,42 @@ const TOOLS = [
     docs: "projects/mcp-probe/README.md",
     featured: true,
   },
+  {
+    id: "passphrase",
+    name: "Passphrase",
+    category: "browser",
+    label: "助记词口令生成",
+    description:
+      "Diceware 风格助记词口令：从 256 词表随机拼词，易记且高熵，实时显示熵估值与强度，纯浏览器零依赖。",
+    tech: "Browser · Security",
+    live: "projects/passphrase/",
+    docs: "projects/passphrase/README.md",
+    featured: false,
+  },
+  {
+    id: "svgfmt",
+    name: "SvgFmt",
+    category: "browser",
+    label: "SVG 压缩 / 美化",
+    description:
+      "SVG 源码一键压缩（去注释、去冗余空白）或美化（缩进排版），实时显示字节节省，纯浏览器零依赖。",
+    tech: "Browser · SVG",
+    live: "projects/svgfmt/",
+    docs: "projects/svgfmt/README.md",
+    featured: false,
+  },
+  {
+    id: "numwords",
+    name: "NumWords",
+    category: "browser",
+    label: "数字转英文单词",
+    description:
+      "把整数写成英文单词（如 1234 → one thousand, two hundred and thirty-four），支持负数与英式 and，纯浏览器零依赖。",
+    tech: "Browser · Number",
+    live: "projects/numwords/",
+    docs: "projects/numwords/README.md",
+    featured: false,
+  },
 ];
 
 const CATEGORY_NAMES = {

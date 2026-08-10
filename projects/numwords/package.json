@@ -1,0 +1,11 @@
+{
+  "name": "numwords",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Convert integers to English words, zero dependencies.",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": { "test": "node --test" },
+  "keywords": ["number", "words", "spell", "english", "convert"],
+  "license": "MIT"
+}
