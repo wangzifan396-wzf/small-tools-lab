@@ -1,29 +1,39 @@
-# SQL 格式化 / 压缩
+# SQL Formatter
 
-零依赖、纯前端的 SQL 排版工具。把挤在一行的 SQL 整理成易读的缩进结构，或压缩成单行。
+A lexically safe, zero-dependency SQL whitespace formatter and minifier for common SQL syntax.
 
-## 功能
-- **格式化**：关键字大写（`SELECT` / `FROM` / `WHERE` …），主子句（`SELECT` / `FROM` / `WHERE` / `JOIN` / `GROUP BY` / `ORDER BY` …）各占一行，`AND` / `OR` 条件二次缩进。
-- **压缩**：去除多余空白、统一 `,` `;` `=` 两侧空格。
-- **安全**：字符串字面量（`'...'` / `"..."` / `` `...` ``）与注释（`--` / `/* */`）原样保留，不会被误当成关键字大写。
-- 数据完全在浏览器本机处理，不上传任何内容。
+[Open the browser tool](https://wangzifan396-wzf.github.io/small-tools-lab/projects/sqlfmt/) · [Security notes](SECURITY.md)
 
-## 用法
-打开 `index.html`，粘贴 SQL，点「格式化」或「压缩」。
+## Lexer coverage
 
-## 示例
-输入：
-```sql
-select id,name from users where age>18 and active=1 order by name desc
+- SQL-standard doubled single and double quotes
+- MySQL backtick and SQL Server bracket identifiers
+- PostgreSQL dollar-quoted strings
+- Positional and named placeholders (`?`, `$1`, `:name`, `@name`)
+- Line comments, nested block comments, and optimizer hints
+- JSON, cast, comparison, concatenation, and assignment operators
+- Unicode identifiers, numeric literals, and balanced-parenthesis validation
+
+Formatting is deterministic and idempotent. Keyword case and indentation are configurable. Minification preserves comments by default because hints and executable comments may affect behavior; removal requires an explicit option.
+
+## Library API
+
+```js
+import { formatSql, minifySql, tokenizeSql } from './src/index.js';
+
+formatSql('select id,name from users where active=true');
+formatSql(sql, { keywordCase: 'lower', indent: 4 });
+minifySql(sql, { removeComments: false });
+tokenizeSql(sql);
 ```
-格式化后：
-```sql
-SELECT id,name
-FROM users
-WHERE age>18
-  AND active=1
-ORDER BY name DESC
-```
 
-## 实现
-`src/sqlfmt.js`，UMD 模块，导出 `format` 与 `minify`，无第三方依赖。`node --test` 覆盖关键字、连接、字符串保护与压缩用例。
+TypeScript declarations and compatibility aliases (`format`, `minify`) are included.
+
+This is a whitespace formatter, not a dialect-complete parser or validator. Review vendor-specific procedural SQL and production migrations after formatting.
+
+## Develop
+
+```bash
+npm test
+npm start -- 4173
+```

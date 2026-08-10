@@ -445,8 +445,8 @@ const TOOLS = [
     category: "browser",
     label: "代码格式化",
     description:
-      "零依赖 SQL 排版：关键字大写、子句分行、AND/OR 缩进，支持美化与压缩，字符串与注释原样保留。",
-    tech: "Browser · SQL",
+      "词法安全的 SQL 排版与压缩，隔离字符串、标识符、占位符和嵌套注释，并检测括号错误。",
+    tech: "Browser · SQL · Library",
     live: "projects/sqlfmt/",
     docs: "projects/sqlfmt/README.md",
     featured: false,
@@ -457,8 +457,8 @@ const TOOLS = [
     category: "browser",
     label: "代码转换",
     description:
-      "把 curl 命令一键转成 JavaScript fetch 与 Python requests，解析 -X/-H/-d/-u/-b/-k 等参数，纯浏览器零依赖。",
-    tech: "Browser · Converter",
+      "严格解析 curl 并生成 Fetch / Python requests，拒绝 shell 执行、重定向和本地文件读取。",
+    tech: "Browser · HTTP · Library",
     live: "projects/curlcon/",
     docs: "projects/curlcon/README.md",
     featured: false,
@@ -625,8 +625,8 @@ const TOOLS = [
     category: "browser",
     label: "网络计算",
     description:
-      "IPv4 子网计算器：网络/广播地址、掩码、可用主机范围与数量，正确处理 /31、/32 边界，纯浏览器零依赖。",
-    tech: "Browser · Network",
+      "严格 IPv4 / IPv6 子网计算、BigInt 地址计数、包含与重叠检查，以及有界网段拆分。",
+    tech: "Browser · IPv6 · Library",
     live: "projects/cidr/",
     docs: "projects/cidr/README.md",
     featured: false,
@@ -637,8 +637,8 @@ const TOOLS = [
     category: "browser",
     label: "ID 生成",
     description:
-      "生成按时间排序的 26 字符 ULID（Crockford Base32），可解析时间戳与随机熵，纯浏览器零依赖。",
-    tech: "Browser · ID",
+      "规范严格的 ULID 生成与解析，强制 Web Crypto，并支持时钟回拨下仍有序的单调模式。",
+    tech: "Browser · Crypto · Library",
     live: "projects/ulid/",
     docs: "projects/ulid/README.md",
     featured: false,

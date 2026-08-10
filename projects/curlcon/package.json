@@ -1,0 +1,15 @@
+{
+  "name": "curlcon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Strict zero-dependency curl command parser and converter for Fetch and Python requests.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "types": "types/index.d.ts",
+  "exports": { ".": { "types": "./types/index.d.ts", "import": "./src/index.js" } },
+  "main": "src/index.js",
+  "files": ["src", "types", "index.html", "playground", "README.md", "SECURITY.md"],
+  "scripts": { "test": "node --test", "start": "node playground/serve.js" },
+  "keywords": ["curl", "fetch", "requests", "converter", "http"],
+  "license": "MIT"
+}

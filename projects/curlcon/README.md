@@ -1,24 +1,33 @@
-# curl → 代码
+# curlcon
 
-零依赖、纯前端的 curl 转换器。把一段 `curl` 命令一键转成 JavaScript（`fetch`）与 Python（`requests`）代码，方便直接粘贴进项目。
+A strict, zero-dependency curl command parser and converter for JavaScript Fetch and Python requests. It parses text only and never invokes a shell or executes the command.
 
-## 支持的 curl 参数
-- `-X` / `--request`：请求方法（GET / POST / PUT / DELETE …）
-- `-H` / `--header`：请求头（自动识别 `Content-Type` / `Authorization` / `Cookie`…）
-- `-d` / `--data` / `--data-raw` / `--data-binary` / `--data-urlencode`：请求体（JSON 自动 `JSON.stringify`）
-- `-u` / `--user`：Basic 认证，转为 `Authorization: Basic base64(...)`
-- `-b` / `--cookie`：Cookie，转为请求头
-- `-k` / `--insecure`：忽略证书校验
-- `--url`：显式 URL
+[Open the browser tool](https://wangzifan396-wzf.github.io/small-tools-lab/projects/curlcon/) · [Security notes](SECURITY.md)
 
-## 输出
-- **JavaScript**：`fetch(url, { method, headers, body })` + `await` 调用骨架。
-- **Python**：`requests.request(method, url, headers=, json=/data=, auth=)`。
+## Supported surface
 
-数据完全在浏览器本机解析，不上传任何内容。
+- Shell-style single/double quotes, escaped spaces, empty arguments, and line continuations
+- Methods, headers, duplicate headers, cookies, Basic auth, user agent, referer, and timeouts
+- Raw, JSON, URL-encoded, query-string, and text-only multipart form data
+- Redirect and insecure-TLS intent with target-specific warnings
+- Short attached values such as `-XPOST` and combined switches such as `-sSL`
 
-## 用法
-打开 `index.html`，粘贴 curl 命令，点「转换」，切换标签页复制 JS 或 Python。
+curlcon deliberately rejects pipelines, redirects, command substitution, local-file data/header/cookie/config flags, proxies, certificates, keys, and file uploads. Those operations cannot be represented faithfully without reading local state or changing routing.
 
-## 实现
-`src/curlcon.js`，UMD 模块，导出 `parse` / `convert` / `toJs` / `toPython`，无第三方依赖。`node --test` 覆盖方法 / URL / 请求头 / 认证 / JSON 体解析。
+## Library API
+
+```js
+import { convertCurl, parseCurl, toFetch, toPythonRequests, tokenizeCurl } from './src/index.js';
+
+const parsed = parseCurl("curl -H 'Accept: application/json' https://api.example.com");
+const { fetch, python, request } = convertCurl('curl -L https://example.com');
+```
+
+Generated source quotes all user-controlled values. Shell variables such as `$TOKEN` remain literal and produce a warning; this tool never reads the shell environment. TypeScript declarations are included.
+
+## Develop
+
+```bash
+npm test
+npm start -- 4173
+```

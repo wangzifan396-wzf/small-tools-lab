@@ -1,70 +1,14 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SQL 格式化 / 压缩</title>
-<style>
-  :root { --bg:#0f1115; --panel:#171a21; --line:#262b36; --fg:#e7eaf0; --muted:#9aa4b2; --accent:#6ea8fe; }
-  * { box-sizing:border-box; }
-  body { margin:0; font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
-    background:var(--bg); color:var(--fg); padding:28px; }
-  h1 { font-size:20px; margin:0 0 4px; }
-  .sub { color:var(--muted); margin:0 0 18px; font-size:13.5px; }
-  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  @media (max-width:760px){ .grid { grid-template-columns:1fr; } }
-  label { display:block; color:var(--muted); font-size:12.5px; margin:0 0 6px; }
-  textarea { width:100%; min-height:260px; resize:vertical; background:var(--panel); color:var(--fg);
-    border:1px solid var(--line); border-radius:10px; padding:12px; font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
-  .bar { display:flex; gap:10px; margin:14px 0; flex-wrap:wrap; }
-  button { background:var(--accent); color:#0b1020; border:0; border-radius:9px; padding:9px 16px; font-weight:600; cursor:pointer; font-size:14px; }
-  button.ghost { background:transparent; color:var(--fg); border:1px solid var(--line); font-weight:500; }
-  .out { position:relative; }
-  .copy { position:absolute; top:10px; right:10px; padding:5px 11px; font-size:12px; }
-  pre { margin:0; white-space:pre-wrap; word-break:break-word; }
-  .hint { color:var(--muted); font-size:12px; margin-top:6px; }
-</style>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; connect-src 'none'">
+  <title>SQL Formatter · Small Tools Lab</title>
+  <style>
+    :root{--bg:#f4f5f3;--card:#fff;--text:#20231f;--muted:#6d746c;--line:#dfe3dc;--accent:#28756d;--bad:#b3261e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,"Microsoft YaHei",sans-serif}.wrap{max-width:1120px;margin:auto;padding:32px 20px 60px}h1{margin:0;font-size:26px}.sub{color:var(--muted);margin:5px 0 22px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:13px}button,select{border:1px solid var(--line);border-radius:8px;background:#fff;padding:8px 12px}button{cursor:pointer}button.primary{background:var(--accent);border-color:var(--accent);color:#fff}.toolbar label{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:5px}.toolbar .push{margin-left:auto}.grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.grid label{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}textarea{width:100%;min-height:480px;border:1px solid var(--line);border-radius:9px;background:#fbfcfa;color:var(--text);padding:11px;font:13px/1.55 ui-monospace,monospace;resize:vertical}.error{min-height:25px;color:var(--bad);margin-top:8px}.note{color:var(--muted);font-size:13px}@media(max-width:760px){.grid{grid-template-columns:1fr}.toolbar .push{margin-left:0}}
+  </style>
 </head>
-<body>
-  <h1>SQL 格式化 / 压缩</h1>
-  <p class="sub">零依赖 · 关键字大写、子句分行、AND/OR 缩进；字符串与注释原样保留。数据不出本机。</p>
-  <div class="grid">
-    <div>
-      <label>输入 SQL</label>
-      <textarea id="in" placeholder="select id,name from users where age>18 and active=1 order by name desc"></textarea>
-    </div>
-    <div class="out">
-      <label>输出</label>
-      <textarea id="out" readonly placeholder="结果将显示在这里"></textarea>
-      <button class="ghost copy" id="copy">复制</button>
-    </div>
-  </div>
-  <div class="bar">
-    <button id="fmt">格式化</button>
-    <button class="ghost" id="min">压缩</button>
-    <button class="ghost" id="clear">清空</button>
-    <span class="hint" id="stat"></span>
-  </div>
-  <script src="src/sqlfmt.js"></script>
-  <script>
-    var $ = function (id) { return document.getElementById(id); };
-    function run(fn) {
-      var src = $('in').value;
-      if (!src.trim()) { $('out').value = ''; $('stat').textContent = ''; return; }
-      try {
-        var res = fn(src);
-        $('out').value = res;
-        $('stat').textContent = res.length + ' 字符';
-      } catch (e) { $('out').value = '错误：' + e.message; }
-    }
-    $('fmt').onclick = function () { run(SqlFmt.format); };
-    $('min').onclick = function () { run(SqlFmt.minify); };
-    $('clear').onclick = function () { $('in').value = ''; $('out').value = ''; $('stat').textContent = ''; };
-    $('copy').onclick = function () {
-      navigator.clipboard.writeText($('out').value).then(function () { $('copy').textContent = '已复制'; setTimeout(function(){ $('copy').textContent='复制'; }, 1200); });
-    };
-    // 默认给个示例
-    $('in').value = "select u.id,u.name,count(o.id) as orders from users u left join orders o on u.id=o.user_id where u.active=1 group by u.id,u.name having count(o.id)>0 order by orders desc limit 20";
-  </script>
-</body>
+<body><main class="wrap"><h1>SQL Formatter</h1><p class="sub">词法安全的通用 SQL 排版与压缩。字符串、标识符、占位符和注释保持隔离。</p>
+  <section class="card"><div class="toolbar"><button class="primary" id="format">格式化</button><button id="minify">压缩</button><button id="swap">输出作为输入</button><button id="sample">示例</button><label>关键字<select id="keyword-case"><option value="upper">UPPER</option><option value="lower">lower</option><option value="preserve">保持</option></select></label><label>缩进<select id="indent"><option>2</option><option>4</option></select></label><label><input id="remove-comments" type="checkbox"> 压缩时删除注释</label><button class="push" id="copy">复制</button></div><div class="grid"><div><label for="input">输入</label><textarea id="input" spellcheck="false"></textarea></div><div><label for="output">输出</label><textarea id="output" readonly spellcheck="false"></textarea></div></div><div id="error" class="error" role="alert"></div><p class="note">这是空白格式化器，不执行 SQL，也不替代方言级语法验证。删除注释是显式选项，因为 optimizer hint 可能影响语义。</p></section>
+</main><script type="module" src="./src/app.js"></script></body>
 </html>

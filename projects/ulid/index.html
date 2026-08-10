@@ -1,69 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ULID 生成/解析 · Small Tools Lab</title>
-<style>
-  :root { --bg:#f6f4f0;--panel:#fff;--ink:#2a2723;--muted:#8a8378;--line:#e7e2d9;--accent:#c2683f;--accent-soft:#f6e7df;--err:#c0392b;--shadow:0 8px 30px rgba(60,50,40,.10); }
-  @media (prefers-color-scheme: dark){ :root{ --bg:#16140f;--panel:#211e18;--ink:#ece7df;--muted:#9b9384;--line:#322d25;--accent:#e08a5c;--accent-soft:#2f2620;--shadow:0 8px 30px rgba(0,0,0,.4);} }
-  *{box-sizing:border-box;} body{margin:0;font:15px/1.6 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);padding:32px 16px;display:flex;justify-content:center;}
-  .wrap{width:100%;max-width:720px;} header{margin-bottom:22px;} h1{font-size:26px;margin:0 0 6px;} h1 .ico{color:var(--accent);} .sub{color:var(--muted);margin:0;}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px;}
-  label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600;} input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:15px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;} input:focus{outline:2px solid var(--accent-soft);border-color:var(--accent);}
-  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center;}
-  button.act{border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:9px 16px;border-radius:10px;cursor:pointer;font:inherit;font-weight:600;transition:.15s;} button.act:hover{border-color:var(--accent);color:var(--accent);} button.primary{background:var(--accent);color:#fff;border-color:var(--accent);} button.primary:hover{filter:brightness(1.05);color:#fff;}
-  .err{color:var(--err);font-size:13px;min-height:18px;margin-top:8px;} .meta{color:var(--muted);font-size:13px;} .meta b{color:var(--ink);}
-  .out{white-space:pre-wrap;word-break:break-all;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-height:48px;}
-</style>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; connect-src 'none'">
+  <title>ULID Toolkit · Small Tools Lab</title>
+  <style>
+    :root{--bg:#f5f6f3;--card:#fff;--text:#20231f;--muted:#6c746b;--line:#dfe4dc;--accent:#21766f;--bad:#b3261e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,"Microsoft YaHei",sans-serif}.wrap{max-width:860px;margin:auto;padding:32px 20px 60px}h1{margin:0;font-size:26px}.sub{color:var(--muted);margin:5px 0 22px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px;margin-bottom:14px}label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}input[type=text],input[type=number]{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fbfcfa;font:14px ui-monospace,monospace}.row{display:flex;gap:9px;align-items:end;flex-wrap:wrap}.row>label:first-child{flex:1;min-width:240px}.check{color:var(--text);white-space:nowrap;margin:0 5px 9px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{border:1px solid var(--line);border-radius:8px;background:#fff;padding:9px 14px;cursor:pointer}button.primary{background:var(--accent);border-color:var(--accent);color:#fff}.value{margin-top:14px;border:1px solid var(--line);border-radius:9px;background:#f1f5f2;padding:12px;word-break:break-all;font:17px ui-monospace,monospace}.details{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}.details div{display:grid;grid-template-columns:130px 1fr;gap:10px}.details span{color:var(--muted)}.details code{word-break:break-all}.error{min-height:24px;color:var(--bad);margin-top:8px}
+  </style>
 </head>
-<body>
-<div class="wrap">
-  <header><h1><span class="ico">🆔</span> ULID 生成 / 解析</h1><p class="sub">Crockford Base32 · 按时间排序 · 零依赖 · 本地运行</p></header>
-  <div class="card">
-    <label>生成 ULID（基于当前时间，可指定时间戳）</label>
-    <input id="gen-time" placeholder="留空=现在；或填毫秒时间戳，如 1700000000000" />
-    <div class="row">
-      <button class="act primary" id="gen">生成</button>
-      <span class="meta" id="gen-meta">—</span>
-      <button class="act" id="gen-copy">复制</button>
-    </div>
-    <div class="out" id="gen-out" style="margin-top:12px">—</div>
-  </div>
-  <div class="card">
-    <label for="dec-in">解析 ULID</label>
-    <input id="dec-in" placeholder="粘贴一个 ULID，如 01ARZ3NDEKTSV4RRFFQ69G5FAV" />
-    <div class="row">
-      <button class="act primary" id="dec">解析</button>
-    </div>
-    <div class="err" id="err"></div>
-    <div class="out" id="dec-out" style="margin-top:12px">—</div>
-  </div>
-</div>
-<script src="src/ulid.js"></script>
-<script>
-  (function(){
-    var U=window.UlidTool, genOut=document.getElementById('gen-out'), genMeta=document.getElementById('gen-meta'),
-        decIn=document.getElementById('dec-in'), decOut=document.getElementById('dec-out'), err=document.getElementById('err');
-    document.getElementById('gen').addEventListener('click',function(){
-      var tv=document.getElementById('gen-time').value.trim();
-      var t=tv?Number(tv):undefined;
-      if(tv&&(!Number.isFinite(t)||t<0)){genMeta.textContent='时间戳无效';return;}
-      var u=(tv?U.generate(t):U.generate());
-      genOut.textContent=u;
-      var d=U.decode(u);
-      genMeta.innerHTML='时间戳 <b>'+d.timestamp+'</b> · '+d.time.toISOString();
-    });
-    document.getElementById('gen-copy').addEventListener('click',function(){if(genOut.textContent!=='—'&&navigator.clipboard)navigator.clipboard.writeText(genOut.textContent);});
-    document.getElementById('dec').addEventListener('click',function(){
-      err.textContent='';decOut.textContent='—';
-      try{
-        var d=U.decode(decIn.value.trim());
-        decOut.textContent='ULID: '+d.ulid+'\n时间戳(ms): '+d.timestamp+'\n时间(UTC): '+d.time.toISOString()+'\n随机熵(hex): '+d.randomness;
-      }catch(e){err.textContent=e.message;}
-    });
-    document.getElementById('gen').click();
-  })();
-</script>
-</body>
+<body><main class="wrap"><h1>ULID Toolkit</h1><p class="sub">规范严格的 ULID 生成与解析，使用 Web Crypto，并支持单调排序模式。</p>
+  <section class="card"><div class="row"><label>时间戳（毫秒，留空使用当前时间）<input id="timestamp" type="number" min="0" max="281474976710655" placeholder="Date.now()"></label><label class="check"><input id="monotonic" type="checkbox" checked> 单调模式</label></div><div class="actions"><button class="primary" id="generate">生成</button><button id="copy">复制</button></div><div class="value" id="generated" aria-live="polite"></div></section>
+  <section class="card"><label for="decode-input">解析 ULID</label><input id="decode-input" type="text" maxlength="26" spellcheck="false"><div class="actions"><button class="primary" id="decode">解析</button></div><div class="details"><div><span>Canonical</span><code id="canonical"></code></div><div><span>Timestamp</span><code id="decoded-time"></code></div><div><span>Randomness (hex)</span><code id="randomness"></code></div></div></section><div class="error" id="error" role="alert"></div>
+</main><script type="module" src="./src/app.js"></script></body>
 </html>

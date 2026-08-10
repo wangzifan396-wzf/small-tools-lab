@@ -1,0 +1,15 @@
+{
+  "name": "cidr-toolkit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Strict zero-dependency IPv4 and IPv6 CIDR parsing, calculation, containment, overlap, and splitting.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "types": "types/index.d.ts",
+  "exports": { ".": { "types": "./types/index.d.ts", "import": "./src/index.js" } },
+  "main": "src/index.js",
+  "files": ["src", "types", "index.html", "playground", "README.md", "SECURITY.md"],
+  "scripts": { "test": "node --test", "start": "node playground/serve.js" },
+  "keywords": ["cidr", "ipv4", "ipv6", "subnet", "network"],
+  "license": "MIT"
+}

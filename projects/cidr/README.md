@@ -1,19 +1,35 @@
-# CIDR 子网计算
+# CIDR Toolkit
 
-零依赖、可离线运行的 IPv4 子网计算器。输入 `IP/前缀` 即给出网段、掩码与可用主机信息。
+A strict, zero-dependency IPv4 and IPv6 CIDR library for parsing, subnet calculation, containment, overlap detection, and bounded subnet splitting.
 
-## 功能
-- 网络地址 / 广播地址
-- 子网掩码、通配符掩码
-- 首 / 末可用主机、主机范围
-- 地址总数、可用主机数（正确处理 /31、/32 边界）
+[Open the browser tool](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cidr/) · [Security notes](SECURITY.md)
 
-## 用法
-打开 `index.html`，输入如 `192.168.1.0/24` 或 `10.0.0.4/30` 即时计算；非法输入会给出明确错误。
+## Highlights
 
-## 实现
-- `src/cidr.js`：UMD 模块，导出 `calc / parse / ipToLong / longToIp / isValidIp`
-- `tests/cidr.test.js`：5 个用例（/24、/30、/32、网段对齐、非法输入）
+- Strict IPv4 decimal parsing, including rejection of ambiguous leading-zero octets
+- Compressed IPv6, embedded IPv4 tails, and RFC 5952-style canonical output
+- Exact 128-bit network arithmetic and address counts with `BigInt`
+- Correct IPv4 `/31` point-to-point and `/32` host-route behavior
+- IPv6-aware containment and overlap checks
+- Deterministic subnet splitting capped at 65,536 results per call
 
-## 注意
-仅支持 IPv4；不支持 IPv6。
+## Library API
+
+```js
+import { calculateCidr, contains, overlaps, parseAddress, splitCidr } from './src/index.js';
+
+calculateCidr('2001:db8:abcd:12::1/64');
+contains('10.0.0.0/8', '10.20.30.40');
+overlaps('192.168.1.0/24', '192.168.1.128/25');
+splitCidr('192.168.0.0/24', 26);
+parseAddress('::ffff:192.0.2.1');
+```
+
+TypeScript declarations and the compatibility aliases `calc`, `parse`, and `isValidIp` are included. IPv6 zone identifiers are intentionally rejected because they are interface-scoped rather than part of a portable CIDR.
+
+## Develop
+
+```bash
+npm test
+npm start -- 4173
+```
