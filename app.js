@@ -1251,6 +1251,18 @@ const TOOLS = [
     docs: "projects/jsonpath/README.md",
     featured: false,
   },
+  {
+    id: "openapi-lab",
+    name: "OpenAPI Lab",
+    category: "browser",
+    label: "本地 API 契约浏览与代码生成",
+    description:
+      "导入 OpenAPI 3.0/3.1 JSON 或 YAML，检查结构、浏览接口，并生成带参数、请求体和认证占位符的 curl、Fetch 与 Python 代码。",
+    tech: "Browser · OpenAPI · Local-first",
+    live: "projects/openapi-lab/",
+    docs: "projects/openapi-lab/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {

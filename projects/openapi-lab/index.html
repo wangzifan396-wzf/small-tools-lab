@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Inspect OpenAPI 3 documents and generate request code locally.">
+  <meta name="theme-color" content="#f3f2ed">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>OpenAPI Lab · Local API explorer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="src/core.js" defer></script>
+  <script type="module" src="src/app.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#workspace">Skip to workspace</a>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">API</span><span>OpenAPI Lab</span></div>
+    <div class="top-actions"><span class="privacy">LOCAL ONLY</span><a class="icon-button" href="README.md">Docs</a><button class="icon-button" id="theme-toggle" type="button" aria-label="Toggle theme">Theme</button></div>
+  </header>
+  <main class="layout" id="workspace">
+    <section class="input-pane" aria-labelledby="source-title">
+      <div class="section-head"><div><span class="step">01 / SOURCE</span><h1 id="source-title">API description</h1></div><div class="toolbar"><label class="button" for="file">Open file</label><input id="file" type="file" accept=".json,.yaml,.yml,application/json,application/yaml,text/yaml" hidden><button class="button" id="sample" type="button">Sample</button></div></div>
+      <div class="drop-zone" id="drop-zone"><textarea class="editor" id="source" aria-label="OpenAPI JSON or YAML" spellcheck="false"></textarea></div>
+      <span class="source-status" id="source-status" role="status"></span>
+      <div class="input-footer"><span class="hint">OpenAPI 3.0 / 3.1 · JSON or safe YAML subset · 5 MB max</span><button class="button primary" id="analyze" type="button">Analyze</button></div>
+    </section>
+    <section class="workspace">
+      <div class="summary" aria-label="API summary">
+        <div class="api"><span>API</span><strong id="api-title">No document</strong><small id="api-version">-</small></div>
+        <div><span>OpenAPI</span><strong id="spec-version">-</strong></div><div><span>Operations</span><strong id="operation-count">0</strong></div><div><span>Errors</span><strong id="error-count">0</strong></div><div><span>Warnings</span><strong id="warning-count">0</strong></div>
+      </div>
+      <section class="issues-wrap" aria-labelledby="issues-title"><div class="issues-heading" id="issues-title">Validation findings</div><ul class="issues" id="issues"></ul><div class="empty" id="issue-empty">No structural findings</div></section>
+      <div class="main-grid">
+        <section class="catalog" aria-label="Operations">
+          <div class="catalog-head"><input class="search" id="search" type="search" placeholder="Search operation, path, or tag" aria-label="Search operations"><div class="filters" id="methods"><button class="filter" data-method="all" aria-pressed="true">All</button><button class="filter" data-method="GET" aria-pressed="false">GET</button><button class="filter" data-method="POST" aria-pressed="false">POST</button><button class="filter" data-method="PUT" aria-pressed="false">PUT</button><button class="filter" data-method="PATCH" aria-pressed="false">PATCH</button><button class="filter" data-method="DELETE" aria-pressed="false">DELETE</button></div></div>
+          <div class="operations" id="operations"></div><div class="empty" id="operation-empty" hidden>No matching operations</div>
+        </section>
+        <section class="detail-panel" aria-label="Operation detail and code">
+          <div class="detail" id="detail"><div class="blank-state"><strong>Select an operation</strong><span>Analyze an OpenAPI document to inspect endpoints.</span></div></div>
+          <div class="code-panel"><div class="code-head"><div class="tabs" id="language-tabs" role="tablist" aria-label="Generated language"><button class="tab" data-language="curl" role="tab" aria-selected="true">curl</button><button class="tab" data-language="fetch" role="tab" aria-selected="false">Fetch</button><button class="tab" data-language="python" role="tab" aria-selected="false">Python</button></div><button class="button" id="copy" type="button">Copy</button></div><pre id="code"># Generated request code appears here</pre><div class="code-warnings" id="code-warnings"></div></div>
+        </section>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

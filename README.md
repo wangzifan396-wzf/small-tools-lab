@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 106 focused tools across three categories (82 browser, 22 CLI, 2 local-AI)
-- 63 Node.js projects and 2 Python local-AI experiments with 808 focused project-level tests
+- 107 focused tools across three categories (83 browser, 22 CLI, 2 local-AI)
+- 64 Node.js projects and 2 Python local-AI experiments with 829 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (82)
+### Browser tools (83)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -109,6 +109,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [SvgFmt](projects/svgfmt/README.md) | SVG minify (strip comments/whitespace) and pretty-print | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/svgfmt/) |
 | [NumWords](projects/numwords/README.md) | Spell integers as English words (negative & UK "and" supported) | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/numwords/) |
 | [JSONPath Explorer](projects/jsonpath/README.md) | Query JSON properties, indexes, wildcards, and recursive paths without eval | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/jsonpath/) |
+| [OpenAPI Lab](projects/openapi-lab/README.md) | Validate OpenAPI 3 contracts, browse operations, and generate curl/Fetch/Python requests locally | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/openapi-lab/) |
 
 ### Developer CLIs (22)
 

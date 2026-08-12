@@ -1,0 +1,11 @@
+{
+  "name": "openapi-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local OpenAPI 3 explorer and request code generator.",
+  "type": "commonjs",
+  "main": "src/core.js",
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}
