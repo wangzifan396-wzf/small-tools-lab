@@ -9,7 +9,7 @@ const { TOOLS, matchesTool, toolCard } = require("../app.js");
 const root = path.resolve(__dirname, "..");
 
 test("catalog has unique projects and valid local targets", () => {
-  assert.equal(TOOLS.length, 107);
+  assert.equal(TOOLS.length, 108);
   assert.equal(new Set(TOOLS.map((tool) => tool.id)).size, TOOLS.length);
   for (const tool of TOOLS) {
     assert.equal(fs.existsSync(path.join(root, "projects", tool.id)), true, `missing project ${tool.id}`);
@@ -20,7 +20,7 @@ test("catalog has unique projects and valid local targets", () => {
 
 test("catalog covers all supported categories", () => {
   assert.deepEqual([...new Set(TOOLS.map((tool) => tool.category))].sort(), ["browser", "cli", "local-ai"]);
-  assert.equal(TOOLS.filter((tool) => tool.category === "browser").length, 83);
+  assert.equal(TOOLS.filter((tool) => tool.category === "browser").length, 84);
   assert.equal(TOOLS.filter((tool) => tool.category === "cli").length, 22);
   assert.equal(TOOLS.filter((tool) => tool.category === "local-ai").length, 2);
 });

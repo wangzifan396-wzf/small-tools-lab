@@ -1,0 +1,11 @@
+{
+  "name": "har-viewer-local",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local HAR 1.2 waterfall viewer, diagnostics, and sanitized export.",
+  "type": "commonjs",
+  "main": "src/core.js",
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

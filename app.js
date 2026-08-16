@@ -1263,6 +1263,18 @@ const TOOLS = [
     docs: "projects/openapi-lab/README.md",
     featured: true,
   },
+  {
+    id: "har-viewer",
+    name: "HAR Viewer",
+    category: "browser",
+    label: "Local network waterfall and diagnostics",
+    description:
+      "Inspect HAR 1.2 captures locally with request filters, phase waterfalls, performance findings, safe CSV output, and a redacted HAR export that strips bodies and secrets.",
+    tech: "Browser · HAR · Performance · Privacy",
+    live: "projects/har-viewer/",
+    docs: "projects/har-viewer/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {

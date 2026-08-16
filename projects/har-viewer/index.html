@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Inspect HAR network captures, diagnose performance, and export a safer redacted copy entirely in your browser.">
+  <meta name="theme-color" content="#101a22">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>HAR Viewer - Local network trace analyzer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="src/core.js" defer></script>
+  <script type="module" src="src/app.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#workspace">Skip to requests</a>
+  <header class="topbar">
+    <a class="brand" href="../../"><span class="brand-mark">HAR</span><span>HAR Viewer</span></a>
+    <div class="top-actions"><span class="privacy"><i></i> Local only</span><a class="small-button" href="README.md">Docs</a><button class="small-button" id="theme" type="button">Theme</button></div>
+  </header>
+
+  <main id="workspace">
+    <section class="import" id="import-panel" aria-labelledby="import-title">
+      <div class="import-copy">
+        <span class="eyebrow">Network forensics, without the upload</span>
+        <h1 id="import-title">See where the page spent its time.</h1>
+        <p>Open a HAR 1.2 capture to explore its request waterfall, failures, payload cost, caching, compression, and connection timings. Processing stays in this tab.</p>
+        <div class="import-actions"><label class="button primary" for="file">Open HAR file</label><input id="file" type="file" accept=".har,application/json" hidden><button class="button" id="sample" type="button">Try a sample</button></div>
+        <span class="limit">HAR / JSON up to 25 MB. Files are never transmitted.</span>
+      </div>
+      <button class="drop-zone" id="drop-zone" type="button">
+        <span class="drop-icon" aria-hidden="true">↓</span><strong>Drop a capture here</strong><small>or click to choose a .har file</small>
+      </button>
+    </section>
+
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+
+    <section class="dashboard" id="dashboard" hidden>
+      <div class="file-bar"><div><span class="eyebrow">Capture</span><strong id="file-name">-</strong><small id="capture-meta">-</small></div><div class="export-actions"><button class="button" id="new-file" type="button">Open another</button><button class="button" id="csv" type="button">Export filtered CSV</button><button class="button primary" id="sanitize" type="button">Download redacted HAR</button></div></div>
+
+      <section class="summary" aria-label="Capture summary">
+        <div><span>Requests</span><strong id="request-count">0</strong></div>
+        <div><span>Failed</span><strong id="failed-count">0</strong></div>
+        <div><span>Domains</span><strong id="domain-count">0</strong></div>
+        <div><span>Transferred</span><strong id="transfer-total">0 B</strong></div>
+        <div><span>Timeline</span><strong id="duration-total">0 ms</strong></div>
+      </section>
+
+      <div class="analysis-grid">
+        <section class="requests-panel" aria-labelledby="requests-title">
+          <div class="panel-heading"><div><span class="eyebrow">Waterfall</span><h2 id="requests-title">Requests <span id="visible-count">0</span></h2></div><button class="small-button" id="clear-filters" type="button">Reset filters</button></div>
+          <div class="filters">
+            <label class="search-field"><span class="sr-only">Search requests</span><input id="search" type="search" placeholder="Search URL, host, method, MIME..."></label>
+            <label><span>Status</span><select id="status-filter"><option value="all">All statuses</option><option value="failed">Failed</option><option value="2xx">2xx</option><option value="3xx">3xx</option><option value="4xx">4xx</option><option value="5xx">5xx</option></select></label>
+            <label><span>Domain</span><select id="domain-filter"><option value="all">All domains</option></select></label>
+            <label><span>Type</span><select id="type-filter"><option value="all">All types</option></select></label>
+            <label><span>Page</span><select id="page-filter"><option value="all">All pages</option></select></label>
+            <label><span>Min time</span><select id="duration-filter"><option value="0">Any duration</option><option value="100">100+ ms</option><option value="500">500+ ms</option><option value="1000">1+ s</option><option value="3000">3+ s</option></select></label>
+          </div>
+          <div class="request-header" aria-hidden="true"><span>Status</span><span>Request</span><span>Type</span><span>Size</span><span>Time</span><span>Waterfall</span></div>
+          <div class="request-list" id="request-list" role="list"></div>
+          <div class="empty" id="request-empty" hidden>No requests match the current filters.</div>
+          <div class="legend" aria-label="Waterfall timing legend"><span class="blocked">Blocked</span><span class="dns">DNS</span><span class="connect">Connect</span><span class="send">Send</span><span class="wait">Wait / TTFB</span><span class="receive">Receive</span></div>
+        </section>
+
+        <aside class="side-column">
+          <section class="insights" aria-labelledby="insights-title"><div class="panel-heading"><div><span class="eyebrow">Diagnostics</span><h2 id="insights-title">Insights <span id="finding-count">0</span></h2></div></div><div id="findings" class="finding-list"></div><div class="empty" id="finding-empty" hidden>No high-signal findings in this capture.</div></section>
+          <section class="detail-panel" aria-labelledby="detail-title"><div class="panel-heading"><div><span class="eyebrow">Selected request</span><h2 id="detail-title">Details</h2></div></div><div id="detail" class="detail"><p class="empty">Select a request to inspect it.</p></div></section>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
