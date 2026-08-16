@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Explore, diagnose, and compare CycloneDX and SPDX software bills of materials locally.">
+  <meta name="theme-color" content="#15152b">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>SBOM Atlas - Local software inventory explorer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="src/core.js" defer></script>
+  <script type="module" src="src/app.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#workspace">Skip to inventory</a>
+  <header class="topbar"><a class="brand" href="../../"><span class="brand-mark">SA</span><span>SBOM Atlas</span></a><div class="top-actions"><span class="private"><i></i> Local analysis</span><a class="small-button" href="README.md">Docs</a><button class="small-button" id="theme" type="button">Theme</button></div></header>
+  <main id="workspace">
+    <section class="import" id="import-panel" aria-labelledby="import-title">
+      <div class="import-copy"><span class="eyebrow">Software supply chain, mapped locally</span><h1 id="import-title">Know what is inside the build.</h1><p>Open a CycloneDX or SPDX JSON bill of materials. Trace dependencies, measure metadata coverage, surface structural risks, inspect VEX context, and compare releases without sending the inventory anywhere.</p><div class="import-actions"><label class="button primary" for="primary-file">Open SBOM</label><input id="primary-file" type="file" accept=".json,.cdx.json,.spdx.json,application/json" hidden><button class="button" id="sample-cdx" type="button">CycloneDX sample</button><button class="button" id="sample-spdx" type="button">SPDX sample</button></div><span class="limit">CycloneDX 1.2–1.7 / SPDX 2.2–2.3 JSON · 20 MB max · no uploads</span></div>
+      <button class="drop-zone" id="drop-zone" type="button"><span class="drop-icon" aria-hidden="true">◇</span><strong>Drop an SBOM here</strong><small>bom.json, *.cdx.json, *.spdx.json</small><span class="format-row"><b>CDX</b><b>SPDX</b></span></button>
+    </section>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+
+    <section class="dashboard" id="dashboard" hidden>
+      <div class="file-bar"><div><span class="eyebrow">Inventory</span><strong id="file-name">-</strong><small id="document-meta">-</small></div><div class="actions"><button class="button" id="open-another" type="button">Open another</button><button class="button" id="compare" type="button">Compare SBOM</button><input id="compare-file" type="file" accept=".json,.cdx.json,.spdx.json,application/json" hidden><button class="button primary" id="export-csv" type="button">Export filtered CSV</button></div></div>
+      <section class="summary" aria-label="SBOM summary"><div><span>Components</span><strong id="component-count">0</strong></div><div><span>Dependencies</span><strong id="dependency-count">0</strong></div><div><span>Roots</span><strong id="root-count">0</strong></div><div><span>Vulnerabilities</span><strong id="vulnerability-count">0</strong></div><div><span>Metadata coverage</span><strong id="coverage-score">0%</strong></div></section>
+
+      <section class="coverage-panel" aria-labelledby="coverage-title"><div><span class="eyebrow">Completeness, not a risk score</span><h2 id="coverage-title">Metadata coverage</h2></div><div class="coverage" id="coverage"></div></section>
+
+      <section class="diff-panel" id="diff-panel" hidden aria-labelledby="diff-title"><div class="panel-heading"><div><span class="eyebrow">Release comparison</span><h2 id="diff-title">Changes against <span id="compare-name">-</span></h2></div><button class="small-button" id="close-diff" type="button">Close comparison</button></div><div class="diff-summary" id="diff-summary"></div><div class="diff-list" id="diff-list"></div></section>
+
+      <div class="analysis-grid">
+        <section class="inventory-panel" aria-labelledby="inventory-title">
+          <div class="panel-heading"><div><span class="eyebrow">Normalized inventory</span><h2 id="inventory-title">Components <span id="visible-count">0</span></h2></div><button class="small-button" id="reset-filters" type="button">Reset filters</button></div>
+          <div class="filters"><label class="search"><span class="sr-only">Search components</span><input id="search" type="search" placeholder="Search name, purl, license, supplier..."></label><label><span>Type</span><select id="type-filter"><option value="all">All types</option></select></label><label><span>License</span><select id="license-filter"><option value="all">Any license state</option><option value="declared">Declared</option><option value="missing">Missing</option><option value="noassertion">NOASSERTION</option><option value="none">NONE</option></select></label><label><span>Graph</span><select id="reach-filter"><option value="all">Any reachability</option><option value="reachable">Reachable</option><option value="unreachable">Outside root graph</option></select></label><label><span>Vulnerability</span><select id="vulnerability-filter"><option value="all">Any status</option><option value="yes">Has findings</option></select></label></div>
+          <div class="component-header" aria-hidden="true"><span>Component</span><span>Type</span><span>License</span><span>Depth</span><span>Dependencies</span><span>Vulnerabilities</span></div><div class="component-list" id="component-list" role="list"></div><div class="empty" id="component-empty" hidden>No components match these filters.</div>
+        </section>
+
+        <aside class="side-column">
+          <section class="findings-panel" aria-labelledby="findings-title"><div class="panel-heading"><div><span class="eyebrow">Structural review</span><h2 id="findings-title">Findings <span id="finding-count">0</span></h2></div></div><div class="finding-list" id="findings"></div><div class="empty" id="finding-empty" hidden>No structural or coverage findings.</div></section>
+          <section class="detail-panel" aria-labelledby="detail-title"><div class="panel-heading"><div><span class="eyebrow">Dependency context</span><h2 id="detail-title">Component detail</h2></div></div><div class="detail" id="detail"><p class="empty">Select a component to inspect it.</p></div></section>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

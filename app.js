@@ -1275,6 +1275,18 @@ const TOOLS = [
     docs: "projects/har-viewer/README.md",
     featured: true,
   },
+  {
+    id: "sbom-atlas",
+    name: "SBOM Atlas",
+    category: "browser",
+    label: "Local CycloneDX and SPDX supply-chain explorer",
+    description:
+      "Normalize, diagnose, filter, trace, and compare CycloneDX or SPDX inventories locally, with metadata coverage, dependency paths, VEX context, and safe CSV export.",
+    tech: "Browser · SBOM · CycloneDX · SPDX",
+    live: "projects/sbom-atlas/",
+    docs: "projects/sbom-atlas/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {
