@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 109 focused tools across three categories (85 browser, 22 CLI, 2 local-AI)
-- 66 Node.js projects and 2 Python local-AI experiments with 889 focused project-level tests
+- 110 focused tools across three categories (86 browser, 22 CLI, 2 local-AI)
+- 67 Node.js projects and 2 Python local-AI experiments with 918 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (85)
+### Browser tools (86)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -112,6 +112,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [OpenAPI Lab](projects/openapi-lab/README.md) | Validate OpenAPI 3 contracts, browse operations, and generate curl/Fetch/Python requests locally | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/openapi-lab/) |
 | [HAR Viewer](projects/har-viewer/README.md) | Inspect HAR waterfalls and performance findings locally, then export a safer redacted capture | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/har-viewer/) |
 | [SBOM Atlas](projects/sbom-atlas/README.md) | Normalize, diagnose, trace, and compare CycloneDX or SPDX software inventories locally | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/sbom-atlas/) |
+| [SARIF Compass](projects/sarif-compass/README.md) | Triage and compare SARIF 2.1.0 scans locally, then export a privacy-clean report | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/sarif-compass/) |
 
 ### Developer CLIs (22)
 

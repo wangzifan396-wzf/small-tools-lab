@@ -1287,6 +1287,18 @@ const TOOLS = [
     docs: "projects/sbom-atlas/README.md",
     featured: true,
   },
+  {
+    id: "sarif-compass",
+    name: "SARIF Compass",
+    category: "browser",
+    label: "Local SARIF triage, comparison, and privacy cleaning",
+    description:
+      "Unify SARIF 2.1.0 runs, inspect rules and code flows, filter baselines and suppressions, compare scans, and export privacy-clean reports or safe CSV locally.",
+    tech: "Browser · SARIF · AppSec · Local-first",
+    live: "projects/sarif-compass/",
+    docs: "projects/sarif-compass/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {

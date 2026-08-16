@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Triage, compare, and privacy-clean SARIF 2.1.0 reports entirely in your browser.">
+  <meta name="theme-color" content="#17212b">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>SARIF Compass - Local security finding triage</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="src/core.js" defer></script>
+  <script type="module" src="src/app.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#workspace">Skip to findings</a>
+  <header class="topbar"><a class="brand" href="../../"><span class="brand-mark">SC</span><span>SARIF Compass</span></a><div class="top-actions"><span class="local"><i></i> Offline triage</span><a class="small-button" href="README.md">Docs</a><button class="small-button" id="theme" type="button">Theme</button></div></header>
+  <main id="workspace">
+    <section class="import" id="import-panel" aria-labelledby="import-title"><div class="import-copy"><span class="eyebrow">Static analysis, without another platform</span><h1 id="import-title">Turn scan output into a review queue.</h1><p>Open a SARIF 2.1.0 report, unify results from multiple tools, follow code flows, separate suppressed and baseline findings, compare scans, and export a privacy-clean copy. Nothing leaves this tab.</p><div class="import-actions"><label class="button primary" for="primary-file">Open SARIF</label><input id="primary-file" type="file" accept=".sarif,.json,application/sarif+json,application/json" hidden><button class="button" id="sample" type="button">Try a sample</button></div><span class="limit">SARIF 2.1.0 JSON · 25 MB max · no uploads or external lookups</span></div><button class="drop-zone" id="drop-zone" type="button"><span class="drop-icon" aria-hidden="true">↘</span><strong>Drop a report here</strong><small>*.sarif or JSON</small><span class="signal-row"><b>RULES</b><b>FLOWS</b><b>DIFF</b></span></button></section>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <section class="dashboard" id="dashboard" hidden>
+      <div class="file-bar"><div><span class="eyebrow">Report</span><strong id="file-name">-</strong><small id="report-meta">-</small></div><div class="actions"><button class="button" id="open-another" type="button">Open another</button><button class="button" id="compare" type="button">Compare scan</button><input id="compare-file" type="file" accept=".sarif,.json,application/sarif+json,application/json" hidden><button class="button" id="csv" type="button">Export filtered CSV</button><button class="button primary" id="sanitize" type="button">Download privacy-clean SARIF</button></div></div>
+      <section class="summary" aria-label="SARIF summary"><div><span>Results</span><strong id="result-count">0</strong></div><div><span>Errors</span><strong id="error-count">0</strong></div><div><span>Tools</span><strong id="tool-count">0</strong></div><div><span>Files</span><strong id="file-count">0</strong></div><div><span>New baseline results</span><strong id="new-count">0</strong></div></section>
+      <section class="diff-panel" id="diff-panel" hidden aria-labelledby="diff-title"><div class="panel-heading"><div><span class="eyebrow">Scan comparison</span><h2 id="diff-title">Changes against <span id="compare-name">-</span></h2></div><button class="small-button" id="close-diff" type="button">Close comparison</button></div><div class="diff-summary" id="diff-summary"></div><div class="diff-list" id="diff-list"></div></section>
+      <div class="analysis-grid">
+        <section class="results-panel" aria-labelledby="results-title"><div class="panel-heading"><div><span class="eyebrow">Unified review queue</span><h2 id="results-title">Results <span id="visible-count">0</span></h2></div><button class="small-button" id="reset-filters" type="button">Reset filters</button></div><div class="filters"><label class="search"><span class="sr-only">Search findings</span><input id="search" type="search" placeholder="Search message, rule, file, tag..."></label><label><span>Level</span><select id="level-filter"><option value="all">All levels</option><option value="error">Error</option><option value="warning">Warning</option><option value="note">Note</option><option value="none">None</option></select></label><label><span>Tool</span><select id="tool-filter"><option value="all">All tools</option></select></label><label><span>Rule</span><select id="rule-filter"><option value="all">All rules</option></select></label><label><span>Baseline</span><select id="baseline-filter"><option value="all">Any baseline</option></select></label><label><span>Suppression</span><select id="suppression-filter"><option value="all">Any status</option><option value="no">Active only</option><option value="yes">Suppressed only</option></select></label><label><span>Code flow</span><select id="flow-filter"><option value="all">Any result</option><option value="yes">Has code flow</option></select></label></div><div class="result-header" aria-hidden="true"><span>Level</span><span>Finding</span><span>Tool</span><span>Artifact</span><span>Baseline</span><span>Flow</span></div><div class="result-list" id="result-list" role="list"></div><div class="empty" id="result-empty" hidden>No results match these filters.</div></section>
+        <aside class="side-column"><section class="notices-panel" aria-labelledby="notices-title"><div class="panel-heading"><div><span class="eyebrow">Document health</span><h2 id="notices-title">Parser notices <span id="notice-count">0</span></h2></div></div><div class="notice-list" id="notices"></div><div class="empty" id="notice-empty" hidden>No structural notices.</div></section><section class="detail-panel" aria-labelledby="detail-title"><div class="panel-heading"><div><span class="eyebrow">Selected finding</span><h2 id="detail-title">Triage detail</h2></div></div><div class="detail" id="detail"><p class="empty">Select a result to inspect it.</p></div></section></aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
