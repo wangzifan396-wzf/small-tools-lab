@@ -1,0 +1,1 @@
+{"name":"lighthouse-report-lab-local","version":"1.0.0","private":true,"description":"Local Lighthouse JSON analysis, budgets, comparison, and privacy-clean export.","type":"commonjs","main":"src/core.js","scripts":{"test":"node --test"},"engines":{"node":">=20"},"license":"MIT"}

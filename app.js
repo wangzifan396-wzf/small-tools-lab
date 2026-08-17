@@ -1311,6 +1311,18 @@ const TOOLS = [
     docs: "projects/oci-image-inspector/README.md",
     featured: true,
   },
+  {
+    id: "lighthouse-report-lab",
+    name: "Lighthouse Report Lab",
+    category: "browser",
+    label: "Local Lighthouse analysis, budgets, and regression comparison",
+    description:
+      "Review Lighthouse metrics, categories, failed audits and opportunities; enforce transparent budgets, compare runs, and export privacy-clean JSON locally.",
+    tech: "Browser · Lighthouse · Web performance",
+    live: "projects/lighthouse-report-lab/",
+    docs: "projects/lighthouse-report-lab/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {
