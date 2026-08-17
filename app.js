@@ -1299,6 +1299,18 @@ const TOOLS = [
     docs: "projects/sarif-compass/README.md",
     featured: true,
   },
+  {
+    id: "oci-image-inspector",
+    name: "OCI Image Inspector",
+    category: "browser",
+    label: "Sparse local Docker and OCI archive analysis",
+    description:
+      "Inspect Docker save and OCI image-layout tar metadata without loading or extracting layers; review history, runtime config, baked secrets, users, sizes, tags, and provenance.",
+    tech: "Browser · OCI · Docker · Supply chain",
+    live: "projects/oci-image-inspector/",
+    docs: "projects/oci-image-inspector/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {

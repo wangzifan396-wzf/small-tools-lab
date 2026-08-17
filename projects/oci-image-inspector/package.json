@@ -1,0 +1,11 @@
+{
+  "name": "oci-image-inspector-local",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Offline Docker save and OCI image layout archive inspector.",
+  "type": "commonjs",
+  "main": "src/core.js",
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}
