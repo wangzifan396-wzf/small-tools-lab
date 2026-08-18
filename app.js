@@ -1334,6 +1334,17 @@ const TOOLS = [
     docs: "projects/csp-studio/README.md",
     featured: true,
   },
+  {
+    id: "api-contract-diff",
+    name: "API Contract Diff",
+    category: "browser",
+    label: "Local OpenAPI compatibility review",
+    description: "Compare OpenAPI JSON contracts, identify breaking operations, parameters, responses, and schemas, then export a review-ready report locally.",
+    tech: "Browser · OpenAPI · API compatibility",
+    live: "projects/api-contract-diff/",
+    docs: "projects/api-contract-diff/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {
