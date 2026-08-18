@@ -1323,6 +1323,17 @@ const TOOLS = [
     docs: "projects/lighthouse-report-lab/README.md",
     featured: true,
   },
+  {
+    id: "csp-studio",
+    name: "CSP Studio",
+    category: "browser",
+    label: "Local Content Security Policy audit and simulation",
+    description: "Parse and audit CSP, inspect effective fallback directives, simulate resource URLs, compare policies, and generate a hardened baseline locally.",
+    tech: "Browser · CSP3 · Web security",
+    live: "projects/csp-studio/",
+    docs: "projects/csp-studio/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {

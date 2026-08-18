@@ -1,0 +1,1 @@
+{"name":"csp-studio-local","version":"1.0.0","private":true,"description":"Local Content Security Policy parser, auditor, simulator, comparison, and generator.","type":"commonjs","main":"src/core.js","scripts":{"test":"node --test"},"engines":{"node":">=20"},"license":"MIT"}

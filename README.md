@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 112 focused tools across three categories (88 browser, 22 CLI, 2 local-AI)
-- 69 Node.js projects and 2 Python local-AI experiments with 960 focused project-level tests
+- 113 focused tools across three categories (89 browser, 22 CLI, 2 local-AI)
+- 70 Node.js projects and 2 Python local-AI experiments with 977 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (88)
+### Browser tools (89)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -115,6 +115,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [SARIF Compass](projects/sarif-compass/README.md) | Triage and compare SARIF 2.1.0 scans locally, then export a privacy-clean report | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/sarif-compass/) |
 | [OCI Image Inspector](projects/oci-image-inspector/README.md) | Sparsely inspect Docker save and OCI image archives without loading or extracting layers | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/oci-image-inspector/) |
 | [Lighthouse Report Lab](projects/lighthouse-report-lab/README.md) | Analyze Lighthouse metrics and budgets locally, then compare performance regressions | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/lighthouse-report-lab/) |
+| [CSP Studio](projects/csp-studio/README.md) | Audit CSP3 directives, simulate resource URLs, and generate a hardened local policy | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/csp-studio/) |
 
 ### Developer CLIs (22)
 
