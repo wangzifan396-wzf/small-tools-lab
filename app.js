@@ -1345,6 +1345,17 @@ const TOOLS = [
     docs: "projects/api-contract-diff/README.md",
     featured: true,
   },
+  {
+    id: "cookie-sentry",
+    name: "Cookie Sentry",
+    category: "browser",
+    label: "Local cookie security audit",
+    description: "Audit Set-Cookie hardening, compare release snapshots, and generate a secure session template without uploading cookie values.",
+    tech: "Browser · HTTP cookies · Web security",
+    live: "projects/cookie-sentry/",
+    docs: "projects/cookie-sentry/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {
