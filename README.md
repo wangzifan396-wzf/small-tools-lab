@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 115 focused tools across three categories (91 browser, 22 CLI, 2 local-AI)
-- 72 Node.js projects and 2 Python local-AI experiments with 999 focused project-level tests
+- 116 focused tools across three categories (92 browser, 22 CLI, 2 local-AI)
+- 73 Node.js projects and 2 Python local-AI experiments with 1,012 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (91)
+### Browser tools (92)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -118,6 +118,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [CSP Studio](projects/csp-studio/README.md) | Audit CSP3 directives, simulate resource URLs, and generate a hardened local policy | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/csp-studio/) |
 | [API Contract Diff](projects/api-contract-diff/README.md) | Compare OpenAPI JSON contracts and explain breaking operations, parameters, responses, and schemas | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/api-contract-diff/) |
 | [Cookie Sentry](projects/cookie-sentry/README.md) | Audit Set-Cookie security attributes, compare release snapshots, and generate a hardened template | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cookie-sentry/) |
+| [Header Sentinel](projects/header-sentinel/README.md) | Audit response security headers, CORS, caching, and cross-origin isolation; compare release drift | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/header-sentinel/) |
 
 ### Developer CLIs (22)
 

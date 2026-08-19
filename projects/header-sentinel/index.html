@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Audit HTTP response security headers, CORS, caching, and cross-origin isolation locally.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none';script-src 'self';style-src 'self';connect-src 'none';img-src 'self' data:;object-src 'none';base-uri 'none';form-action 'none'">
+  <title>Header Sentinel - Local HTTP security header audit</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="src/core.js" defer></script>
+  <script type="module" src="src/app.mjs"></script>
+</head>
+<body>
+  <header><a href="../../">Header Sentinel</a><a href="README.md">Docs</a></header>
+  <main>
+    <section class="hero">
+      <small>HTTP RESPONSE SECURITY WORKBENCH</small>
+      <h1>Trust the response.<br>Verify the headers.</h1>
+      <p>Audit browser security headers, CORS, caching, and cross-origin isolation locally—then compare releases before configuration drift reaches production.</p>
+    </section>
+    <section class="context panel">
+      <label>Response URL<input id="url" value="https://app.example.com/"></label>
+      <label>Response kind<select id="kind"><option value="html">HTML document</option><option value="api">API / asset</option></select></label>
+      <label class="check"><input id="sensitive" type="checkbox"><span>Sensitive response</span></label>
+      <label class="check"><input id="isolation" type="checkbox"><span>Require cross-origin isolation</span></label>
+    </section>
+    <section class="workspace">
+      <div class="panel editor">
+        <div class="panel-head"><h2>Current response headers</h2><span>paste a raw header block</span></div>
+        <textarea id="current" spellcheck="false"></textarea>
+      </div>
+      <div class="panel editor">
+        <div class="panel-head"><h2>Previous snapshot <small>(optional)</small></h2><span>compare release drift</span></div>
+        <textarea id="previous" spellcheck="false"></textarea>
+      </div>
+    </section>
+    <div class="actions">
+      <button id="audit">Audit response</button>
+      <button id="sample">Load risky sample</button>
+      <button id="baseline">Generate hardened baseline</button>
+      <button id="compare">Compare snapshots</button>
+      <button id="markdown">Export Markdown</button>
+      <button id="json">Export JSON</button>
+    </div>
+    <div id="status" role="status"></div>
+    <section id="report" hidden>
+      <div class="summary">
+        <div><span>Score</span><b id="score">0</b></div>
+        <div class="bad"><span>Errors</span><b id="errors">0</b></div>
+        <div class="warn"><span>Warnings</span><b id="warnings">0</b></div>
+        <div><span>Headers</span><b id="headers">0</b></div>
+        <div><span>Isolation</span><b id="isolated">No</b></div>
+      </div>
+      <div class="report-grid">
+        <section class="panel findings-panel">
+          <div class="finding-controls">
+            <h2>Findings</h2>
+            <label>Severity<select id="severity"><option value="all">All</option><option value="error">Errors</option><option value="warning">Warnings</option><option value="info">Info</option></select></label>
+            <input id="query" type="search" placeholder="Search header or issue">
+          </div>
+          <div id="findings"></div>
+        </section>
+        <aside>
+          <section class="panel"><h2>Release readout</h2><div id="readout"></div></section>
+          <section class="panel"><h2>Header inventory</h2><div id="inventory"></div></section>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

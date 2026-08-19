@@ -1356,6 +1356,17 @@ const TOOLS = [
     docs: "projects/cookie-sentry/README.md",
     featured: true,
   },
+  {
+    id: "header-sentinel",
+    name: "Header Sentinel",
+    category: "browser",
+    label: "Local HTTP response security audit",
+    description: "Audit security headers, CORS, sensitive caching, and cross-origin isolation; compare release drift and generate a contextual baseline locally.",
+    tech: "Browser · HTTP headers · Web security",
+    live: "projects/header-sentinel/",
+    docs: "projects/header-sentinel/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {
