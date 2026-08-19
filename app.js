@@ -1367,6 +1367,17 @@ const TOOLS = [
     docs: "projects/header-sentinel/README.md",
     featured: true,
   },
+  {
+    id: "sri-studio",
+    name: "SRI Studio",
+    category: "browser",
+    label: "Local Subresource Integrity audit",
+    description: "Inspect HTML resource tags, validate SRI and crossorigin configuration, generate Web Crypto hashes, and compare resource snapshots locally.",
+    tech: "Browser · SRI · Supply chain",
+    live: "projects/sri-studio/",
+    docs: "projects/sri-studio/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {

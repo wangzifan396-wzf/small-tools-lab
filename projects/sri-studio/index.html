@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Audit and generate Subresource Integrity hashes locally without fetching resources.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none';script-src 'self';style-src 'self';connect-src 'none';img-src 'self' data:;object-src 'none';base-uri 'none';form-action 'none'">
+  <title>SRI Studio - Local Subresource Integrity audit</title><link rel="stylesheet" href="styles.css">
+  <script src="src/core.js" defer></script><script type="module" src="src/app.mjs"></script>
+</head>
+<body><header><a href="../../">SRI Studio</a><a href="README.md">Docs</a></header><main>
+  <section class="hero"><small>SUBRESOURCE INTEGRITY WORKBENCH</small><h1>Pin the bytes.<br>Trust the load.</h1><p>Inspect HTML resource tags, validate SRI and crossorigin configuration, and generate hashes from pasted content—without fetching a single URL.</p></section>
+  <section class="context panel"><label>Document origin<input id="base" value="https://app.example.com/"></label><label class="check"><input id="require" type="checkbox" checked><span>Require SRI for external resources</span></label></section>
+  <section class="workspace"><div class="panel editor"><div class="panel-head"><h2>HTML document</h2><span>static extraction only</span></div><textarea id="html" spellcheck="false"></textarea></div><div class="panel editor"><div class="panel-head"><h2>Resource content</h2><span>optional Web Crypto input</span></div><textarea id="content" spellcheck="false" placeholder="Paste the exact script or stylesheet bytes here..."></textarea><div class="hash-actions"><label><input type="checkbox" value="sha256"> SHA-256</label><label><input type="checkbox" value="sha384" checked> SHA-384</label><label><input type="checkbox" value="sha512"> SHA-512</label></div><div id="generated" class="generated"></div></div></section>
+  <div class="actions"><button id="audit">Audit resources</button><button id="sample">Load sample</button><button id="hash">Generate integrity</button><button id="compare">Compare snapshots</button><button id="markdown">Export Markdown</button><button id="json">Export JSON</button></div><div id="status" role="status"></div>
+  <section id="report" hidden><div class="summary"><div><span>Resources</span><b id="resources">0</b></div><div class="bad"><span>Errors</span><b id="errors">0</b></div><div class="warn"><span>Warnings</span><b id="warnings">0</b></div><div><span>Info</span><b id="info">0</b></div><div><span>Changes</span><b id="changes">0</b></div></div><div class="report-grid"><section class="panel"><div class="finding-controls"><h2>Findings</h2><label>Severity<select id="severity"><option value="all">All</option><option value="error">Errors</option><option value="warning">Warnings</option><option value="info">Info</option></select></label><input id="query" type="search" placeholder="Search URL or issue"></div><div id="findings"></div></section><aside class="panel"><h2>Resource inventory</h2><div id="inventory"></div></aside></div></section>
+</main></body></html>
