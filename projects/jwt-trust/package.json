@@ -1,0 +1,11 @@
+{
+  "name": "jwt-trust",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local JWT signature verification, JWKS selection, and claims auditing.",
+  "type": "commonjs",
+  "main": "src/core.js",
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

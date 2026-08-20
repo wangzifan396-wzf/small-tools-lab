@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Verify JWT signatures against pasted local JWKs and audit claims without network calls.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none';script-src 'self';style-src 'self';connect-src 'none';img-src 'self' data:;object-src 'none';base-uri 'none';form-action 'none'">
+  <title>JWT Trust - local signature verification</title><link rel="stylesheet" href="styles.css">
+  <script src="src/core.js" defer></script><script type="module" src="src/app.mjs"></script>
+</head>
+<body><header><a href="../../">JWT Trust</a><a href="README.md">Docs</a></header><main>
+  <section class="hero"><small>LOCAL JWT TRUST WORKBENCH</small><h1>Decode less.<br>Verify more.</h1><p>Verify compact JWT signatures with pasted JWK/JWKS material, audit issuer, audience, and time claims, and export a privacy-safe report. No key discovery or token upload happens here.</p></section>
+  <section class="panel context"><label>Expected issuer<input id="issuer" placeholder="https://idp.example.com"></label><label>Expected audience<input id="audience" placeholder="api"></label><label>Clock skew (seconds)<input id="skew" type="number" min="0" value="60"></label></section>
+  <section class="workspace"><div class="panel"><div class="panel-head"><h2>Compact JWT</h2><span>paste locally</span></div><textarea id="token" spellcheck="false"></textarea><div class="actions"><button id="inspect">Inspect claims</button><button id="sample">Load sample</button></div></div><div class="panel"><div class="panel-head"><h2>JWK or JWKS</h2><span>no remote fetch</span></div><textarea id="keys" spellcheck="false"></textarea><div class="actions"><button id="verify">Verify signature</button><button id="markdown">Export Markdown</button><button id="json">Export JSON</button></div></div></section>
+  <div id="status" role="status"></div><section class="summary"><div><span>Signature</span><b id="signature">Not verified</b></div><div class="bad"><span>Errors</span><b id="errors">0</b></div><div class="warn"><span>Warnings</span><b id="warnings">0</b></div><div><span>Info</span><b id="info">0</b></div></section>
+  <section class="report-grid"><div class="panel"><h2>Findings</h2><div id="findings"></div></div><div class="panel"><h2>Selected key</h2><pre id="key"></pre></div></section><section class="report-grid"><div class="panel"><h2>Header</h2><pre id="header"></pre></div><div class="panel"><h2>Payload</h2><pre id="payload"></pre></div></section>
+</main></body></html>

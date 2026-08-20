@@ -1379,6 +1379,17 @@ const TOOLS = [
     featured: true,
   },
   {
+    id: "jwt-trust",
+    name: "JWT Trust",
+    category: "browser",
+    label: "Local JWT verification and claims audit",
+    description: "Verify compact JWT signatures against local JWK or JWKS material, inspect claims, and export a privacy-safe report locally.",
+    tech: "Browser / JWT / JWKS / Web Crypto",
+    live: "projects/jwt-trust/",
+    docs: "projects/jwt-trust/README.md",
+    featured: true,
+  },
+  {
     id: "trace-atlas",
     name: "Trace Atlas",
     category: "browser",

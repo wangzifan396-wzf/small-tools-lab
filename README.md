@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 118 focused tools across three categories (94 browser, 22 CLI, 2 local-AI)
-- 75 Node.js projects and 2 Python local-AI experiments with 1,028 focused project-level tests
+- 119 focused tools across three categories (95 browser, 22 CLI, 2 local-AI)
+- 75 Node.js projects and 2 Python local-AI experiments with 1,034 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (94)
+### Browser tools (95)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -39,6 +39,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [Cron Describe](projects/cron-describe/README.md) | Turn a cron expression into plain Chinese and list the next run times | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cron-describe/) |
 | [CtxCalc](projects/ctxcalc/README.md) | Estimate prompt tokens and check fit against a model context window | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/ctxcalc/) |
 | [JwtPeek](projects/jwtpeek/README.md) | Decode a JWT and surface expiry / issued / not-before timing | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/jwtpeek/) |
+| [JWT Trust](projects/jwt-trust/README.md) | Verify compact JWT signatures against local JWK or JWKS material and audit claims | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/jwt-trust/) |
 | [Radix](projects/radix/README.md) | Convert between bases 2–36 with BigInt-exact math and a bit & byte view | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/radix/) |
 | [Epoch](projects/epoch/README.md) | Convert Unix seconds or milliseconds to local, UTC, ISO, and relative time | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/epoch/) |
 | [Word Count](projects/wordcount/README.md) | Count Unicode characters, mixed CJK / Latin text, structure, and reading time | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/wordcount/) |
