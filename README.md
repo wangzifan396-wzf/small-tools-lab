@@ -14,8 +14,8 @@ A practical monorepo of browser utilities, explainable developer CLIs, and local
 
 These projects share an engineering style, not one runtime. Browser tools should open immediately, developer CLIs should explain every decision, and local AI experiments should keep private data on the machine by default. A monorepo concentrates discovery and Stars while preserving a clear boundary inside every project folder.
 
-- 117 focused tools across three categories (93 browser, 22 CLI, 2 local-AI)
-- 74 Node.js projects and 2 Python local-AI experiments with 1,020 focused project-level tests
+- 118 focused tools across three categories (94 browser, 22 CLI, 2 local-AI)
+- 75 Node.js projects and 2 Python local-AI experiments with 1,028 focused project-level tests
 - Two Python local AI experiments with standard-library unit tests
 - Zero-account browser tools and no telemetry
 - Root catalog, cross-project verification, CI, and GitHub Pages
@@ -23,7 +23,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 
 ## Catalog
 
-### Browser tools (93)
+### Browser tools (94)
 
 | Project | Purpose | Open |
 | --- | --- | --- |
@@ -120,6 +120,7 @@ These projects share an engineering style, not one runtime. Browser tools should
 | [Cookie Sentry](projects/cookie-sentry/README.md) | Audit Set-Cookie security attributes, compare release snapshots, and generate a hardened template | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/cookie-sentry/) |
 | [Header Sentinel](projects/header-sentinel/README.md) | Audit response security headers, CORS, caching, and cross-origin isolation; compare release drift | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/header-sentinel/) |
 | [SRI Studio](projects/sri-studio/README.md) | Validate Subresource Integrity and crossorigin settings, generate hashes, and compare HTML resource snapshots | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/sri-studio/) |
+| [Trace Atlas](projects/trace-atlas/README.md) | Analyze Jaeger and OTLP traces for latency, errors, orphan spans, critical paths, and regressions | [Launch](https://wangzifan396-wzf.github.io/small-tools-lab/projects/trace-atlas/) |
 
 ### Developer CLIs (22)
 

@@ -1378,6 +1378,17 @@ const TOOLS = [
     docs: "projects/sri-studio/README.md",
     featured: true,
   },
+  {
+    id: "trace-atlas",
+    name: "Trace Atlas",
+    category: "browser",
+    label: "Local distributed trace analysis",
+    description: "Analyze Jaeger and OTLP traces, surface errors, orphan spans, service latency, critical paths, and release regressions locally.",
+    tech: "Browser · OpenTelemetry · Observability",
+    live: "projects/trace-atlas/",
+    docs: "projects/trace-atlas/README.md",
+    featured: true,
+  },
 ];
 
 const CATEGORY_NAMES = {
