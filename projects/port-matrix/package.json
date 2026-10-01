@@ -16,6 +16,6 @@
     "test": "node --test",
     "demo": "node bin/port-matrix.js examples/drift-stack --format html --output port-matrix-report.html --fail-on none"
   },
-  "dependencies": {"yaml": "^2.9.0"},
+  "dependencies": {"yaml": "^2.9.1"},
   "engines": {"node": ">=20"}
 }

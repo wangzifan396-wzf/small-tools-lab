@@ -38,7 +38,7 @@
     "demo": "node bin/action-budget.js examples/expensive-ci --format html --output action-budget-report.html --fail-on none"
   },
   "dependencies": {
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.1"
   },
   "engines": {
     "node": ">=20"
